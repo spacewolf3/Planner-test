@@ -1,0 +1,595 @@
+<title>Housekeeping Log</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<style>
+/* Layout: one phone column; sticky header, scrolling list of task rows, fixed bottom tab bar, full-height task sheet. */
+:root{
+  --bg:#eef3f2; --surface:#ffffff; --surface-2:#e3ebe9; --ink:#1b2a29; --muted:#5a6c6a; --line:#d3dedb;
+  --accent:#1d6b64; --accent-ink:#ffffff; --accent-soft:#d4ebe7;
+  --ok:#2d7a4c; --ok-soft:#dcefe3; --warn:#9a6512; --warn-soft:#f6e8cc; --due:#ad3b30; --due-soft:#f6dcd8;
+  --shadow:0 1px 2px rgba(20,40,38,.08),0 6px 20px rgba(20,40,38,.06);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --tabh:64px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111816; --surface:#19221f; --surface-2:#222d2a; --ink:#e4edeb; --muted:#93a5a1; --line:#2c3a36;
+  --accent:#5fc2b5; --accent-ink:#0d1d1b; --accent-soft:#1d3532;
+  --ok:#73c995; --ok-soft:#1c3226; --warn:#e2b257; --warn-soft:#3a2f17; --due:#f08a7d; --due-soft:#3d2220;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111816; --surface:#19221f; --surface-2:#222d2a; --ink:#e4edeb; --muted:#93a5a1; --line:#2c3a36;
+  --accent:#5fc2b5; --accent-ink:#0d1d1b; --accent-soft:#1d3532;
+  --ok:#73c995; --ok-soft:#1c3226; --warn:#e2b257; --warn-soft:#3a2f17; --due:#f08a7d; --due-soft:#3d2220;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 24px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+header.top h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+header.top .sub{color:var(--muted);font-size:.85rem;text-align:right}
+.view{display:flex;flex-direction:column;gap:22px}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.section-h h2{font-size:1.15rem;font-weight:700}
+.section-h .aside{color:var(--muted);font-size:.85rem}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.summary{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.92rem;min-height:38px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips .chip{flex:none}
+.timebar{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.timebar .q{font-family:var(--f-display);font-size:1.05rem;font-weight:700}
+.fit{color:var(--muted);font-size:.88rem}
+.timebar .chips{flex-wrap:wrap;overflow:visible}
+ul.rows{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 12px 10px 10px;border-top:1px solid var(--line);position:relative}
+.row:first-child{border-top:0}
+.tick{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:transparent;display:grid;place-items:center;color:transparent;flex:none}
+.tick:hover,.tick:focus-visible{border-color:var(--ok);color:var(--ok)}
+.tick svg{width:20px;height:20px}
+.row .main{all:unset;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:2px;padding-block:2px}
+.row .main:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:6px}
+.row .name{font-weight:700;overflow-wrap:anywhere}
+.row .meta{color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums}
+.meter{position:absolute;left:0;bottom:0;height:3px;background:var(--st,var(--line));opacity:.85}
+.pill{font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;background:var(--st-soft);color:var(--st)}
+.st-ok{--st:var(--ok);--st-soft:var(--ok-soft)}
+.st-soon{--st:var(--warn);--st-soft:var(--warn-soft)}
+.st-due{--st:var(--due);--st-soft:var(--due-soft)}
+.st-new{--st:var(--muted);--st-soft:var(--surface-2)}
+.st-aside{--st:var(--muted);--st-soft:var(--surface-2)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:18px;color:var(--muted)}
+.empty strong{color:var(--ink)}
+.banner{background:var(--accent-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.banner p{margin:0}
+.search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;min-height:46px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 16px;min-height:44px;font-weight:700}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.small{min-height:36px;padding:6px 12px;font-size:.88rem}
+.btn.danger{color:var(--due)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.shop{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+.shop ul{margin:6px 0 0;padding-left:18px}
+.shop li{margin:3px 0}
+details.aside{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 0}
+details.aside>summary{list-style:none;cursor:pointer;padding:10px 16px;font-weight:700;display:flex;justify-content:space-between}
+details.aside>summary::-webkit-details-marker{display:none}
+details.aside ul.rows{border:0;border-radius:0;border-top:1px solid var(--line)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
+  display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;font-size:.78rem;color:var(--muted);min-height:44px;justify-content:center}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700;background:var(--accent-soft)}
+nav.tabs button:focus-visible{outline:3px solid var(--accent)}
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) max(16px,env(safe-area-inset-left,0px))}
+.sheet-in{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.sheet-top{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg);padding-block:6px;z-index:2}
+.sheet h2{font-size:1.6rem;font-weight:700;letter-spacing:-.01em}
+.badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted);background:var(--surface)}
+.status-line{font-size:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{font-size:1rem;font-weight:700}
+.card ol,.card ul{margin:0;padding-left:20px}
+.card li{margin:4px 0}
+.card p{margin:0}
+.card.eco{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
+.card.eco h3{color:var(--ok)}
+.card.alt h3{color:var(--accent)}
+.card.warn{background:var(--due-soft);border-color:transparent}
+.card.warn h3{color:var(--due)}
+.donebox{display:flex;flex-direction:column;gap:8px}
+textarea,select,input[type="date"],input[type="text"],input[type="number"]{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea{min-height:70px;resize:vertical}
+label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;margin-bottom:4px}
+.hist{list-style:none;padding:0;margin:0}
+.hist li{padding:8px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.hist li:first-child{border-top:0}
+.hist .d{font-variant-numeric:tabular-nums;font-weight:700}
+.hist .n{color:var(--muted);overflow-wrap:anywhere}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 14px);z-index:30;
+  background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 10px 10px 16px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.toast button{background:transparent;border:0;color:var(--bg);font-weight:700;text-decoration:underline;padding:6px 8px;min-height:36px}
+/* guide */
+.guide h2{font-size:1.2rem;margin-bottom:8px}
+.kit{display:flex;flex-direction:column;gap:10px}
+.kit .card .good{color:var(--ok);font-weight:700}
+.kit .card .bad{color:var(--due);font-weight:700}
+.mix{display:flex;flex-direction:column;gap:8px}
+.mix .card{background:var(--due-soft);border:0}
+.mix b{color:var(--due)}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;padding-top:8px}
+.form{display:flex;flex-direction:column;gap:12px}
+@media (prefers-reduced-motion:no-preference){.row,.toast{transition:background .15s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1 id="title">Today</h1>
+    <div class="sub" id="sub"></div>
+  </header>
+  <main id="view" class="view" aria-live="polite"></main>
+  <p class="foot" id="foot"></p>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</button>
+  <button data-tab="all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Cleaning</button>
+  <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Upkeep</button>
+  <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V3"/></svg>Guide</button>
+</nav>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------------- Task library ----------------
+   e = repeat every N days, m = minutes of hands-on time
+   s = steps, sup = supplies, eco = the gentle / right way, alt = stronger option, w = watch out */
+var L = [];
+function T(id,list,area,name,e,m,o){o=o||{};o.id=id;o.list=list;o.area=area;o.name=name;o.e=e;o.m=m;L.push(o)}
+function C(id,area,name,e,m,o){T(id,"clean",area,name,e,m,o)}
+function U(id,area,name,e,m,o){T(id,"upkeep",area,name,e,m,o)}
+
+/* Kitchen */
+C("k-counters","Kitchen","Wipe counters, stovetop & sink",2,10,{sup:"Dish soap, microfiber cloth",s:["Clear the counters and put things away.","Spray or wipe with warm water and a few drops of dish soap.","Wipe the stovetop while it's cool. Lift grates if crumbs fell under.","Rinse the sink and wipe the faucet handles dry."],eco:"Warm soapy water handles daily grime. Disinfectant is only needed after raw meat.",alt:"After raw meat or eggs, use 3% hydrogen peroxide or a diluted bleach solution (1 tbsp bleach per quart water) and let it sit 1 minute.",w:"Don't use vinegar or lemon on marble, granite, or quartz. Acid etches stone and wears down sealer."});
+C("k-sink","Kitchen","Scrub & deodorize kitchen sink",7,5,{sup:"Baking soda, dish soap, scrub brush, lemon (optional)",s:["Empty the sink and rinse.","Sprinkle baking soda over the basin and scrub with a damp brush.","Scrub around the drain lip and under the faucet base with an old toothbrush.","Rinse and dry. Run a lemon wedge through the disposal or drain if it smells."],eco:"Baking soda is a gentle abrasive that won't scratch stainless.",alt:"Bar Keepers Friend for hard-water rings and rust spots on stainless.",w:"Scrub stainless along the grain."});
+C("k-micro","Kitchen","Clean the microwave",14,10,{sup:"Microwave-safe bowl, water, lemon or vinegar, cloth",s:["Fill a bowl with 1 cup water and a lemon slice or 1 tbsp vinegar.","Microwave on high 3–5 minutes, then leave the door shut 5 more minutes to steam.","Take out the turntable and wash it in the sink.","Wipe the inside top to bottom. Splatters will lift off easily."],eco:"Steam does the scrubbing. No sprays needed.",w:"Put a wooden spoon in the bowl to stop water from superheating and boiling over."});
+C("k-fridge-out","Kitchen","Fridge clean-out",7,10,{sup:"Damp cloth",s:["Toss expired leftovers and wilted produce. Do this the night before trash day.","Wipe any drips on shelves.","Move older items to the front."],eco:"Cuts food waste and keeps smells from building up."});
+C("k-fridge-deep","Kitchen","Deep clean the fridge",90,45,{sup:"Baking soda, warm water, microfiber cloths, cooler",s:["Move food into a cooler or bunch it on one shelf.","Pull out drawers and shelves. Wash them in warm soapy water.","Wipe the interior with 2 tbsp baking soda dissolved in 1 quart warm water.","Wipe the door seals with an old toothbrush. Crumbs hide in the folds.","Dry everything and reload. Leave an open box of baking soda on a back shelf."],eco:"Baking soda cleans and deodorizes without leaving a scent on food.",w:"Let cold glass shelves warm up before washing in hot water, or they can crack."});
+C("k-coils","Kitchen","Vacuum fridge coils",180,15,{sup:"Vacuum with crevice tool, coil brush",s:["Unplug the fridge or turn it off.","Pop off the bottom front grille, or pull the fridge out to reach coils on the back.","Brush and vacuum dust and pet hair off the coils.","Vacuum the floor under it and plug it back in."],eco:"Clean coils use less electricity. Cat hair clogs them faster."});
+C("k-oven","Kitchen","Clean the oven",90,30,{sup:"Baking soda, water, spray bottle of vinegar, scraper, cloths",s:["Remove racks (see the oven racks task).","Mix 1/2 cup baking soda with a few tbsp water into a spreadable paste.","Spread it over the inside, avoiding heating elements. Leave overnight.","Wipe out the paste with a damp cloth. Use a plastic scraper on stuck spots.","Spritz vinegar on leftover white residue. It foams. Wipe until clean."],eco:"The paste softens baked-on grease overnight with zero fumes.",alt:"Self-clean cycle: open windows and keep cats and kids out of the kitchen, since the smoke and fumes are irritating (and can be fatal to pet birds). For a non-self-cleaning oven, a fume-free commercial oven cleaner works fast on heavy carbon.",w:"Don't use commercial oven cleaner inside a self-cleaning oven unless the manual allows it. It can damage the enamel."});
+C("k-racks","Kitchen","Soak & scrub oven racks",180,20,{sup:"Bathtub or utility tub, old towel, dish soap, dryer sheets (optional), scrub brush",s:["Lay an old towel in the tub to protect it.","Put racks in and cover with hot water.","Add 1/2 cup dish soap (or a few dryer sheets). Soak overnight.","Scrub with a brush, rinse, and dry."],eco:"A long hot soak does most of the work.",alt:"Bar Keepers Friend paste for leftover brown spots.",w:"Clean the tub right after so kids don't bathe in greasy residue."});
+C("k-trays","Kitchen","Deep clean baking trays",180,20,{sup:"Baking soda, 3% hydrogen peroxide, scrub sponge",s:["Sprinkle baking soda over the tray.","Pour hydrogen peroxide over it, then add another layer of baking soda.","Let it sit 2 hours to overnight.","Scrub off the brown buildup and rinse."],eco:"Baking soda and peroxide lift baked-on polymerized oil without harsh fumes.",alt:"Bar Keepers Friend works faster on stainless and aluminum sheets. Spot-test on aluminum first.",w:"Skip abrasives on nonstick trays. They strip the coating."});
+C("k-dw-filter","Kitchen","Clean dishwasher filter",30,10,{sup:"Soft brush, dish soap",s:["Pull out the bottom rack.","Twist out the cylindrical filter, then lift out the flat mesh under it.","Rinse under hot water and scrub gently with a soft brush and soap.","Wipe out the sump area and put the filters back."],eco:"A clean filter means cleaner dishes and less need for extra rinse cycles.",w:"Make sure the filter clicks back in place, or food bits can reach the pump."});
+C("k-dw-deep","Kitchen","Descale & freshen dishwasher",90,10,{sup:"Citric acid or dishwasher cleaner, damp cloth",s:["Wipe the door edges and gasket where gunk collects.","Clean the filter first.","Put 2 tbsp citric acid in the detergent cup (or use a cleaner tablet).","Run an empty hot cycle."],eco:"Citric acid descales without odor.",alt:"Affresh or Finish dishwasher cleaner tablets.",w:"Some manufacturers advise against frequent vinegar cycles because it can wear rubber gaskets. Citric acid or a cleaner made for dishwashers is safer."});
+C("k-faucet","Kitchen","Soak kitchen faucet aerator in vinegar",90,5,{sup:"White vinegar, zip-top bag, rubber band, old toothbrush",s:["Fill a zip-top bag with enough vinegar to cover the faucet tip.","Rubber-band it over the spout so the aerator is submerged.","Leave 1 hour.","Remove, scrub the holes with an old toothbrush, and run hot water."],eco:"Vinegar dissolves mineral scale with no harsh chemicals.",w:"Limit soaks on brass, gold, or matte black finishes to 15–20 minutes. Test first."});
+C("k-hood","Kitchen","Degrease range hood filter",90,15,{sup:"Large pot or sink, boiling water, dish soap, baking soda, brush",s:["Pop the metal mesh filter out of the hood.","Fill the sink with very hot water, a squirt of dish soap, and 1/4 cup baking soda.","Soak 15–20 minutes, then scrub with a soft brush.","Rinse, dry fully, and reinstall. Wipe the hood underside too."],eco:"Hot water, soap and baking soda cut grease without solvents.",alt:"Many stainless mesh filters can go in the dishwasher. Check the manual.",w:"Charcoal (recirculating) filters can't be washed. Replace them instead."});
+C("k-cabinets","Kitchen","Wipe cabinet fronts & handles",30,15,{sup:"Dish soap, microfiber cloths",s:["Mix a few drops of dish soap in warm water.","Wipe cabinet fronts, paying attention near the stove and trash.","Wipe handles and pulls (sticky kid hands!).","Dry with a second cloth."],eco:"Dish soap is all most cabinets need.",w:"Avoid vinegar and heavy water on wood cabinets. Wring your cloth well."});
+C("k-boards","Kitchen","Oil wooden boards & spoons",30,5,{sup:"Food-grade mineral oil or board cream, coarse salt, lemon",s:["Scrub boards with coarse salt and half a lemon to deodorize. Rinse and dry fully.","Rub a thin coat of mineral oil on all sides.","Let it soak in overnight and wipe off extra."],eco:"Oiling keeps wood from cracking so it lasts for years.",w:"Never put wooden boards in the dishwasher. Don't use cooking oils like olive oil, which go rancid."});
+C("k-kettle","Kitchen","Descale kettle",60,5,{sup:"Citric acid or white vinegar",s:["Fill halfway with water and add 1 tbsp citric acid (or half vinegar, half water).","Bring to a boil, then let sit 20 minutes.","Pour out, rinse, and boil once with plain water."],eco:"Citric acid leaves no smell and works fast."});
+C("k-small","Kitchen","Clean toaster & small appliances",30,10,{sup:"Damp cloth, pastry brush",s:["Unplug the toaster. Empty the crumb tray over the trash.","Turn it upside down and shake gently.","Wipe the outside of the toaster, blender base, and coffee maker."],w:"Never put a knife or fork into a plugged-in toaster."});
+C("k-sponge","Kitchen","Swap sponge & wash dish brush, rags",14,5,{sup:"New sponge",s:["Toss the old sponge.","Run the dish brush through the dishwasher on the top rack.","Wash dishcloths and towels on hot."],eco:"Natural cellulose sponges compost. Swedish dishcloths last longer than sponges."});
+C("k-trash","Kitchen","Wash trash & recycling bins",60,15,{sup:"Hose or tub, dish soap, brush, baking soda",s:["Empty the bin and take it outside or to the tub.","Scrub with hot soapy water and rinse.","Dry in the sun if you can.","Sprinkle a little baking soda in the bottom before the new bag."],eco:"Sunlight helps dry and deodorize."});
+C("k-pantry","Kitchen","Pantry check & wipe shelves",180,30,{sup:"Damp cloth, trash bag",s:["Pull everything out a shelf at a time.","Toss expired items and watch for pantry moths (webbing in grains).","Wipe shelves and put things back, oldest in front."],w:"If you find pantry moths, toss infested food and freeze new grains for 4 days."});
+
+/* Espresso */
+C("e-weekly","Espresso","Clean group head, basket & drip tray",7,10,{sup:"Group brush, microfiber cloth, warm water",s:["Brush around the group gasket to clear grounds.","Backflush with plain water using a blind basket if your machine allows.","Soak baskets and portafilter (not the handle) in hot water.","Empty and wash the drip tray. Wipe the steam wand and purge it."],eco:"A weekly water rinse means you need detergent less often."});
+C("e-backflush","Espresso","Backflush with espresso cleaner",30,15,{sup:"Espresso machine cleaner (Cafiza, Urnex), blind basket",s:["Check your manual: backflushing only works on machines with a 3-way solenoid valve.","Put 1/2 tsp cleaner in the blind basket and lock in.","Run 10 seconds, stop 10 seconds. Repeat 5 times.","Rinse: repeat with plain water 5+ times. Pull and discard one shot."],eco:"Espresso cleaners are made to rinse clean. Coffee oils turn rancid without them.",w:"Don't use dish soap. It leaves residue and flavor."});
+C("e-grinder","Espresso","Clean grinder burrs",60,15,{sup:"Grinder cleaning tablets or brush, small vacuum",s:["Run grinder cleaning pellets (Grindz) through, then 10–20g of coffee to purge.","Or unplug, remove the top burr per your manual, and brush oils and fines out.","Vacuum the chute and put it back together."],w:"Don't use rice. It's harder than coffee and can strain burrs and motors."});
+C("e-descale","Espresso","Descale espresso machine",90,30,{sup:"Manufacturer's descaler or citric acid",s:["Read your manual first. Some dual-boiler machines should not be descaled at home.","Mix descaler in the tank as directed.","Run it through the group and steam wand per the manual.","Flush with at least two full tanks of fresh water."],eco:"Using filtered or softened water greatly reduces how often you need this.",w:"Avoid vinegar in espresso machines. It can harm seals and leave a taste."});
+
+/* Bathrooms */
+C("b-toilet","Bathrooms","Clean toilets",7,10,{sup:"Toilet brush, baking soda, castile soap or toilet cleaner, cloth",s:["Sprinkle baking soda in the bowl and add a squirt of castile soap. Let sit while you do the rest.","Wipe the outside top to bottom: tank, seat, hinges, base, and the floor around it.","Scrub the bowl, under the rim especially, and flush."],eco:"Baking soda plus castile soap cleans the bowl well week to week.",alt:"A commercial toilet cleaner or a bleach cleaner after stomach bugs.",w:"Close lids so curious cats and kids stay out of the cleaning water."});
+C("b-sinks","Bathrooms","Bathroom sinks, counters & mirrors",7,10,{sup:"Microfiber cloths, dish soap, glass cloth",s:["Clear the counter.","Wipe the sink and counter with soapy water. Scrub around the faucet base with a toothbrush.","Clean the mirror with a damp microfiber cloth, then a dry one."],eco:"Good microfiber and plain water leave mirrors streak-free.",alt:"A 50/50 vinegar and water spray for hard water spots on chrome and glass.",w:"No vinegar on marble or natural stone vanities."});
+C("b-shower","Bathrooms","Scrub tub & shower",7,15,{sup:"Baking soda, dish soap, scrub brush, squeegee",s:["Mix baking soda with a squirt of dish soap into a paste.","Scrub tub, walls and fixtures, then rinse.","Squeegee glass doors.","Going forward: squeegee after showers to slow buildup."],eco:"Dish soap breaks down body oils. Baking soda handles soap scum.",alt:"For heavy hard-water scale on glass, a vinegar spray or CLR. Rinse well.",w:"Never use vinegar and bleach in the same session. Rinse completely between products."});
+C("b-towels","Bathrooms","Wash towels & bath mats",7,5,{s:["Wash bath towels hot.","Wash bath mats every other time, or weekly with kids splashing.","Dry fully to stop mildew smell."],eco:"Skip fabric softener. It coats towels and makes them less absorbent. Use 1/2 cup vinegar in the rinse instead."});
+C("b-toys","Bathrooms","Clean kids' bath toys",14,10,{sup:"White vinegar, bowl, dish soap",s:["Squeeze water out of squirt toys.","Soak 1 hour in equal parts hot water and white vinegar, squeezing it through.","Rinse, squeeze out, and air dry upside down.","Toss anything with black mold inside."],eco:"Seal squirt holes with hot glue so water never gets in.",alt:"Hard plastic toys can go on the dishwasher's top rack."});
+C("b-holder","Bathrooms","Wash toothbrush holder & soap dish",14,5,{s:["Run them through the dishwasher or scrub with hot soapy water.","Dry before putting brushes back."]});
+C("b-showerhead","Bathrooms","Descale showerhead",90,5,{sup:"White vinegar, zip bag, rubber band",s:["Fill a bag with vinegar and rubber-band it over the showerhead.","Soak 1 hour (or overnight for chrome).","Remove, run hot water, and scrub nozzles with a toothbrush."],eco:"Vinegar dissolves the scale that blocks spray holes.",w:"Limit soaks to 15–20 minutes on brass, nickel, or matte black finishes."});
+C("b-grout","Bathrooms","Scrub grout & treat mildew",90,30,{sup:"Oxygen bleach powder or 3% hydrogen peroxide, baking soda, grout brush",s:["Make a paste of baking soda and hydrogen peroxide (or oxygen bleach and water).","Spread on grout lines and let sit 10–15 minutes.","Scrub with a stiff grout brush and rinse well.","Run the fan for an hour afterwards."],eco:"Oxygen bleach and peroxide whiten grout without chlorine fumes.",alt:"For black mold in caulk, a bleach gel pen works well. Ventilate and keep cats and kids out until it's rinsed. If mold is inside the caulk, re-caulk.",w:"Never mix bleach with vinegar, ammonia, or other cleaners."});
+C("b-curtain","Bathrooms","Wash shower curtain & liner",60,5,{s:["Put the liner and curtain in the washer with 2–3 towels (they scrub).","Wash warm with detergent and 1/2 cup baking soda.","Add 1/2 cup vinegar to the rinse.","Hang back up to dry."],eco:"Washing makes plastic liners last much longer."});
+C("b-drains","Bathrooms","Clear hair from drains",30,10,{sup:"Plastic drain snake (Zip-It), gloves",s:["Pull the stopper if possible.","Push the plastic snake down, twist, and pull out the hair.","Flush with very hot water."],eco:"Mechanical removal beats chemicals and is safer for pipes.",w:"Skip chemical drain openers. They're dangerous around kids and can damage pipes."});
+C("b-fan","Bathrooms","Vacuum exhaust fan cover",180,10,{s:["Turn off the fan.","Vacuum the grille with a brush attachment.","For a deeper clean, pull the cover down and wash it in soapy water."],eco:"A clean fan pulls out moisture better, which prevents mildew."});
+C("b-meds","Bathrooms","Clear out expired meds & products",365,20,{s:["Check expiration dates on medicines, sunscreen, and cosmetics.","Take old meds to a pharmacy take-back bin.","Move anything kids could reach up high or into a locked box."],w:"Children's poisoning risk: keep meds and vitamins locked or high, even ones with child-proof caps."});
+
+/* Floors & rugs */
+C("f-vacuum","Floors & rugs","Vacuum floors & rugs",4,30,{sup:"Vacuum with brush-roll on/off control",s:["Hardwood: use the hard-floor setting with the brush roll off.","Silk and wool rugs: suction only. Turn the beater bar off or use an upholstery head.","Vacuum in the direction of the pile, not against it.","Keep the vacuum off fringe. Comb fringe gently by hand instead."],eco:"Frequent vacuuming keeps grit from wearing down floor finish and rug fibers.",w:"A spinning beater bar frays and fuzzes silk and wool."});
+C("f-mop","Floors & rugs","Damp-mop hardwood",14,20,{sup:"Microfiber flat mop, pH-neutral hardwood cleaner (e.g. Bona)",s:["Vacuum first.","Lightly mist a pH-neutral hardwood cleaner, or dampen the pad and wring it until barely damp.","Mop with the grain, a small section at a time.","Wipe up anything wet. Keep cats off until dry."],eco:"A well-wrung microfiber pad with a little cleaner is all hardwood needs.",w:"Avoid vinegar (dulls the finish over time), steam mops, oil soaps (leave a film), and puddles of water. If your floors are oil-finished instead of polyurethane, use a cleaner made for oiled floors."});
+C("f-rug-spot","Floors & rugs","Check rugs for spots & stains",14,10,{sup:"White cloths, cool water, wool-safe detergent",s:["Look for cat hairballs, food, and spills.","Blot from the outside in with a white cloth and cool water. Don't rub.","For stubborn spots, use a wool-safe detergent (look for the WoolSafe label).","Blot dry, then prop the area up to air dry."],eco:"Water and gentle blotting fix most fresh spots.",w:"Enzyme cleaners with protease can damage silk and wool. Spot-test or use a WoolSafe-approved product. Never use baking soda, ammonia, or oxygen bleach on silk or wool. Silk can lose dye easily: test first."});
+C("f-rug-rotate","Floors & rugs","Rotate rugs & clean underneath",180,20,{s:["Roll up or flip the rug back.","Vacuum the rug's back side and the floor underneath.","Look for clothes moths or carpet beetles (tiny larvae, webbing, bald patches), especially under furniture.","Rotate the rug 180° so sun and traffic wear evenly."],eco:"Moths love undisturbed wool. Regular vacuuming under furniture is the best prevention.",w:"If you find moths, call a rug cleaner. They can treat it without damaging fibers."});
+C("f-rug-pro","Floors & rugs","Professional rug cleaning",730,0,{s:["Book a cleaner who specializes in handmade wool and silk rugs.","Plan for every 1–2 years for high traffic, 3–5 for low."],w:"Steam cleaning or home carpet shampooers can shrink wool and bleed silk dyes. Don't DIY a full wash."});
+C("f-baseboards","Floors & rugs","Wipe baseboards",60,20,{sup:"Damp microfiber cloth",s:["Vacuum along baseboards with a brush attachment.","Wipe with a damp cloth.","Use a melamine sponge on scuffs."],eco:"A dryer sheet wiped over clean baseboards helps repel dust and cat hair."});
+C("f-mats","Floors & rugs","Shake or wash doormats",30,5,{s:["Shake outdoor mats.","Machine-wash washable mats.","Sweep or vacuum under them."]});
+
+/* Whole house */
+C("h-dust","Whole house","Dust surfaces",7,20,{sup:"Damp microfiber cloth",s:["Work top to bottom, room by room.","Use a slightly damp microfiber cloth so dust sticks instead of flying.","Dust shelves, tables, lamps, picture frames, and electronics.","Vacuum the floor after."],eco:"Microfiber holds dust without spray.",w:"Don't use sprays with essential oils. They're toxic to cats."});
+C("h-high","Whole house","Dust ceiling fans, lights & up high",60,25,{sup:"Pillowcase, extendable duster, step stool",s:["Slide an old pillowcase over each fan blade and pull back. The dust stays inside.","Dust light fixtures, door frames, and tops of cabinets and fridge.","Vacuum the floor after."],eco:"The pillowcase trick keeps dust off beds and floors."});
+C("h-touch","Whole house","Disinfect switches, knobs & remotes",14,10,{sup:"70% isopropyl alcohol or hydrogen peroxide, cloth",s:["Wipe light switches, doorknobs, cabinet pulls, remotes, and phone screens.","Let surfaces stay wet for the time on the label.","Do this more often in cold and flu season."],eco:"Alcohol evaporates fast and is safe for electronics.",alt:"After stomach bugs, use a bleach solution. Alcohol and vinegar don't reliably kill norovirus.",w:"Spray the cloth, not the switch."});
+C("h-couch","Whole house","Vacuum couch & under cushions",30,15,{sup:"Vacuum upholstery tool, rubber glove or lint roller",s:["Pull off cushions and vacuum crumbs and toys out of the crevices.","Vacuum the cushions on all sides.","Wipe a damp rubber glove across fabric to pull up cat hair."],eco:"A rubber glove or squeegee lifts cat hair better than most attachments."});
+C("h-walls","Whole house","Spot-clean walls & doors",30,15,{sup:"Warm soapy water, melamine sponge",s:["Look for handprints around switches and doorways and crayon at kid height.","Try warm soapy water first.","Use a melamine sponge (Magic Eraser) lightly on tougher marks."],eco:"Plain soap and water won't strip paint.",w:"Melamine sponges are fine abrasives and can dull flat or matte paint. Test in a hidden spot."});
+C("h-windows","Whole house","Wash windows (inside)",90,40,{sup:"Squeegee, microfiber, dish soap",s:["Mix a few drops of dish soap in a bucket of warm water.","Wash the glass, then squeegee from the top down, wiping the blade each pass.","Wipe the edges with a dry microfiber.","Work on a cloudy day so it doesn't dry streaky."],eco:"Dish soap water and a squeegee beat any spray."});
+C("h-tracks","Whole house","Vacuum window & door tracks",90,20,{sup:"Crevice tool, old toothbrush, damp cloth",s:["Vacuum loose dirt and dead bugs.","Scrub with a damp toothbrush.","Wipe dry."]});
+C("h-vents","Whole house","Vacuum air vents & returns",90,15,{s:["Vacuum vent covers and cold-air return grilles with a brush tool.","Wash them in soapy water if they're greasy or dusty.","Check the HVAC filter while you're at it."],eco:"Cat hair builds up fast on returns."});
+C("h-blinds","Whole house","Clean blinds & curtains",90,30,{s:["Close blinds and wipe each side with a damp microfiber cloth.","Vacuum curtains with a brush tool, or wash per the label."],w:"Make sure blind cords are tied up out of kids' reach."});
+C("h-lamps","Whole house","Dust lampshades",90,10,{s:["Roll a lint roller over fabric shades.","Wipe bulbs once they're cool."]});
+C("h-screens","Whole house","Wipe screens & electronics",30,10,{sup:"Dry microfiber, 70% isopropyl alcohol",s:["Turn screens off.","Wipe gently with a dry microfiber cloth.","For smudges, lightly dampen the cloth with water or alcohol."],w:"Never spray directly onto screens."});
+C("h-closets","Whole house","Declutter & dust closets",365,60,{s:["Take everything out of one closet at a time.","Donate what doesn't fit or isn't used.","Vacuum the floor and dust shelves.","Check wool clothing for moth holes."]});
+
+/* Bedrooms & kids */
+C("r-sheets","Bedrooms & kids","Change sheets",7,15,{s:["Strip beds and wash sheets warm or hot.","Wash kids' sheets more often after sickness or accidents."]});
+C("r-bedding","Bedrooms & kids","Wash pillows, duvets & comforters",180,20,{s:["Check care labels.","Wash two pillows at a time to balance the machine.","Dry thoroughly on low with dryer balls to keep fill fluffy."],w:"Not drying completely leads to mildew inside the fill."});
+C("r-mattress","Bedrooms & kids","Vacuum & rotate mattress",180,20,{sup:"Vacuum upholstery tool, baking soda",s:["Strip the bed.","Sprinkle baking soda over the mattress and leave 1 hour.","Vacuum thoroughly.","Rotate head to foot."],eco:"Baking soda pulls odors without fragrance."});
+C("r-toys","Bedrooms & kids","Wash & sanitize toys",30,20,{s:["Hard plastic toys: top rack of the dishwasher in a mesh bag, or soapy water.","Stuffed animals: in a pillowcase in the washer on gentle, then air dry.","Wipe electronic toys with a cloth dampened with alcohol."],eco:"Soap and water is enough for routine cleaning."});
+C("r-carseat","Bedrooms & kids","Clean car seats & high chair",90,30,{s:["High chair: take the tray to the sink and scrub with hot soapy water. Wipe the frame and straps.","Car seat: vacuum crumbs. Remove the cover and wash it per the manual.","Spot-clean straps with a damp cloth and mild soap only."],w:"Never machine-wash or bleach car seat harness straps. It weakens the webbing. Follow the seat's manual."});
+
+/* Cats */
+C("c-scoop","Cats","Scoop litter boxes",1,5,{s:["Scoop clumps and waste.","Top up litter to 2–3 inches.","Sweep or vacuum scattered litter."],eco:"Daily scooping means fewer full litter changes."});
+C("c-litter","Cats","Full litter change & wash box",21,20,{sup:"Unscented dish soap, hot water, scrub brush, fresh litter",s:["Dump all the litter.","Scrub the box with hot water and unscented dish soap. Rinse well.","Dry fully and refill with fresh litter."],eco:"Plain soap is enough. Cats dislike scented boxes.",w:"No ammonia (it smells like urine) and no essential oils or phenol cleaners. If pregnant, have someone else do it (toxoplasmosis)."});
+C("c-fountain","Cats","Clean water fountain & bowls",14,15,{sup:"Small brush, replacement filter",s:["Take apart the fountain. Scrub the pump and tubes with a small brush.","Wash bowls on the top rack of the dishwasher or with hot soapy water.","Replace the filter if it's due and reassemble."],eco:"Slime builds up fast. Clean bowls keep cats drinking."});
+C("c-beds","Cats","Wash cat beds & blankets",14,5,{s:["Shake hair outside first.","Wash hot with unscented detergent.","Clean the lint trap afterwards. Cat hair loads it up."]});
+C("c-tree","Cats","Vacuum cat tree & scratchers",14,10,{s:["Vacuum carpeted perches and posts.","Check for loose platforms or worn-out scratchers."]});
+
+/* Laundry */
+C("l-washer","Laundry","Clean the washing machine (top load)",30,15,{sup:"Washer cleaner (Affresh) or 1 cup bleach, cloth, old toothbrush",s:["Run an empty hottest, largest cycle with a washer cleaner tablet or 1 cup bleach.","Optional: pause it after it fills and agitates for a minute. Let it soak an hour, then let it finish.","Wipe under the lid, the tub rim, and the agitator top with a damp cloth.","Pull out the fabric softener and bleach dispensers if they come out and scrub them.","Leave the lid open to dry out."],eco:"A cleaner tablet or a hot-water cycle with 2 cups vinegar works for light upkeep.",alt:"Bleach cycle for musty smells or visible mold.",w:"If you do both vinegar and bleach, run them as separate cycles with a rinse in between. Never mix them. Some top-loaders have a lint filter in the agitator or along the tub rim: check the manual."});
+C("l-lint-screen","Laundry","Wash dryer lint screen",60,5,{sup:"Dish soap, soft brush",s:["Pull out the lint screen and clear the lint.","Scrub with warm soapy water and a soft brush to remove dryer-sheet film.","Test it: water should pass through. Let it dry fully before reinstalling."],eco:"Wool dryer balls replace dryer sheets and don't clog the screen.",w:"Clean the screen itself every load. Lint buildup is a fire risk."});
+C("l-lint-housing","Laundry","Vacuum the lint trap housing",90,10,{sup:"Long dryer lint brush or vacuum crevice tool",s:["With the screen out, push a long lint brush down into the slot.","Twist and pull out lint.","Vacuum the slot with a narrow crevice attachment."],eco:"Clearing this deep lint shortens drying times."});
+C("l-tub","Laundry","Scrub the laundry tub",30,10,{sup:"Baking soda, dish soap, scrub brush",s:["Rinse out debris.","Sprinkle baking soda and scrub the basin with a squirt of dish soap.","Scrub the faucet and drain. Rinse."],alt:"Oxygen bleach paste for stains, or Bar Keepers Friend on stainless.",w:"Don't leave cleaning water standing where little kids can reach it."});
+C("l-behind","Laundry","Dust behind & on top of machines",90,15,{s:["Wipe the tops of washer and dryer.","Vacuum behind and around them, where lint and cat hair collect."]});
+
+/* Upkeep: home systems */
+U("m-hvac","Home systems","Replace HVAC filter",60,5,{s:["Turn the system off.","Note the arrow on the filter showing airflow direction.","Swap in the new filter. Write the date on its edge."],eco:"With cats, change every 60 days instead of 90.",w:"Use the size printed on the old filter. Add it to the house notes below."});
+U("m-hvac-service","Home systems","HVAC tune-up",365,0,{s:["Book a technician before peak heating or cooling season."]});
+U("m-fridge-filter","Home systems","Replace fridge water filter",180,5,{s:["Find the model number in the fridge manual or on the old filter.","Swap the filter and run 2–3 gallons through to flush it."]});
+U("m-water-heater","Home systems","Flush water heater",365,45,{s:["Turn off the power or gas setting to 'pilot'.","Attach a hose to the drain valve and run it outside or to a floor drain.","Open the valve and drain a few gallons until water runs clear.","Close the valve and turn back on."],w:"Water is scalding. Keep kids away while draining."});
+U("m-dryer-vent","Home systems","Clean dryer vent duct",365,45,{sup:"Dryer vent brush kit",s:["Unplug the dryer and pull it out.","Disconnect the duct and brush it out from both ends.","Clear the outside vent flap.","Reconnect with metal (not plastic foil) ducting."],w:"Clogged dryer vents are a leading cause of house fires."});
+U("m-washer-hoses","Home systems","Check washer hoses",365,5,{s:["Look for bulges, cracks, or rust at the fittings.","Replace rubber hoses every 5 years with braided steel ones."]});
+U("m-caulk","Home systems","Inspect caulk & grout seals",365,15,{s:["Check around tubs, showers, and sinks for gaps or mold inside caulk.","Re-caulk where needed."]});
+U("m-fans","Home systems","Switch ceiling fan direction",180,5,{s:["Summer: counterclockwise to push air down.","Winter: clockwise on low to pull air up."]});
+U("m-gutters","Outdoors","Clean gutters",180,60,{s:["Clear leaves in late fall and in spring.","Flush downspouts with a hose.","Hire it out for second stories."],w:"Use a stable ladder with someone holding it."});
+U("m-spigots","Outdoors","Winterize outdoor faucets",365,15,{s:["Disconnect hoses before the first freeze.","Shut off interior valves to outdoor spigots and drain them."]});
+/* Upkeep: safety */
+U("m-smoke","Safety","Test smoke & CO alarms",30,10,{s:["Press and hold the test button on each alarm until it sounds."],w:"Alarms older than 10 years need replacing. Check the date on the back."});
+U("m-batteries","Safety","Replace alarm batteries",365,20,{s:["Replace batteries in every alarm that isn't a sealed 10-year model.","Test each one after."]});
+U("m-gfci","Safety","Test GFCI outlets",90,10,{s:["Press TEST on each kitchen, bath, laundry and outdoor GFCI outlet. Power should cut.","Press RESET."]});
+U("m-extinguisher","Safety","Check fire extinguishers",90,5,{s:["Make sure the gauge needle is in the green.","Make sure it's easy to reach in the kitchen."]});
+U("m-childproof","Safety","Childproofing check",180,20,{s:["Test cabinet and drawer locks, especially under sinks.","Check heavy furniture and TVs are anchored to the wall.","Check outlet covers and window cord ties.","Move cleaning supplies up as kids grow and climb."]});
+/* Upkeep: espresso */
+U("e-gasket","Espresso","Replace group gasket & shower screen",365,20,{s:["Order the gasket for your machine model.","Pry the old one out with a pick (machine cool), clean the groove, and press the new one in.","Replace the shower screen if it's damaged."]});
+U("e-filter","Espresso","Replace water tank filter",60,5,{s:["Swap the filter cartridge in the reservoir per the manual.","Soak the new cartridge before installing if required."]});
+/* Upkeep: pool */
+U("p-test","Pool","Test & balance pool water",3,10,{s:["Test free chlorine, pH and alkalinity.","Targets: free chlorine 1–3 ppm, pH 7.4–7.6, alkalinity 80–120 ppm. Check calcium (200–400) and stabilizer (30–50) monthly.","Add chemicals one at a time with the pump running, spaced out."],w:"Always add chemicals to water, never water to chemicals. Never mix different chlorine types (for example cal-hypo and trichlor). That can cause fire or explosion. Store chemicals locked away from kids."});
+U("p-skim","Pool","Skim pool & empty skimmer baskets",2,10,{s:["Skim leaves off the surface.","Turn off the pump, then empty the skimmer baskets."]});
+U("p-pump","Pool","Empty pump basket",7,5,{s:["Turn the pump off.","Open the pump lid and empty the basket.","Check the lid O-ring, refill with water, and restart."]});
+U("p-brush","Pool","Brush & vacuum pool",7,30,{s:["Brush walls, steps and floor toward the main drain.","Vacuum the floor or let the robot run."],eco:"Regular brushing prevents algae so you need less chemical."});
+U("p-shock","Pool","Shock the pool",7,10,{s:["Shock at dusk so sun doesn't burn off chlorine.","Run the pump overnight.","Test before swimming."],w:"Keep everyone out until free chlorine is back under 5 ppm."});
+U("p-filter","Pool","Clean or backwash filter",30,30,{s:["Backwash (sand/DE) or hose off cartridges when pressure is 8–10 psi above clean.","Recharge DE if you have a DE filter."]});
+U("p-tile","Pool","Scrub waterline tile",30,20,{s:["Scrub the waterline with a tile brush and pool-safe tile cleaner."]});
+U("p-safety","Pool","Pool safety check",30,10,{s:["Make sure the gate self-closes and latches.","Test the pool alarm.","Make sure the rescue hook and ring buoy are in place.","Check the cover, if you have one."],w:"Drowning is silent and fast. Never leave little kids unattended near the pool."});
+U("p-season","Pool","Open or close pool for the season",180,0,{s:["Spring: open, balance chemistry and shock.","Fall: balance, lower water, blow out lines and cover."]});
+/* Upkeep: pond */
+U("f-skim","Pond","Remove leaves & debris",7,10,{s:["Net out floating leaves before they sink and rot.","Empty the skimmer basket if you have one."]});
+U("f-test","Pond","Test pond water",14,10,{s:["Test ammonia, nitrite and pH.","Ammonia and nitrite should be 0. pH around 7–8.5."],w:"Don't overfeed. Uneaten food spikes ammonia."});
+U("f-change","Pond","Partial water change",14,20,{s:["Replace about 10% of the water.","Add dechlorinator to the new water."],w:"Tap water chlorine or chloramine kills fish and filter bacteria. Always dechlorinate."});
+U("f-filter","Pond","Rinse filter media in pond water",30,20,{s:["Scoop a bucket of pond water.","Swish and squeeze filter sponges in it until mostly clean.","Put back and restart the pump."],w:"Never rinse media in tap water. It kills the good bacteria."});
+U("f-pump","Pond","Clean pump intake",30,15,{s:["Unplug the pump.","Clear debris and string algae from the intake.","Restart and check flow."]});
+U("f-plants","Pond","Trim pond plants",30,15,{s:["Cut off yellow or dead leaves.","Thin out plants that are overgrowing."]});
+U("f-uv","Pond","Replace UV clarifier bulb",365,15,{s:["Replace in spring. Bulbs lose strength after a year even if they still glow."]});
+U("f-season","Pond","Pond seasonal prep",180,30,{s:["Fall: net the pond, stop feeding below 50°F (10°C), add a floating de-icer.","Spring: remove net, clean out sludge, start feeding when water is above 50°F."],w:"Even shallow ponds are a drowning risk for toddlers. Consider a grate or fence."});
+
+/* ---------------- Store: db when the page runs in claude.ai, this device otherwise ---------------- */
+var LS="hk-log-v1";
+var S={state:{},custom:{},mode:"local",readonly:false};
+function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");S.state=v.state||{};S.custom=v.custom||{}}catch(e){}}
+function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({state:S.state,custom:S.custom}))}catch(e){}}
+var dbref=null, chains={};
+function chain(key,fn){var p=(chains[key]||Promise.resolve()).then(fn,fn);chains[key]=p.catch(function(){});return p}
+function writeErr(e){
+  if(e&&e.code==="invalid_argument"){S.readonly=true;toast("You can view this list, but not change it.")}
+  else if(e&&e.code==="quota_exceeded"){toast("Storage is full. Your latest change wasn't saved.")}
+  else toast("Couldn't save that change. Check your connection and try again.");
+}
+function saveState(id){
+  var v=S.state[id]; lsWrite(); render();
+  if(S.mode!=="db")return;
+  chain("s:"+id,function(){var r=dbref.collection("state").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
+}
+function saveCustom(id){
+  var v=S.custom[id]; lsWrite(); render();
+  if(S.mode!=="db")return;
+  chain("c:"+id,function(){var r=dbref.collection("custom").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
+}
+function connect(){
+  if(!window.claude||!window.claude.use){footer();return}
+  window.claude.use("db").then(function(db){
+    if(!db){footer();return}
+    dbref=db;S.mode="db";footer();
+    db.collection("state").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.state=m;lsWrite();render()},function(){});
+    db.collection("custom").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.custom=m;lsWrite();render()},function(){});
+  }).catch(function(){footer()});
+}
+function footer(){document.getElementById("foot").textContent=S.mode==="db"?"Your log is saved to your account and syncs across devices.":"Your log is saved in this browser only."}
+
+/* ---------------- Logic ---------------- */
+var DAY=864e5;
+function tasks(){var c=Object.keys(S.custom).map(function(k){var t=Object.assign({},S.custom[k]);t.id=k;t.custom=true;return t});return L.concat(c)}
+function st(id){return S.state[id]||{}}
+function every(t){return st(t.id).every||t.e}
+function lastAt(t){var h=st(t.id).hist||[];return h.length?h[0].at:null}
+function since(t){var a=lastAt(t);return a==null?null:Math.max(0,Math.floor((Date.now()-new Date(a).getTime())/DAY))}
+function ratio(t){var d=since(t);return d==null?1:d/every(t)}
+function aside(t){var s=st(t.id);if(s.why==="supplies")return "supplies";if(s.why==="later"&&s.until&&new Date(s.until).getTime()>Date.now())return "later";return null}
+function hidden(t){return !!st(t.id).hidden}
+function status(t){
+  if(aside(t))return {cls:"st-aside",label:aside(t)==="supplies"?"Need supplies":"Later"};
+  if(since(t)==null)return {cls:"st-new",label:"Not logged"};
+  var r=ratio(t);
+  if(r>=1)return {cls:"st-due",label:r>=2?"Overdue":"Due"};
+  if(r>=.75)return {cls:"st-soon",label:"Soon"};
+  return {cls:"st-ok",label:"Fresh"};
+}
+function fmtEvery(n){if(n===1)return "daily";if(n%365===0)return n===365?"yearly":"every "+(n/365)+" yrs";if(n%30===0&&n>=60)return "every "+(n/30)+" mo";if(n===30)return "monthly";if(n%7===0)return n===7?"weekly":"every "+(n/7)+" wks";return "every "+n+" days"}
+function fmtAgo(d){if(d==null)return "not logged yet";if(d===0)return "today";if(d===1)return "yesterday";if(d<14)return d+" days ago";if(d<60)return Math.round(d/7)+" wks ago";if(d<730)return Math.round(d/30)+" mo ago";return Math.round(d/365)+" yrs ago"}
+function fmtDate(iso){return new Date(iso).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function tier(t){var e=every(t);return e<=14?"Routine":e<=90?"Periodic":"Deep clean"}
+function active(list){return tasks().filter(function(t){return t.list===list&&!hidden(t)})}
+function byDue(a,b){return ratio(b)-ratio(a)||every(a)-every(b)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+function markDone(id,note,atIso){
+  var s=Object.assign({},st(id));var h=(s.hist||[]).slice();
+  h.push({at:atIso||new Date().toISOString(),note:note||""});
+  h.sort(function(a,b){return new Date(b.at)-new Date(a.at)});
+  s.hist=h.slice(0,60);delete s.why;delete s.until;S.state[id]=s;saveState(id);
+}
+function undoDone(id,prev){S.state[id]=prev;saveState(id)}
+function setAside(id,why,days){var s=Object.assign({},st(id));s.why=why;if(days)s.until=new Date(Date.now()+days*DAY).toISOString();else delete s.until;S.state[id]=s;saveState(id)}
+function clearAside(id){var s=Object.assign({},st(id));delete s.why;delete s.until;S.state[id]=s;saveState(id)}
+function patch(id,obj){var s=Object.assign({},st(id),obj);Object.keys(obj).forEach(function(k){if(obj[k]==null||obj[k]==="")delete s[k]});S.state[id]=s;saveState(id)}
+function findTask(id){return tasks().filter(function(t){return t.id===id})[0]}
+
+/* ---------------- Rendering ---------------- */
+var ui={tab:"today",budget:null,area:"All",q:"",upArea:"All"};
+try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=saved.tab}catch(e){}
+var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function row(t){
+  var s=status(t),d=since(t),pct=Math.min(100,Math.round(ratio(t)*100));
+  var meta=esc(t.area)+" · "+fmtAgo(d)+" · "+fmtEvery(every(t))+(t.m?" · ~"+t.m+" min":"");
+  if(aside(t)==="later")meta=esc(t.area)+" · back "+fmtDate(st(t.id).until);
+  return '<li class="row '+s.cls+'" data-id="'+esc(t.id)+'">'+
+    '<button class="tick" data-act="quick" aria-label="Mark '+esc(t.name)+' done">'+TICK+'</button>'+
+    '<button class="main" data-act="open"><span class="name">'+esc(t.name)+'</span><span class="meta">'+meta+'</span></button>'+
+    '<span class="pill">'+s.label+'</span>'+
+    (d!=null&&!aside(t)?'<span class="meter" style="width:'+pct+'%"></span>':'')+'</li>';
+}
+function rows(list){return '<ul class="rows">'+list.map(row).join("")+'</ul>'}
+
+function pickForBudget(min){
+  var c=active("clean").filter(function(t){return !aside(t)&&ratio(t)>=.6}).sort(byDue),out=[],used=0;
+  c.forEach(function(t){var m=t.m||10;if(used+m<=min){out.push(t);used+=m}});
+  return {list:out,used:used};
+}
+function viewToday(){
+  var all=active("clean"),live=all.filter(function(t){return !aside(t)});
+  var due=live.filter(function(t){return since(t)!=null&&ratio(t)>=1}).length;
+  var logged=all.filter(function(t){return since(t)!=null}).length;
+  document.getElementById("sub").textContent=due?due+" due":"";
+  var h="";
+  if(logged<5)h+='<div class="banner"><p class="eyebrow">Getting started</p><p>Everything starts as “not logged.” Tap a task and pick roughly when you last did it, so the list knows what’s actually due.</p></div>';
+  var chips=[[null,"Just show me"],[5,"5 min"],[15,"15 min"],[30,"30 min"],[60,"1 hr"]];
+  h+='<section class="timebar"><span class="q">How much time do you have?</span><div class="chips" role="group" aria-label="Time available">'+
+    chips.map(function(c){return '<button class="chip" data-act="budget" data-v="'+(c[0]||"")+'" aria-pressed="'+(ui.budget===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
+  var list;
+  if(ui.budget){var p=pickForBudget(ui.budget);list=p.list;h+='<span class="fit">'+(list.length?list.length+" task"+(list.length>1?"s":"")+" · about "+p.used+" min":"Nothing due fits in that time. Try a longer window.")+'</span>'}
+  else{list=live.slice().sort(byDue).filter(function(t){return ratio(t)>=.75}).slice(0,5)}
+  h+='</section>';
+  h+='<section><div class="section-h"><h2>Up next</h2><span class="aside">'+(ui.budget?"most overdue that fit":"most overdue first")+'</span></div>';
+  h+=list.length?rows(list):'<div class="empty"><strong>You’re caught up.</strong> Nothing in cleaning is due right now.</div>';
+  h+='</section>';
+  var later=all.filter(function(t){return aside(t)==="later"}),sup=all.concat(active("upkeep")).filter(function(t){return aside(t)==="supplies"});
+  if(sup.length){
+    var items={};sup.forEach(function(t){(t.sup||"Supplies for "+t.name).split(/,\s*/).forEach(function(x){items[x.trim()]=1})});
+    h+='<section><div class="section-h"><h2>Shopping list</h2><span class="aside">from “Need supplies”</span></div><div class="shop"><span class="eyebrow">Probably need</span><ul>'+Object.keys(items).map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul></div></section>';
+    h+='<details class="aside" open><summary>Waiting on supplies <span>'+sup.length+'</span></summary>'+rows(sup)+'</details>';
+  }
+  if(later.length)h+='<details class="aside"><summary>Set aside for later <span>'+later.length+'</span></summary>'+rows(later)+'</details>';
+  return h;
+}
+function areaChips(list,cur,act){
+  var areas=["All"];list.forEach(function(t){if(areas.indexOf(t.area)<0)areas.push(t.area)});
+  return '<div class="chips" role="group" aria-label="Filter by area">'+areas.map(function(a){return '<button class="chip" data-act="'+act+'" data-v="'+esc(a)+'" aria-pressed="'+(a===cur)+'">'+esc(a)+'</button>'}).join("")+'</div>';
+}
+function viewAll(){
+  var all=active("clean"),q=ui.q.toLowerCase();
+  var list=all.filter(function(t){return (ui.area==="All"||t.area===ui.area)&&(!q||t.name.toLowerCase().indexOf(q)>=0)}).sort(byDue);
+  var hid=tasks().filter(function(t){return t.list==="clean"&&hidden(t)});
+  document.getElementById("sub").textContent=all.length+" tasks";
+  var h='<input class="search" id="q" type="search" placeholder="Search tasks" value="'+esc(ui.q)+'" aria-label="Search tasks">'+areaChips(all,ui.area,"area");
+  h+=list.length?rows(list):'<div class="empty">No tasks match.</div>';
+  h+='<div class="btnrow"><button class="btn" data-act="add" data-list="clean">Add a task</button></div>';
+  if(hid.length)h+='<details class="aside"><summary>Hidden from your list <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
+  return h;
+}
+function viewUpkeep(){
+  var all=active("upkeep"),list=all.filter(function(t){return ui.upArea==="All"||t.area===ui.upArea}).sort(byDue);
+  var hid=tasks().filter(function(t){return t.list==="upkeep"&&hidden(t)});
+  var due=all.filter(function(t){return since(t)!=null&&ratio(t)>=1&&!aside(t)}).length;
+  document.getElementById("sub").textContent=due?due+" due":"";
+  var h='<p style="margin:0;color:var(--muted)">Home maintenance, the pool, and the pond. Kept separate from cleaning so it doesn’t crowd your Today list.</p>'+areaChips(all,ui.upArea,"uparea");
+  h+=rows(list)+'<div class="btnrow"><button class="btn" data-act="add" data-list="upkeep">Add a task</button></div>';
+  if(hid.length)h+='<details class="aside"><summary>Hidden <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
+  return h;
+}
+function viewGuide(){
+  document.getElementById("sub").textContent="";
+  var kit=[
+    ["White vinegar","Hard-water scale, faucets, showerheads, glass, rinse aid in laundry.","Natural stone (marble, granite, quartz), hardwood floors, waxed or oiled wood, cast iron, espresso machines, rubber seals for long soaks."],
+    ["Baking soda","Gentle scrubbing paste, deodorizing, oven, sinks, tubs, mattresses.","Silk and wool rugs (hard to rinse out, alkaline), aluminum (can darken), glass you need streak-free."],
+    ["Dish soap","Grease, everyday wiping, windows, cabinets. The most useful bottle you own.","Espresso machines (leaves residue). Too much on floors leaves film."],
+    ["Castile soap","All-purpose spray (1 tbsp per 2 cups water), toilets, counters.","Mixing with vinegar (it curdles into a greasy mess). Hardwood floors (can leave film)."],
+    ["3% hydrogen peroxide","Disinfecting, whitening grout, mildew, cutting boards.","Colored fabrics and rugs (bleaches), mixing with vinegar. Keep in the brown bottle; light breaks it down."],
+    ["Citric acid","Descaling kettles, dishwashers, and (if the manual allows) espresso machines. Stronger than vinegar, no smell.","Natural stone, and aluminum for long soaks."],
+    ["Oxygen bleach (OxiClean)","Laundry stains, grout paste, deck and patio.","Wool, silk, leather."],
+    ["70% isopropyl alcohol","Electronics, light switches, stainless streaks, quick disinfecting.","Painted, lacquered, or acrylic surfaces. Flammable."],
+    ["Microfiber cloths","Dusting and wiping with just water. Wash without fabric softener.",""],
+    ["Enzyme cleaner","Cat urine and vomit on washable surfaces and synthetic carpet.","Silk and wool unless labeled WoolSafe. Protease enzymes break down protein fibers."]
+  ];
+  var strong=[
+    ["Bar Keepers Friend","Rust, hard-water rings, stainless pans, baking sheets, sinks.","Gloves, rinse well, don't use on stone or nonstick."],
+    ["Bleach (diluted)","Mold inside caulk, disinfecting after stomach bugs (vinegar and peroxide don't reliably kill norovirus).","1 tbsp per quart water. Ventilate, keep cats and kids out until rinsed and dry."],
+    ["Commercial oven cleaner","Heavy baked-on carbon in non-self-cleaning ovens.","Fumes are strong. Pick a fume-free formula, ventilate, keep everyone out of the kitchen."],
+    ["CLR / lime remover","Thick scale that vinegar doesn't move.","Not on stone, painted metal, or brass. Rinse thoroughly."],
+    ["Washer cleaner tablets","Musty top-loader smells.","Follow the label. Don't combine with bleach."]
+  ];
+  function k(r){return '<div class="card"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p>'+(r[2]?'<p><span class="bad">Avoid:</span> '+r[2]+'</p>':'')+'</div>'}
+  var h='<div class="guide view">';
+  h+='<section><h2>Never mix</h2><div class="mix">'+
+    '<div class="card"><p><b>Bleach + vinegar or any acid</b> makes chlorine gas. That includes toilet bowl cleaners and lime removers.</p></div>'+
+    '<div class="card"><p><b>Bleach + ammonia</b> makes chloramine gas. Some glass cleaners contain ammonia.</p></div>'+
+    '<div class="card"><p><b>Bleach + rubbing alcohol</b> makes chloroform and other toxic compounds.</p></div>'+
+    '<div class="card"><p><b>Hydrogen peroxide + vinegar</b> in the same bottle makes peracetic acid, which burns skin and lungs. Using them one after another with a rinse is fine.</p></div>'+
+    '<div class="card"><p><b>Different drain cleaners</b>, or different pool chlorine types. They can react violently.</p></div></div></section>';
+  h+='<section><h2>Your house</h2><div class="kit">'+
+    '<div class="card"><h3>Cats</h3><ul><li>Essential oils are toxic to cats, including tea tree, eucalyptus, citrus, pine, peppermint, and wintergreen. That covers “natural” cleaners scented with them and diffusers.</li><li>Phenol cleaners (some Pine-Sol and Lysol formulas) are dangerous to cats.</li><li>Let floors and surfaces dry before cats walk on them. They lick their paws.</li><li>ASPCA Animal Poison Control: <b>(888) 426-4435</b></li></ul></div>'+
+    '<div class="card"><h3>Little kids</h3><ul><li>Store all cleaners up high or locked, in their original bottles.</li><li>Laundry and dishwasher pods are a top poisoning risk. Keep them closed and out of reach.</li><li>Never leave a bucket of water or a filled tub unattended.</li><li>Poison Control (US): <b>1-800-222-1222</b></li></ul></div>'+
+    '<div class="card"><h3>Hardwood floors</h3><ul><li>Barely damp microfiber and a pH-neutral cleaner.</li><li>No vinegar, steam mops, oil soaps, or standing water.</li><li>Felt pads under furniture, and doormats at every entry for grit.</li></ul></div>'+
+    '<div class="card"><h3>Silk & wool rugs</h3><ul><li>Vacuum with suction only, never a spinning beater bar.</li><li>Blot spills with cool water. Never rub.</li><li>Only WoolSafe-labeled spot cleaners. No baking soda, oxygen bleach, ammonia, or protease enzymes.</li><li>Silk dyes can run. Test hidden spots first.</li><li>Rotate yearly; vacuum underneath to prevent moths; professional wash every 1–3 years.</li></ul></div>'+
+    '</div></section>';
+  h+='<section><h2>Gentle kit</h2><div class="kit">'+kit.map(k).join("")+'</div></section>';
+  h+='<section><h2>When stronger is worth it</h2><div class="kit">'+strong.map(function(r){return '<div class="card alt"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p><p><span class="bad">Care:</span> '+r[2]+'</p></div>'}).join("")+'</div></section>';
+  h+='<section><h2>Your data</h2><div class="card"><p>Copy a backup of your full log, or paste one back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div></section>';
+  return h+'</div>';
+}
+var titles={today:"Today",all:"Cleaning",upkeep:"Upkeep",guide:"Cleaning guide"};
+function render(){
+  if(!document.getElementById("view"))return;
+  var focusQ=document.activeElement&&document.activeElement.id==="q",pos=focusQ?document.activeElement.selectionStart:0;
+  document.getElementById("title").textContent=titles[ui.tab];
+  document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="upkeep"?viewUpkeep():viewGuide();
+  document.getElementById("view").innerHTML=v;
+  if(focusQ){var q=document.getElementById("q");q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}
+  if(openId){
+    var keep={};["note","hnote","pastdate"].forEach(function(k){var x=document.getElementById(k);if(x)keep[k]=x.value});
+    var sc=document.getElementById("sheet").scrollTop;renderSheet();document.getElementById("sheet").scrollTop=sc;
+    Object.keys(keep).forEach(function(k){var x=document.getElementById(k);if(x&&keep[k])x.value=keep[k]});
+  }
+}
+
+/* ---------------- Task sheet ---------------- */
+var openId=null,sheetMode=null;
+var EVERY=[1,2,3,4,7,10,14,21,30,45,60,90,120,180,270,365,730];
+function renderSheet(){
+  var el=document.getElementById("sheet");
+  if(sheetMode==="add"){el.innerHTML=addForm();el.hidden=false;return}
+  var t=findTask(openId);if(!t){closeSheet();return}
+  var s=st(t.id),stt=status(t),d=since(t),h=s.hist||[];
+  var opts=EVERY.slice();if(opts.indexOf(every(t))<0)opts.push(every(t));opts.sort(function(a,b){return a-b});
+  var out='<div class="sheet-in"><div class="sheet-top"><button class="btn small ghost" data-act="close">← Back</button><span class="pill '+stt.cls+'">'+stt.label+'</span></div>';
+  out+='<div style="display:flex;flex-direction:column;gap:8px"><div class="badges"><span class="badge">'+esc(t.area)+'</span><span class="badge">'+(t.list==="upkeep"?"Upkeep":tier(t))+'</span>'+(t.m?'<span class="badge">~'+t.m+' min</span>':'')+'</div><h2 id="sheet-title">'+esc(t.name)+'</h2>';
+  out+='<p class="status-line">'+(d==null?"Not logged yet.":"Last done <b>"+fmtAgo(d)+"</b> ("+fmtDate(h[0].at)+").")+' Repeats '+fmtEvery(every(t))+'.</p></div>';
+  if(aside(t))out+='<div class="banner"><p>'+(aside(t)==="supplies"?"Set aside until you get supplies.":"Set aside until "+fmtDate(s.until)+".")+'</p><div class="btnrow"><button class="btn small" data-act="unaside">Put it back on the list</button></div></div>';
+  out+='<div class="card donebox"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea><div class="btnrow"><button class="btn primary" data-act="done">Mark done</button></div>';
+  if(!aside(t))out+='<div class="btnrow"><button class="btn small" data-act="later" data-v="1">Tomorrow</button><button class="btn small" data-act="later" data-v="3">In 3 days</button><button class="btn small" data-act="later" data-v="7">Next week</button><button class="btn small" data-act="supplies">Need supplies</button></div>';
+  out+='</div>';
+  if(d==null)out+='<div class="card"><h3>When did you last do this?</h3><p style="color:var(--muted);font-size:.9rem">A rough guess is fine.</p><div class="btnrow">'+[[0,"Today"],[7,"~1 week"],[30,"~1 month"],[90,"~3 months"],[180,"~6 months"],[400,"Over a year"]].map(function(x){return '<button class="btn small" data-act="ago" data-v="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div></div>';
+  if(t.sup)out+='<div class="card"><h3>Supplies</h3><p>'+esc(t.sup)+'</p></div>';
+  if(t.s&&t.s.length)out+='<div class="card"><h3>How to</h3><ol>'+t.s.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ol></div>';
+  if(t.eco)out+='<div class="card eco"><h3>Gentle way</h3><p>'+esc(t.eco)+'</p></div>';
+  if(t.alt)out+='<div class="card alt"><h3>Stronger option</h3><p>'+esc(t.alt)+'</p></div>';
+  if(t.w)out+='<div class="card warn"><h3>Watch out</h3><p>'+esc(t.w)+'</p></div>';
+  out+='<div class="card"><h3>House notes</h3><label class="lbl" for="hnote">Sizes, model numbers, where things are</label><textarea id="hnote" placeholder="e.g. filter size 16×25×1, buy at …">'+esc(s.notes||"")+'</textarea><div class="btnrow"><button class="btn small" data-act="savenotes">Save notes</button></div></div>';
+  out+='<div class="card"><h3>History</h3>'+(h.length?'<ul class="hist">'+h.map(function(x,i){return '<li><span class="d">'+fmtDate(x.at)+'</span>'+(x.note?'<span class="n">'+esc(x.note)+'</span>':'')+'<span><button class="btn small ghost danger" data-act="delhist" data-v="'+i+'">Remove</button></span></li>'}).join("")+'</ul>':'<p style="color:var(--muted)">Nothing logged yet.</p>')+
+    '<div class="grid2"><div><label class="lbl" for="pastdate">Log an earlier date</label><input type="date" id="pastdate" max="'+new Date().toISOString().slice(0,10)+'"></div><div style="display:flex;align-items:flex-end"><button class="btn small" data-act="logpast">Add to history</button></div></div></div>';
+  out+='<div class="card"><h3>Settings</h3><label class="lbl" for="every">Repeat</label><select id="every">'+opts.map(function(n){return '<option value="'+n+'"'+(n===every(t)?" selected":"")+'>'+fmtEvery(n)+(n===t.e?" (default)":"")+'</option>'}).join("")+'</select>'+
+    '<div class="btnrow">'+(hidden(t)?'<button class="btn small" data-act="unhide">Show on my list</button>':'<button class="btn small ghost" data-act="hide">Not for our house — hide</button>')+(t.custom?'<button class="btn small ghost danger" data-act="delcustom">Delete task</button>':'')+'</div></div>';
+  el.innerHTML=out+'</div>';el.hidden=false;
+}
+function addForm(){
+  var areas={};tasks().forEach(function(t){if(t.list===addList)areas[t.area]=1});
+  return '<div class="sheet-in"><div class="sheet-top"><button class="btn small ghost" data-act="close">← Back</button></div><h2 id="sheet-title">New '+(addList==="upkeep"?"upkeep":"cleaning")+' task</h2>'+
+  '<form class="form" id="addform"><div><label class="lbl" for="a-name">Task</label><input type="text" id="a-name" required placeholder="e.g. Wipe down patio furniture"></div>'+
+  '<div class="grid2"><div><label class="lbl" for="a-area">Area</label><input type="text" id="a-area" list="a-areas" placeholder="e.g. Outdoors"><datalist id="a-areas">'+Object.keys(areas).map(function(a){return '<option value="'+esc(a)+'">'}).join("")+'</datalist></div>'+
+  '<div><label class="lbl" for="a-every">Repeat</label><select id="a-every">'+EVERY.map(function(n){return '<option value="'+n+'"'+(n===30?" selected":"")+'>'+fmtEvery(n)+'</option>'}).join("")+'</select></div></div>'+
+  '<div class="grid2"><div><label class="lbl" for="a-min">Minutes</label><input type="number" id="a-min" min="0" value="15"></div><div><label class="lbl" for="a-sup">Supplies</label><input type="text" id="a-sup" placeholder="comma separated"></div></div>'+
+  '<div><label class="lbl" for="a-steps">How to (one step per line)</label><textarea id="a-steps"></textarea></div>'+
+  '<div class="btnrow"><button class="btn primary" type="submit">Add task</button></div></form></div>';
+}
+var addList="clean",lastFocus=null;
+function openSheet(id){lastFocus=document.activeElement;openId=id;sheetMode="task";renderSheet();document.getElementById("sheet").scrollTop=0;document.body.style.overflow="hidden";var b=document.querySelector("#sheet [data-act=close]");if(b)b.focus()}
+function closeSheet(){openId=null;sheetMode=null;var el=document.getElementById("sheet");el.hidden=true;el.innerHTML="";document.body.style.overflow="";render();if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+
+/* ---------------- Toast ---------------- */
+var toastTimer;
+function toast(msg,undo){
+  var el=document.getElementById("toast");el.innerHTML="";var sp=document.createElement("span");sp.textContent=msg;el.appendChild(sp);
+  if(undo){var b=document.createElement("button");b.textContent="Undo";b.onclick=function(){undo();el.hidden=true};el.appendChild(b)}
+  el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.hidden=true},5000);
+}
+
+/* ---------------- Events ---------------- */
+function guard(){if(S.readonly){toast("You can view this list, but not change it.");return false}return true}
+document.addEventListener("click",function(e){
+  var tab=e.target.closest("nav.tabs button");
+  if(tab){ui.tab=tab.dataset.tab;try{localStorage.setItem("hk-ui",JSON.stringify({tab:ui.tab}))}catch(x){}render();window.scrollTo(0,0);return}
+  var b=e.target.closest("[data-act]");if(!b)return;
+  var act=b.dataset.act,r=b.closest(".row"),id=r?r.dataset.id:openId;
+  switch(act){
+    case "open":openSheet(id);break;
+    case "quick":{if(!guard())return;var t=findTask(id),prev=S.state[id]?JSON.parse(JSON.stringify(S.state[id])):undefined;markDone(id);toast("Done: "+t.name,function(){undoDone(id,prev)});break}
+    case "budget":ui.budget=b.dataset.v?+b.dataset.v:null;render();break;
+    case "area":ui.area=b.dataset.v;render();break;
+    case "uparea":ui.upArea=b.dataset.v;render();break;
+    case "close":closeSheet();break;
+    case "done":{if(!guard())return;var n=document.getElementById("note").value.trim(),t2=findTask(id);markDone(id,n);closeSheet();toast("Done: "+t2.name);break}
+    case "later":if(!guard())return;setAside(id,"later",+b.dataset.v);closeSheet();toast("Set aside");break;
+    case "supplies":if(!guard())return;setAside(id,"supplies");closeSheet();toast("Added to your shopping list on Today");break;
+    case "unaside":if(!guard())return;clearAside(id);break;
+    case "ago":if(!guard())return;markDone(id,"",new Date(Date.now()-(+b.dataset.v)*DAY).toISOString());break;
+    case "logpast":{if(!guard())return;var v=document.getElementById("pastdate").value;if(!v){toast("Pick a date first.");return}markDone(id,"",new Date(v+"T12:00:00").toISOString());break}
+    case "delhist":{if(!guard())return;var s=Object.assign({},st(id)),h=(s.hist||[]).slice();h.splice(+b.dataset.v,1);s.hist=h;S.state[id]=s;saveState(id);break}
+    case "savenotes":if(!guard())return;patch(id,{notes:document.getElementById("hnote").value.trim()});toast("Notes saved");break;
+    case "hide":if(!guard())return;patch(id,{hidden:true});toast("Hidden. Find it at the bottom of the list.");break;
+    case "unhide":if(!guard())return;patch(id,{hidden:null});break;
+    case "delcustom":if(!guard())return;delete S.custom[id];S.state[id]=undefined;delete S.state[id];saveState(id);saveCustom(id);closeSheet();toast("Task deleted");break;
+    case "add":lastFocus=b;addList=b.dataset.list;sheetMode="add";renderSheet();document.body.style.overflow="hidden";break;
+    case "export":{var data=JSON.stringify({state:S.state,custom:S.custom});var io=document.getElementById("io");
+      var done=function(){toast("Backup copied. Paste it into a note to keep it.")};
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(data).then(done,function(){io.innerHTML='<textarea readonly id="iotext"></textarea>';var ta=document.getElementById("iotext");ta.value=data;ta.select()});
+      else{io.innerHTML='<textarea readonly id="iotext"></textarea>';var ta=document.getElementById("iotext");ta.value=data;ta.select()}break}
+    case "import":document.getElementById("io").innerHTML='<label class="lbl" for="iotext">Paste your backup</label><textarea id="iotext"></textarea><div class="btnrow"><button class="btn small primary" data-act="doimport">Restore</button></div>';break;
+    case "doimport":{if(!guard())return;try{var d=JSON.parse(document.getElementById("iotext").value);if(!d||typeof d.state!=="object")throw 0;
+      Object.keys(d.state).forEach(function(k){S.state[k]=d.state[k];saveState(k)});Object.keys(d.custom||{}).forEach(function(k){S.custom[k]=d.custom[k];saveCustom(k)});toast("Backup restored")}catch(x){toast("That doesn't look like a backup from this app.")}break}
+  }
+});
+document.addEventListener("change",function(e){if(e.target.id==="every"&&openId){if(!guard())return;var t=findTask(openId),n=+e.target.value;patch(openId,{every:n===t.e?null:n})}});
+document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
+document.addEventListener("submit",function(e){
+  if(e.target.id!=="addform")return;e.preventDefault();if(!guard())return;
+  var name=document.getElementById("a-name").value.trim();if(!name)return;
+  var id="u"+Date.now().toString(36);
+  S.custom[id]={list:addList,name:name,area:document.getElementById("a-area").value.trim()||"Other",e:+document.getElementById("a-every").value,m:+document.getElementById("a-min").value||0,
+    sup:document.getElementById("a-sup").value.trim(),s:document.getElementById("a-steps").value.split("\n").map(function(x){return x.trim()}).filter(Boolean)};
+  saveCustom(id);openId=id;sheetMode="task";renderSheet();toast("Task added");
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!document.getElementById("sheet").hidden)closeSheet()});
+
+lsRead();footer();render();connect();
+</script>
