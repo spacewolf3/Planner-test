@@ -89,7 +89,7 @@ details.aside>summary::-webkit-details-marker{display:none}
 details.aside ul.rows{border:0;border-radius:0;border-top:1px solid var(--line)}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--line);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
-  display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
 nav.tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;font-size:.78rem;color:var(--muted);min-height:44px;justify-content:center}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700;background:var(--accent-soft)}
@@ -137,6 +137,29 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 .mix b{color:var(--due)}
 .foot{color:var(--muted);font-size:.8rem;text-align:center;padding-top:8px}
 .form{display:flex;flex-direction:column;gap:12px}
+/* week wrap-up */
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav .range{font-family:var(--f-display);font-weight:700;font-size:1.1rem;text-align:center;font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .v{font-family:var(--f-display);font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .k{color:var(--muted);font-size:.82rem}
+.tile .d{font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+.tile.save{background:var(--ok-soft);border-color:transparent}
+.tile.save .v{color:var(--ok)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.9rem}
+.bar .track{grid-column:1/-1;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px}
+.bar .n{color:var(--muted);font-variant-numeric:tabular-nums}
+.daylog,.card ul.daylog{list-style:none;margin:0;padding:0}
+.daylog .when{display:block;color:var(--muted);font-size:.82rem}
+.daylog li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line)}
+.daylog li:first-child{border-top:0}
+.daylog .day{grid-column:1/-1;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;padding-top:6px}
+.daylog .x{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;text-align:right}
+.daylog .nt{grid-column:1/-1;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+.fineprint{color:var(--muted);font-size:.82rem;margin:0}
 @media (prefers-reduced-motion:no-preference){.row,.toast{transition:background .15s}}
 </style>
 
@@ -153,6 +176,7 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
   <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</button>
   <button data-tab="all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Cleaning</button>
   <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Upkeep</button>
+  <button data-tab="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L16 13"/></svg>Week</button>
   <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V3"/></svg>Guide</button>
 </nav>
 
@@ -296,9 +320,9 @@ U("f-season","Pond","Pond seasonal prep",180,30,{s:["Fall: net the pond, stop fe
 
 /* ---------------- Store: db when the page runs in claude.ai, this device otherwise ---------------- */
 var LS="hk-log-v1";
-var S={state:{},custom:{},mode:"local",readonly:false};
-function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");S.state=v.state||{};S.custom=v.custom||{}}catch(e){}}
-function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({state:S.state,custom:S.custom}))}catch(e){}}
+var S={state:{},custom:{},spend:{},prefs:{},mode:"local",readonly:false};
+function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");S.state=v.state||{};S.custom=v.custom||{};S.spend=v.spend||{};S.prefs=v.prefs||{}}catch(e){}}
+function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({state:S.state,custom:S.custom,spend:S.spend,prefs:S.prefs}))}catch(e){}}
 var dbref=null, chains={};
 function chain(key,fn){var p=(chains[key]||Promise.resolve()).then(fn,fn);chains[key]=p.catch(function(){});return p}
 function writeErr(e){
@@ -316,6 +340,16 @@ function saveCustom(id){
   if(S.mode!=="db")return;
   chain("c:"+id,function(){var r=dbref.collection("custom").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
 }
+function saveSpend(id){
+  var v=S.spend[id]; lsWrite(); render();
+  if(S.mode!=="db")return;
+  chain("p:"+id,function(){var r=dbref.collection("spend").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
+}
+function savePrefs(){
+  lsWrite(); render();
+  if(S.mode!=="db")return;
+  chain("prefs",function(){return dbref.collection("meta").doc("prefs").set(JSON.parse(JSON.stringify(S.prefs)))}).catch(writeErr);
+}
 function connect(){
   if(!window.claude||!window.claude.use){footer();return}
   window.claude.use("db").then(function(db){
@@ -323,6 +357,8 @@ function connect(){
     dbref=db;S.mode="db";footer();
     db.collection("state").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.state=m;lsWrite();render()},function(){});
     db.collection("custom").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.custom=m;lsWrite();render()},function(){});
+    db.collection("spend").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.spend=m;lsWrite();render()},function(){});
+    db.collection("meta").doc("prefs").onSnapshot(function(d){S.prefs=d.exists?Object.assign({},d.data()):{};lsWrite();render()},function(){});
   }).catch(function(){footer()});
 }
 function footer(){document.getElementById("foot").textContent=S.mode==="db"?"Your log is saved to your account and syncs across devices.":"Your log is saved in this browser only."}
@@ -353,9 +389,9 @@ function active(list){return tasks().filter(function(t){return t.list===list&&!h
 function byDue(a,b){return ratio(b)-ratio(a)||every(a)-every(b)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 
-function markDone(id,note,atIso){
+function markDone(id,note,atIso,x){
   var s=Object.assign({},st(id));var h=(s.hist||[]).slice();
-  h.push({at:atIso||new Date().toISOString(),note:note||""});
+  h.push(Object.assign({at:atIso||new Date().toISOString(),note:note||""},x||{}));
   h.sort(function(a,b){return new Date(b.at)-new Date(a.at)});
   s.hist=h.slice(0,60);delete s.why;delete s.until;S.state[id]=s;saveState(id);
 }
@@ -365,8 +401,31 @@ function clearAside(id){var s=Object.assign({},st(id));delete s.why;delete s.unt
 function patch(id,obj){var s=Object.assign({},st(id),obj);Object.keys(obj).forEach(function(k){if(obj[k]==null||obj[k]==="")delete s[k]});S.state[id]=s;saveState(id)}
 function findTask(id){return tasks().filter(function(t){return t.id===id})[0]}
 
+/* ---------------- Week wrap-up math ----------------
+   Value of doing it yourself = flat pro price where one is typical, else minutes × the cleaner's hourly rate.
+   Tasks with 0 minutes are ones you usually hire out, so they add no savings. */
+var PRO={"m-dryer-vent":150,"m-gutters":175,"h-windows":200,"m-water-heater":125,"e-gasket":80,"p-filter":75,"m-hvac":40,"m-fridge-filter":40};
+function rate(){return +S.prefs.rate||40}
+function proValue(t,min){if(PRO[t.id]!=null)return PRO[t.id];if(!t.m)return 0;return min/60*rate()}
+function weekStart(off){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7+off*7);return d}
+function weekData(off){
+  var s=weekStart(off),e=new Date(s);e.setDate(e.getDate()+7);
+  var items=[],buys=[];
+  tasks().forEach(function(t){(st(t.id).hist||[]).forEach(function(h,i){var at=new Date(h.at);
+    if(at>=s&&at<e&&!h.est){var min=h.min!=null?+h.min:(t.m||0);items.push({t:t,h:h,i:i,at:at,min:min,cost:+h.cost||0,pro:proValue(t,min)})}})});
+  Object.keys(S.spend).forEach(function(k){var b=S.spend[k],at=new Date(b.at);if(at>=s&&at<e)buys.push({id:k,at:at,what:b.what,amt:+b.amt||0})});
+  items.sort(function(a,b){return a.at-b.at});buys.sort(function(a,b){return a.at-b.at});
+  var sum=function(a,f){return a.reduce(function(n,x){return n+f(x)},0)};
+  var min=sum(items,function(x){return x.min}),spent=sum(items,function(x){return x.cost})+sum(buys,function(x){return x.amt}),pro=sum(items,function(x){return x.pro});
+  return {s:s,e:e,items:items,buys:buys,min:min,spent:spent,pro:pro,saved:pro-spent};
+}
+function money(n){var r=Math.round(n);return (r<0?"−$":"$")+Math.abs(r).toLocaleString()}
+function fmtMin(m){m=Math.round(m);if(m<60)return m+" min";var h=Math.floor(m/60),r=m%60;return h+" h"+(r?" "+r+" min":"")}
+function fmtHrs(m){return m<60?Math.round(m)+" min":(Math.round(m/6)/10)+" hrs"}
+function delta(a,b,f){var d=a-b;if(!b&&!a)return "";return (d>0?"+":d<0?"−":"±")+f(Math.abs(d))+" vs last week"}
+
 /* ---------------- Rendering ---------------- */
-var ui={tab:"today",budget:null,area:"All",q:"",upArea:"All"};
+var ui={tab:"today",budget:null,area:"All",q:"",upArea:"All",weekOff:0};
 try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=saved.tab}catch(e){}
 var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function row(t){
@@ -393,6 +452,8 @@ function viewToday(){
   document.getElementById("sub").textContent=due?due+" due":"";
   var h="";
   if(logged<5)h+='<div class="banner"><p class="eyebrow">Getting started</p><p>Everything starts as “not logged.” Tap a task and pick roughly when you last did it, so the list knows what’s actually due.</p></div>';
+  var dow=new Date().getDay();
+  if(dow===0||dow>=5){var wk=weekData(0);if(wk.items.length)h+='<div class="banner"><p class="eyebrow">Your week so far</p><p>'+wk.items.length+' task'+(wk.items.length>1?"s":"")+' · '+fmtHrs(wk.min)+' · saved about '+money(wk.saved)+'</p><div class="btnrow"><button class="btn small" data-act="tab" data-v="week">See the wrap-up</button></div></div>'}
   var chips=[[null,"Just show me"],[5,"5 min"],[15,"15 min"],[30,"30 min"],[60,"1 hr"]];
   h+='<section class="timebar"><span class="q">How much time do you have?</span><div class="chips" role="group" aria-label="Time available">'+
     chips.map(function(c){return '<button class="chip" data-act="budget" data-v="'+(c[0]||"")+'" aria-pressed="'+(ui.budget===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
@@ -477,19 +538,62 @@ function viewGuide(){
   h+='<section><h2>Your data</h2><div class="card"><p>Copy a backup of your full log, or paste one back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div></section>';
   return h+'</div>';
 }
-var titles={today:"Today",all:"Cleaning",upkeep:"Upkeep",guide:"Cleaning guide"};
+function viewWeek(){
+  var off=ui.weekOff,w=weekData(off),p=weekData(off-1),last=new Date(w.e-DAY);
+  var fmt=function(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})};
+  document.getElementById("sub").textContent=off===0?"this week":off===-1?"last week":"";
+  var h='<div class="weeknav"><button class="btn small" data-act="wk" data-v="-1" aria-label="Previous week">‹ Prev</button><span class="range">'+fmt(w.s)+' – '+fmt(last)+'</span><button class="btn small" data-act="wk" data-v="1" aria-label="Next week"'+(off>=0?" disabled":"")+'>Next ›</button></div>';
+  if(!w.items.length&&!w.buys.length){
+    h+='<div class="empty"><strong>Nothing logged '+(off===0?"yet this week":"this week")+'.</strong> Tasks you mark done show up here with the time they took and what you spent.</div>';
+  }
+  h+='<div class="tiles">'+
+    '<div class="tile"><span class="k">Tasks done</span><span class="v">'+w.items.length+'</span><span class="d">'+delta(w.items.length,p.items.length,String)+'</span></div>'+
+    '<div class="tile"><span class="k">Time spent</span><span class="v">'+fmtHrs(w.min)+'</span><span class="d">'+delta(w.min,p.min,fmtMin)+'</span></div>'+
+    '<div class="tile"><span class="k">Spent on supplies</span><span class="v">'+money(w.spent)+'</span><span class="d">'+(w.buys.length?w.buys.length+" purchase"+(w.buys.length>1?"s":""):"")+'</span></div>'+
+    '<div class="tile save"><span class="k">Saved by doing it yourself</span><span class="v">'+money(w.saved)+'</span><span class="d">a pro would charge ~'+money(w.pro)+'</span></div></div>';
+  if(w.items.length){
+    var areas={};w.items.forEach(function(x){var a=areas[x.t.area]=areas[x.t.area]||{n:0,m:0};a.n++;a.m+=x.min});
+    var keys=Object.keys(areas).sort(function(a,b){return areas[b].m-areas[a].m||areas[b].n-areas[a].n}),max=Math.max.apply(null,keys.map(function(k){return areas[k].m}))||1;
+    h+='<section><div class="section-h"><h2>Where the time went</h2></div><div class="card"><div class="bars">'+keys.map(function(k){var a=areas[k];
+      return '<div class="bar"><span>'+esc(k)+'</span><span class="n">'+a.n+' · '+fmtMin(a.m)+'</span><div class="track"><div class="fill" style="width:'+Math.max(3,Math.round(a.m/max*100))+'%"></div></div></div>'}).join("")+'</div></div></section>';
+    var deep=w.items.filter(function(x){return every(x.t)>=90});
+    if(deep.length)h+='<div class="banner"><p class="eyebrow">Big ones this week</p><p>'+deep.map(function(x){return esc(x.t.name)}).join(", ")+'</p></div>';
+    var day="",lis="";
+    w.items.forEach(function(x){var d=x.at.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
+      if(d!==day){day=d;lis+='<li><span class="day">'+d+'</span></li>'}
+      lis+='<li><span>'+esc(x.t.name)+'</span><span class="x">'+fmtMin(x.min)+(x.cost?" · "+money(x.cost):"")+'</span>'+(x.h.note?'<span class="nt">'+esc(x.h.note)+'</span>':'')+'</li>'});
+    h+='<section><div class="section-h"><h2>What you did</h2></div><div class="card"><ul class="daylog">'+lis+'</ul></div></section>';
+  }
+  h+='<section><div class="section-h"><h2>Purchases</h2><span class="aside">supplies, tools, refills</span></div><div class="card">'+
+    (w.buys.length?'<ul class="daylog">'+w.buys.map(function(b){return '<li><span>'+esc(b.what||"Purchase")+'<span class="when">'+fmt(b.at)+'</span></span><span class="x">'+money(b.amt)+' <button class="btn small ghost danger" data-act="delbuy" data-v="'+esc(b.id)+'">Remove</button></span></li>'}).join("")+'</ul>':'<p class="fineprint">No purchases logged this week.</p>')+
+    '<form class="form" id="buyform"><div class="grid2"><div><label class="lbl" for="b-what">What</label><input type="text" id="b-what" placeholder="e.g. vinegar, microfiber cloths"></div>'+
+    '<div class="grid2"><div><label class="lbl" for="b-amt">Amount ($)</label><input type="number" id="b-amt" min="0" step="0.01" inputmode="decimal"></div><div><label class="lbl" for="b-date">Date</label><input type="date" id="b-date" value="'+isoDay(off===0?new Date():last)+'"></div></div></div>'+
+    '<div class="btnrow"><button class="btn small primary" type="submit">Add purchase</button></div></form></div></section>';
+  if(off===0){
+    var soon=tasks().filter(function(t){return !hidden(t)&&!aside(t)&&since(t)!=null}).map(function(t){return {t:t,d:every(t)-since(t)}}).filter(function(x){return every(x.t)>7&&x.d>=1&&x.d<=7}).sort(function(a,b){return a.d-b.d||b.t.m-a.t.m});
+    if(soon.length)h+='<section><div class="section-h"><h2>Coming up next week</h2><span class="aside">~'+fmtMin(soon.reduce(function(n,x){return n+(x.t.m||0)},0))+'</span></div>'+rows(soon.slice(0,6).map(function(x){return x.t}))+'</section>';
+  }
+  h+='<section><div class="card"><h3>How savings are counted</h3><p class="fineprint">Each task is valued at what you’d pay someone else: a typical flat price for jobs like dryer vents, gutters and windows, otherwise its time at a house cleaner’s hourly rate. Supplies you log are subtracted. Hired-out jobs (like rug cleaning) add no savings.</p>'+
+    '<div class="grid2"><div><label class="lbl" for="rate">Cleaner’s hourly rate ($)</label><input type="number" id="rate" min="0" step="1" inputmode="numeric" value="'+rate()+'"></div><div style="display:flex;align-items:flex-end"><button class="btn small" data-act="saverate">Save rate</button></div></div></div></section>';
+  return h;
+}
+function isoDay(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
+var titles={today:"Today",all:"Cleaning",upkeep:"Upkeep",week:"Week wrap-up",guide:"Cleaning guide"};
 function render(){
   if(!document.getElementById("view"))return;
   var focusQ=document.activeElement&&document.activeElement.id==="q",pos=focusQ?document.activeElement.selectionStart:0;
   document.getElementById("title").textContent=titles[ui.tab];
   document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
-  var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="upkeep"?viewUpkeep():viewGuide();
-  document.getElementById("view").innerHTML=v;
+  var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="upkeep"?viewUpkeep():ui.tab==="week"?viewWeek():viewGuide();
+  // A live update re-renders while someone may be typing: carry over anything typed into a field.
+  var typed=function(root){var k={};root.querySelectorAll("input[id],textarea[id]").forEach(function(x){if(x.id!=="q"&&x.value!==x.defaultValue)k[x.id]=x.value});return k};
+  var put=function(k){Object.keys(k).forEach(function(id){var x=document.getElementById(id);if(x)x.value=k[id]})};
+  var view=document.getElementById("view"),keepV=typed(view);
+  view.innerHTML=v;put(keepV);
   if(focusQ){var q=document.getElementById("q");q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}
   if(openId){
-    var keep={};["note","hnote","pastdate"].forEach(function(k){var x=document.getElementById(k);if(x)keep[k]=x.value});
-    var sc=document.getElementById("sheet").scrollTop;renderSheet();document.getElementById("sheet").scrollTop=sc;
-    Object.keys(keep).forEach(function(k){var x=document.getElementById(k);if(x&&keep[k])x.value=keep[k]});
+    var sh=document.getElementById("sheet"),keep=typed(sh),sc=sh.scrollTop;
+    renderSheet();sh.scrollTop=sc;put(keep);
   }
 }
 
@@ -506,7 +610,7 @@ function renderSheet(){
   out+='<div style="display:flex;flex-direction:column;gap:8px"><div class="badges"><span class="badge">'+esc(t.area)+'</span><span class="badge">'+(t.list==="upkeep"?"Upkeep":tier(t))+'</span>'+(t.m?'<span class="badge">~'+t.m+' min</span>':'')+'</div><h2 id="sheet-title">'+esc(t.name)+'</h2>';
   out+='<p class="status-line">'+(d==null?"Not logged yet.":"Last done <b>"+fmtAgo(d)+"</b> ("+fmtDate(h[0].at)+").")+' Repeats '+fmtEvery(every(t))+'.</p></div>';
   if(aside(t))out+='<div class="banner"><p>'+(aside(t)==="supplies"?"Set aside until you get supplies.":"Set aside until "+fmtDate(s.until)+".")+'</p><div class="btnrow"><button class="btn small" data-act="unaside">Put it back on the list</button></div></div>';
-  out+='<div class="card donebox"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea><div class="btnrow"><button class="btn primary" data-act="done">Mark done</button></div>';
+  out+='<div class="card donebox"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea><div class="grid2" style="grid-template-columns:1fr 1fr"><div><label class="lbl" for="dmin">Minutes it took</label><input type="number" id="dmin" min="0" inputmode="numeric" value="'+(t.m||"")+'"></div><div><label class="lbl" for="dcost">Spent on it ($)</label><input type="number" id="dcost" min="0" step="0.01" inputmode="decimal" placeholder="0"></div></div><div class="btnrow"><button class="btn primary" data-act="done">Mark done</button></div>';
   if(!aside(t))out+='<div class="btnrow"><button class="btn small" data-act="later" data-v="1">Tomorrow</button><button class="btn small" data-act="later" data-v="3">In 3 days</button><button class="btn small" data-act="later" data-v="7">Next week</button><button class="btn small" data-act="supplies">Need supplies</button></div>';
   out+='</div>';
   if(d==null)out+='<div class="card"><h3>When did you last do this?</h3><p style="color:var(--muted);font-size:.9rem">A rough guess is fine.</p><div class="btnrow">'+[[0,"Today"],[7,"~1 week"],[30,"~1 month"],[90,"~3 months"],[180,"~6 months"],[400,"Over a year"]].map(function(x){return '<button class="btn small" data-act="ago" data-v="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div></div>';
@@ -558,11 +662,18 @@ document.addEventListener("click",function(e){
     case "area":ui.area=b.dataset.v;render();break;
     case "uparea":ui.upArea=b.dataset.v;render();break;
     case "close":closeSheet();break;
-    case "done":{if(!guard())return;var n=document.getElementById("note").value.trim(),t2=findTask(id);markDone(id,n);closeSheet();toast("Done: "+t2.name);break}
+    case "done":{if(!guard())return;var n=document.getElementById("note").value.trim(),t2=findTask(id),x={},
+      dm=document.getElementById("dmin").value,dc=parseFloat(document.getElementById("dcost").value);
+      if(dm!==""&&+dm!==(t2.m||0))x.min=Math.max(0,Math.round(+dm));if(dc>0)x.cost=Math.round(dc*100)/100;
+      markDone(id,n,null,x);closeSheet();toast("Done: "+t2.name);break}
+    case "tab":ui.tab=b.dataset.v;render();window.scrollTo(0,0);break;
+    case "wk":ui.weekOff=Math.min(0,ui.weekOff+(+b.dataset.v));render();break;
+    case "delbuy":if(!guard())return;delete S.spend[b.dataset.v];saveSpend(b.dataset.v);break;
+    case "saverate":{if(!guard())return;var rv=parseFloat(document.getElementById("rate").value);if(!(rv>=0)){toast("Enter an hourly rate in dollars.");return}S.prefs=Object.assign({},S.prefs,{rate:rv});savePrefs();toast("Rate saved");break}
     case "later":if(!guard())return;setAside(id,"later",+b.dataset.v);closeSheet();toast("Set aside");break;
     case "supplies":if(!guard())return;setAside(id,"supplies");closeSheet();toast("Added to your shopping list on Today");break;
     case "unaside":if(!guard())return;clearAside(id);break;
-    case "ago":if(!guard())return;markDone(id,"",new Date(Date.now()-(+b.dataset.v)*DAY).toISOString());break;
+    case "ago":if(!guard())return;markDone(id,"",new Date(Date.now()-(+b.dataset.v)*DAY).toISOString(),+b.dataset.v?{est:true}:null);break;
     case "logpast":{if(!guard())return;var v=document.getElementById("pastdate").value;if(!v){toast("Pick a date first.");return}markDone(id,"",new Date(v+"T12:00:00").toISOString());break}
     case "delhist":{if(!guard())return;var s=Object.assign({},st(id)),h=(s.hist||[]).slice();h.splice(+b.dataset.v,1);s.hist=h;S.state[id]=s;saveState(id);break}
     case "savenotes":if(!guard())return;patch(id,{notes:document.getElementById("hnote").value.trim()});toast("Notes saved");break;
@@ -570,18 +681,25 @@ document.addEventListener("click",function(e){
     case "unhide":if(!guard())return;patch(id,{hidden:null});break;
     case "delcustom":if(!guard())return;delete S.custom[id];S.state[id]=undefined;delete S.state[id];saveState(id);saveCustom(id);closeSheet();toast("Task deleted");break;
     case "add":lastFocus=b;addList=b.dataset.list;sheetMode="add";renderSheet();document.body.style.overflow="hidden";break;
-    case "export":{var data=JSON.stringify({state:S.state,custom:S.custom});var io=document.getElementById("io");
+    case "export":{var data=JSON.stringify({state:S.state,custom:S.custom,spend:S.spend,prefs:S.prefs});var io=document.getElementById("io");
       var done=function(){toast("Backup copied. Paste it into a note to keep it.")};
       if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(data).then(done,function(){io.innerHTML='<textarea readonly id="iotext"></textarea>';var ta=document.getElementById("iotext");ta.value=data;ta.select()});
       else{io.innerHTML='<textarea readonly id="iotext"></textarea>';var ta=document.getElementById("iotext");ta.value=data;ta.select()}break}
     case "import":document.getElementById("io").innerHTML='<label class="lbl" for="iotext">Paste your backup</label><textarea id="iotext"></textarea><div class="btnrow"><button class="btn small primary" data-act="doimport">Restore</button></div>';break;
     case "doimport":{if(!guard())return;try{var d=JSON.parse(document.getElementById("iotext").value);if(!d||typeof d.state!=="object")throw 0;
-      Object.keys(d.state).forEach(function(k){S.state[k]=d.state[k];saveState(k)});Object.keys(d.custom||{}).forEach(function(k){S.custom[k]=d.custom[k];saveCustom(k)});toast("Backup restored")}catch(x){toast("That doesn't look like a backup from this app.")}break}
+      Object.keys(d.state).forEach(function(k){S.state[k]=d.state[k];saveState(k)});Object.keys(d.custom||{}).forEach(function(k){S.custom[k]=d.custom[k];saveCustom(k)});
+      Object.keys(d.spend||{}).forEach(function(k){S.spend[k]=d.spend[k];saveSpend(k)});if(d.prefs&&d.prefs.rate){S.prefs=d.prefs;savePrefs()}toast("Backup restored")}catch(x){toast("That doesn't look like a backup from this app.")}break}
   }
 });
 document.addEventListener("change",function(e){if(e.target.id==="every"&&openId){if(!guard())return;var t=findTask(openId),n=+e.target.value;patch(openId,{every:n===t.e?null:n})}});
 document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
 document.addEventListener("submit",function(e){
+  if(e.target.id==="buyform"){e.preventDefault();if(!guard())return;
+    var what=document.getElementById("b-what"),amt=document.getElementById("b-amt"),dt=document.getElementById("b-date").value,a=parseFloat(amt.value);
+    if(!(a>0)){toast("Enter how much it cost.");return}
+    var bid="b"+Date.now().toString(36);
+    S.spend[bid]={what:what.value.trim(),amt:Math.round(a*100)/100,at:(dt?new Date(dt+"T12:00:00"):new Date()).toISOString()};
+    what.value="";amt.value="";saveSpend(bid);toast("Purchase added");return}
   if(e.target.id!=="addform")return;e.preventDefault();if(!guard())return;
   var name=document.getElementById("a-name").value.trim();if(!name)return;
   var id="u"+Date.now().toString(36);

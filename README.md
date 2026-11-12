@@ -4,6 +4,7 @@ A personal, phone-first tracker for house cleaning and upkeep. The app is a sing
 
 - **Today**: the most overdue cleaning tasks, plus an "I have X minutes" picker. Includes a shopping list built from tasks marked "Need supplies".
 - **Cleaning**: every cleaning task, sorted by how overdue it is. Filter by room, search, or add your own.
+- **Week**: an end-of-week wrap-up with tasks done, time spent, money spent on supplies, and what hiring it out would have cost. Browse earlier weeks, log purchases, and set the hourly rate used for savings.
 - **Upkeep**: home maintenance, safety, pool, pond and espresso machine, kept separate from cleaning.
 - **Guide**: the gentle cleaning kit, when a stronger product is worth it, never-mix rules, and notes for cats, kids, hardwood, and silk/wool rugs.
 
