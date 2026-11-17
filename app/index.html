@@ -1,59 +1,82 @@
-<title>Housekeeping Log</title>
+<title>The Zhang-Wolfe House</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap">
 <style>
-/* Layout: one phone column; sticky header, scrolling list of task rows, fixed bottom tab bar, full-height task sheet. */
+/* Layout: a house ledger on one phone column. Masthead with the family monogram over a woven rug border,
+   then the page; fixed tab bar at the bottom; full-height sheets for tasks, appliances, visits and settings.
+   Palette: silk-rug indigo + walnut floorboards; leaf green and madder red carry status. */
 :root{
-  --bg:#eef3f2; --surface:#ffffff; --surface-2:#e3ebe9; --ink:#1b2a29; --muted:#5a6c6a; --line:#d3dedb;
-  --accent:#1d6b64; --accent-ink:#ffffff; --accent-soft:#d4ebe7;
-  --ok:#2d7a4c; --ok-soft:#dcefe3; --warn:#9a6512; --warn-soft:#f6e8cc; --due:#ad3b30; --due-soft:#f6dcd8;
-  --shadow:0 1px 2px rgba(20,40,38,.08),0 6px 20px rgba(20,40,38,.06);
-  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --bg:#f4f4f7; --surface:#ffffff; --surface-2:#e9e9f0; --ink:#1e1c2a; --muted:#625f73; --line:#dcdbe5;
+  --accent:#33408c; --accent-ink:#ffffff; --accent-soft:#e3e6f6;
+  --wood:#8a5634; --wood-soft:#f2e7de;
+  --ok:#2c7349; --ok-soft:#dcefe2; --warn:#94600f; --warn-soft:#f6e8cc; --due:#a63d33; --due-soft:#f6dcd8;
+  --f-display:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
   --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
   --tabh:64px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111816; --surface:#19221f; --surface-2:#222d2a; --ink:#e4edeb; --muted:#93a5a1; --line:#2c3a36;
-  --accent:#5fc2b5; --accent-ink:#0d1d1b; --accent-soft:#1d3532;
-  --ok:#73c995; --ok-soft:#1c3226; --warn:#e2b257; --warn-soft:#3a2f17; --due:#f08a7d; --due-soft:#3d2220;
-  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}}
+  --bg:#14141b; --surface:#1d1d27; --surface-2:#282834; --ink:#e8e7f0; --muted:#a09db2; --line:#302f3d;
+  --accent:#a3adff; --accent-ink:#14163a; --accent-soft:#262b4d; --wood:#d9a07a; --wood-soft:#33261e;
+  --ok:#79c99a; --ok-soft:#1b3125; --warn:#e2b257; --warn-soft:#3a2f17; --due:#f08a7d; --due-soft:#3d2220; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111816; --surface:#19221f; --surface-2:#222d2a; --ink:#e4edeb; --muted:#93a5a1; --line:#2c3a36;
-  --accent:#5fc2b5; --accent-ink:#0d1d1b; --accent-soft:#1d3532;
-  --ok:#73c995; --ok-soft:#1c3226; --warn:#e2b257; --warn-soft:#3a2f17; --due:#f08a7d; --due-soft:#3d2220;
-  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
+  --bg:#14141b; --surface:#1d1d27; --surface-2:#282834; --ink:#e8e7f0; --muted:#a09db2; --line:#302f3d;
+  --accent:#a3adff; --accent-ink:#14163a; --accent-soft:#262b4d; --wood:#d9a07a; --wood-soft:#33261e;
+  --ok:#79c99a; --ok-soft:#1b3125; --warn:#e2b257; --warn-soft:#3a2f17; --due:#f08a7d; --due-soft:#3d2220; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:0 calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 24px)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:640px;margin:0 auto}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1,h2{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;line-height:1.05;letter-spacing:.005em}
+h3{font-size:1rem;margin:0;text-wrap:balance}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-header.top h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
-header.top .sub{color:var(--muted);font-size:.85rem;text-align:right}
+/* masthead */
+.house{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding-block:18px 12px}
+.mono{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--wood);color:var(--wood);display:grid;place-items:center;
+  font-family:var(--f-display);font-size:1.35rem;font-style:italic;letter-spacing:.02em;background:var(--wood-soft)}
+.house h1{font-size:1.75rem}
+.greet{margin:0 0 2px;color:var(--muted);font-size:.82rem}
+.gear{all:unset;cursor:pointer;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.gear:hover{background:var(--surface-2)}
+.gear:focus-visible{outline:3px solid var(--accent)}
+.gear svg{width:22px;height:22px}
+.rug{height:14px;border-block:2px solid var(--wood);margin-bottom:18px;
+  background:
+   linear-gradient(135deg,var(--accent) 25%,transparent 25%) 0 0/16px 10px repeat-x,
+   linear-gradient(225deg,var(--accent) 25%,transparent 25%) 0 0/16px 10px repeat-x,
+   linear-gradient(45deg,var(--wood) 25%,transparent 25%) 8px 100%/16px 6px repeat-x,
+   linear-gradient(315deg,var(--wood) 25%,transparent 25%) 8px 100%/16px 6px repeat-x,
+   var(--wood-soft)}
+.pagehead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.pagehead h2{font-size:2.1rem}
+.pagehead .sub{color:var(--muted);font-size:.88rem;text-align:right}
 .view{display:flex;flex-direction:column;gap:22px}
 .section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
-.section-h h2{font-size:1.15rem;font-weight:700}
-.section-h .aside{color:var(--muted);font-size:.85rem}
-.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
-.summary{display:flex;gap:8px;flex-wrap:wrap}
+.section-h h2{font-size:1.5rem}
+.section-h .aside{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:0}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.92rem;min-height:38px}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chips .chip{flex:none}
-.timebar{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.timebar .q{font-family:var(--f-display);font-size:1.05rem;font-weight:700}
-.fit{color:var(--muted);font-size:.88rem}
-.timebar .chips{flex-wrap:wrap;overflow:visible}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface-2);border-radius:12px;padding:3px;gap:3px}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:8px 4px;border-radius:9px;font-size:.92rem;color:var(--muted);min-height:24px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg button:focus-visible{outline:3px solid var(--accent)}
+.finder{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.finder .lab{font-size:.85rem;color:var(--muted);font-weight:700}
+.fit{color:var(--muted);font-size:.88rem;margin:0}
 ul.rows{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 12px 10px 10px;border-top:1px solid var(--line);position:relative}
+.row.noTick{grid-template-columns:1fr auto;padding-left:16px}
 .row:first-child{border-top:0}
 .tick{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:transparent;display:grid;place-items:center;color:transparent;flex:none}
 .tick:hover,.tick:focus-visible{border-color:var(--ok);color:var(--ok)}
@@ -67,82 +90,89 @@ ul.rows{list-style:none;margin:0;padding:0;background:var(--surface);border:1px 
 .st-ok{--st:var(--ok);--st-soft:var(--ok-soft)}
 .st-soon{--st:var(--warn);--st-soft:var(--warn-soft)}
 .st-due{--st:var(--due);--st-soft:var(--due-soft)}
-.st-new{--st:var(--muted);--st-soft:var(--surface-2)}
-.st-aside{--st:var(--muted);--st-soft:var(--surface-2)}
+.st-new,.st-aside{--st:var(--muted);--st-soft:var(--surface-2)}
 .empty{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:18px;color:var(--muted)}
 .empty strong{color:var(--ink)}
 .banner{background:var(--accent-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .banner p{margin:0}
+.cleaners{background:var(--wood-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.cleaners .big{font-family:var(--f-display);font-size:1.45rem;line-height:1.1}
+.cleaners p{margin:0}
+.cleaners .eyebrow{color:var(--wood)}
 .search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px;min-height:46px}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 16px;min-height:44px;font-weight:700}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.wood{background:var(--wood);border-color:var(--wood);color:var(--surface)}
 .btn.ghost{background:transparent}
 .btn.small{min-height:36px;padding:6px 12px;font-size:.88rem}
 .btn.danger{color:var(--due)}
-.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn:disabled{opacity:.45;cursor:default}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .shop{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
 .shop ul{margin:6px 0 0;padding-left:18px}
 .shop li{margin:3px 0}
-details.aside{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 0}
-details.aside>summary{list-style:none;cursor:pointer;padding:10px 16px;font-weight:700;display:flex;justify-content:space-between}
+details.aside{background:var(--surface);border:1px solid var(--line);border-radius:16px}
+details.aside>summary{list-style:none;cursor:pointer;padding:12px 16px;font-weight:700;display:flex;justify-content:space-between;gap:10px}
 details.aside>summary::-webkit-details-marker{display:none}
+details.aside>summary .hint{font-weight:400;color:var(--muted);font-size:.85rem}
 details.aside ul.rows{border:0;border-radius:0;border-top:1px solid var(--line)}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--line);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
   display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
-nav.tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;font-size:.78rem;color:var(--muted);min-height:44px;justify-content:center}
+nav.tabs button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:12px;font-size:.76rem;color:var(--muted);min-height:44px;justify-content:center}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700;background:var(--accent-soft)}
 nav.tabs button:focus-visible{outline:3px solid var(--accent)}
-/* sheet */
+/* sheets */
 .sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) max(16px,env(safe-area-inset-left,0px))}
 .sheet-in{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .sheet-top{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg);padding-block:6px;z-index:2}
-.sheet h2{font-size:1.6rem;font-weight:700;letter-spacing:-.01em}
+.sheet h2{font-size:2rem}
 .badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .badge{font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted);background:var(--surface)}
-.status-line{font-size:1rem}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.card h3{font-size:1rem;font-weight:700}
+button.badge{cursor:pointer;color:var(--wood);border-color:var(--wood)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .card ol,.card ul{margin:0;padding-left:20px}
 .card li{margin:4px 0}
 .card p{margin:0}
-.card.eco{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
 .card.eco h3{color:var(--ok)}
 .card.alt h3{color:var(--accent)}
 .card.warn{background:var(--due-soft);border-color:transparent}
 .card.warn h3{color:var(--due)}
-.donebox{display:flex;flex-direction:column;gap:8px}
-textarea,select,input[type="date"],input[type="text"],input[type="number"]{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea,select,input[type="date"],input[type="text"],input[type="number"],input[type="url"]{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;min-height:44px}
 textarea{min-height:70px;resize:vertical}
 label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;margin-bottom:4px}
+.check{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);cursor:pointer}
+.check:first-child{border-top:0}
+.check input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.check .m{margin-left:auto;color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums}
 .hist{list-style:none;padding:0;margin:0}
 .hist li{padding:8px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
 .hist li:first-child{border-top:0}
 .hist .d{font-variant-numeric:tabular-nums;font-weight:700}
 .hist .n{color:var(--muted);overflow-wrap:anywhere}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+@media (max-width:420px){.grid2.stack{grid-template-columns:1fr}}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.facts dt{color:var(--muted);font-size:.88rem}
+.facts dd{margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 14px);z-index:30;
-  background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 10px 10px 16px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+  background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 10px 10px 16px;display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast button{background:transparent;border:0;color:var(--bg);font-weight:700;text-decoration:underline;padding:6px 8px;min-height:36px}
-/* guide */
-.guide h2{font-size:1.2rem;margin-bottom:8px}
 .kit{display:flex;flex-direction:column;gap:10px}
-.kit .card .good{color:var(--ok);font-weight:700}
-.kit .card .bad{color:var(--due);font-weight:700}
+.good{color:var(--ok);font-weight:700}
+.bad{color:var(--due);font-weight:700}
 .mix{display:flex;flex-direction:column;gap:8px}
 .mix .card{background:var(--due-soft);border:0}
 .mix b{color:var(--due)}
-.foot{color:var(--muted);font-size:.8rem;text-align:center;padding-top:8px}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;padding-top:14px}
 .form{display:flex;flex-direction:column;gap:12px}
-/* week wrap-up */
 .weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.weeknav .range{font-family:var(--f-display);font-weight:700;font-size:1.1rem;text-align:center;font-variant-numeric:tabular-nums}
+.weeknav .range{font-family:var(--f-display);font-size:1.4rem;text-align:center}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.tile .v{font-family:var(--f-display);font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .v{font-family:var(--f-display);font-size:2.1rem;line-height:1.05;font-variant-numeric:tabular-nums}
 .tile .k{color:var(--muted);font-size:.82rem}
 .tile .d{font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--muted)}
 .tile.save{background:var(--ok-soft);border-color:transparent}
@@ -151,33 +181,37 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 .bar{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.9rem}
 .bar .track{grid-column:1/-1;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
 .bar .fill{height:100%;background:var(--accent);border-radius:4px}
+.bar.wood .fill{background:var(--wood)}
 .bar .n{color:var(--muted);font-variant-numeric:tabular-nums}
 .daylog,.card ul.daylog{list-style:none;margin:0;padding:0}
-.daylog .when{display:block;color:var(--muted);font-size:.82rem}
-.daylog li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line)}
+.daylog li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line);align-items:center}
 .daylog li:first-child{border-top:0}
 .daylog .day{grid-column:1/-1;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;padding-top:6px}
 .daylog .x{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;text-align:right}
-.daylog .nt{grid-column:1/-1;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+.daylog .nt,.daylog .when{grid-column:1/-1;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+.daylog .when{grid-column:auto;display:block}
 .fineprint{color:var(--muted);font-size:.82rem;margin:0}
-@media (prefers-reduced-motion:no-preference){.row,.toast{transition:background .15s}}
+@media (prefers-reduced-motion:no-preference){.row{transition:background .15s}}
 </style>
 
 <div class="wrap">
-  <header class="top">
-    <h1 id="title">Today</h1>
-    <div class="sub" id="sub"></div>
+  <header class="house">
+    <div class="mono" id="mono" aria-hidden="true">ZW</div>
+    <div><p class="greet" id="greet"></p><h1 id="house">The Zhang-Wolfe House</h1></div>
+    <button class="gear" data-act="settings" aria-label="Household settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
+  <div class="rug" aria-hidden="true"></div>
+  <div class="pagehead"><h2 id="title">To do</h2><span class="sub" id="sub"></span></div>
   <main id="view" class="view" aria-live="polite"></main>
   <p class="foot" id="foot"></p>
 </div>
 
 <nav class="tabs" aria-label="Sections">
-  <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Today</button>
+  <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>To do</button>
   <button data-tab="all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Cleaning</button>
-  <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Upkeep</button>
-  <button data-tab="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L16 13"/></svg>Week</button>
-  <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 17l-5-9V3"/></svg>Guide</button>
+  <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>Home</button>
+  <button data-tab="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Week</button>
+  <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-2-8-5-8-11a8 8 0 0 1 8-6 8 8 0 0 1 8 6c0 6-4 9-8 11z"/><path d="M12 21V9"/><path d="M12 13l-3-2M12 16l3-2"/></svg>Guide</button>
 </nav>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div>
@@ -221,9 +255,9 @@ C("e-grinder","Espresso","Clean grinder burrs",60,15,{sup:"Grinder cleaning tabl
 C("e-descale","Espresso","Descale espresso machine",90,30,{sup:"Manufacturer's descaler or citric acid",s:["Read your manual first. Some dual-boiler machines should not be descaled at home.","Mix descaler in the tank as directed.","Run it through the group and steam wand per the manual.","Flush with at least two full tanks of fresh water."],eco:"Using filtered or softened water greatly reduces how often you need this.",w:"Avoid vinegar in espresso machines. It can harm seals and leave a taste."});
 
 /* Bathrooms */
-C("b-toilet","Bathrooms","Clean toilets",7,10,{sup:"Toilet brush, baking soda, castile soap or toilet cleaner, cloth",s:["Sprinkle baking soda in the bowl and add a squirt of castile soap. Let sit while you do the rest.","Wipe the outside top to bottom: tank, seat, hinges, base, and the floor around it.","Scrub the bowl, under the rim especially, and flush."],eco:"Baking soda plus castile soap cleans the bowl well week to week.",alt:"A commercial toilet cleaner or a bleach cleaner after stomach bugs.",w:"Close lids so curious cats and kids stay out of the cleaning water."});
-C("b-sinks","Bathrooms","Bathroom sinks, counters & mirrors",7,10,{sup:"Microfiber cloths, dish soap, glass cloth",s:["Clear the counter.","Wipe the sink and counter with soapy water. Scrub around the faucet base with a toothbrush.","Clean the mirror with a damp microfiber cloth, then a dry one."],eco:"Good microfiber and plain water leave mirrors streak-free.",alt:"A 50/50 vinegar and water spray for hard water spots on chrome and glass.",w:"No vinegar on marble or natural stone vanities."});
-C("b-shower","Bathrooms","Scrub tub & shower",7,15,{sup:"Baking soda, dish soap, scrub brush, squeegee",s:["Mix baking soda with a squirt of dish soap into a paste.","Scrub tub, walls and fixtures, then rinse.","Squeegee glass doors.","Going forward: squeegee after showers to slow buildup."],eco:"Dish soap breaks down body oils. Baking soda handles soap scum.",alt:"For heavy hard-water scale on glass, a vinegar spray or CLR. Rinse well.",w:"Never use vinegar and bleach in the same session. Rinse completely between products."});
+C("b-toilet","Bathrooms","Clean all 3 toilets",7,20,{sup:"Toilet brush, baking soda, castile soap or toilet cleaner, cloth",s:["Sprinkle baking soda in the bowl and add a squirt of castile soap. Let sit while you do the rest.","Wipe the outside top to bottom: tank, seat, hinges, base, and the floor around it.","Scrub the bowl, under the rim especially, and flush."],eco:"Baking soda plus castile soap cleans the bowl well week to week.",alt:"A commercial toilet cleaner or a bleach cleaner after stomach bugs.",w:"Close lids so curious cats and kids stay out of the cleaning water."});
+C("b-sinks","Bathrooms","Bathroom sinks, counters & mirrors (3)",7,20,{sup:"Microfiber cloths, dish soap, glass cloth",s:["Clear the counter.","Wipe the sink and counter with soapy water. Scrub around the faucet base with a toothbrush.","Clean the mirror with a damp microfiber cloth, then a dry one."],eco:"Good microfiber and plain water leave mirrors streak-free.",alt:"A 50/50 vinegar and water spray for hard water spots on chrome and glass.",w:"No vinegar on marble or natural stone vanities."});
+C("b-shower","Bathrooms","Scrub both tubs & showers",7,30,{sup:"Baking soda, dish soap, scrub brush, squeegee",s:["Mix baking soda with a squirt of dish soap into a paste.","Scrub tub, walls and fixtures, then rinse.","Squeegee glass doors.","Going forward: squeegee after showers to slow buildup."],eco:"Dish soap breaks down body oils. Baking soda handles soap scum.",alt:"For heavy hard-water scale on glass, a vinegar spray or CLR. Rinse well.",w:"Never use vinegar and bleach in the same session. Rinse completely between products."});
 C("b-towels","Bathrooms","Wash towels & bath mats",7,5,{s:["Wash bath towels hot.","Wash bath mats every other time, or weekly with kids splashing.","Dry fully to stop mildew smell."],eco:"Skip fabric softener. It coats towels and makes them less absorbent. Use 1/2 cup vinegar in the rinse instead."});
 C("b-toys","Bathrooms","Clean kids' bath toys",14,10,{sup:"White vinegar, bowl, dish soap",s:["Squeeze water out of squirt toys.","Soak 1 hour in equal parts hot water and white vinegar, squeezing it through.","Rinse, squeeze out, and air dry upside down.","Toss anything with black mold inside."],eco:"Seal squirt holes with hot glue so water never gets in.",alt:"Hard plastic toys can go on the dishwasher's top rack."});
 C("b-holder","Bathrooms","Wash toothbrush holder & soap dish",14,5,{s:["Run them through the dishwasher or scrub with hot soapy water.","Dry before putting brushes back."]});
@@ -235,8 +269,8 @@ C("b-fan","Bathrooms","Vacuum exhaust fan cover",180,10,{s:["Turn off the fan.",
 C("b-meds","Bathrooms","Clear out expired meds & products",365,20,{s:["Check expiration dates on medicines, sunscreen, and cosmetics.","Take old meds to a pharmacy take-back bin.","Move anything kids could reach up high or into a locked box."],w:"Children's poisoning risk: keep meds and vitamins locked or high, even ones with child-proof caps."});
 
 /* Floors & rugs */
-C("f-vacuum","Floors & rugs","Vacuum floors & rugs",4,30,{sup:"Vacuum with brush-roll on/off control",s:["Hardwood: use the hard-floor setting with the brush roll off.","Silk and wool rugs: suction only. Turn the beater bar off or use an upholstery head.","Vacuum in the direction of the pile, not against it.","Keep the vacuum off fringe. Comb fringe gently by hand instead."],eco:"Frequent vacuuming keeps grit from wearing down floor finish and rug fibers.",w:"A spinning beater bar frays and fuzzes silk and wool."});
-C("f-mop","Floors & rugs","Damp-mop hardwood",14,20,{sup:"Microfiber flat mop, pH-neutral hardwood cleaner (e.g. Bona)",s:["Vacuum first.","Lightly mist a pH-neutral hardwood cleaner, or dampen the pad and wring it until barely damp.","Mop with the grain, a small section at a time.","Wipe up anything wet. Keep cats off until dry."],eco:"A well-wrung microfiber pad with a little cleaner is all hardwood needs.",w:"Avoid vinegar (dulls the finish over time), steam mops, oil soaps (leave a film), and puddles of water. If your floors are oil-finished instead of polyurethane, use a cleaner made for oiled floors."});
+C("f-vacuum","Floors & rugs","Vacuum floors & rugs",4,45,{sup:"Vacuum with brush-roll on/off control",s:["Hardwood: use the hard-floor setting with the brush roll off.","Silk and wool rugs: suction only. Turn the beater bar off or use an upholstery head.","Vacuum in the direction of the pile, not against it.","Keep the vacuum off fringe. Comb fringe gently by hand instead."],eco:"Frequent vacuuming keeps grit from wearing down floor finish and rug fibers.",w:"A spinning beater bar frays and fuzzes silk and wool."});
+C("f-mop","Floors & rugs","Damp-mop the wood floors",14,45,{sup:"Microfiber flat mop, pH-neutral hardwood cleaner (e.g. Bona)",s:["Vacuum first.","Lightly mist a pH-neutral hardwood cleaner, or dampen the pad and wring it until barely damp.","Mop with the grain, a small section at a time.","Wipe up anything wet. Keep cats off until dry."],eco:"A well-wrung microfiber pad with a little cleaner is all hardwood needs.",w:"Avoid vinegar (dulls the finish over time), steam mops, oil soaps (leave a film), and puddles of water. If your floors are oil-finished instead of polyurethane, use a cleaner made for oiled floors."});
 C("f-rug-spot","Floors & rugs","Check rugs for spots & stains",14,10,{sup:"White cloths, cool water, wool-safe detergent",s:["Look for cat hairballs, food, and spills.","Blot from the outside in with a white cloth and cool water. Don't rub.","For stubborn spots, use a wool-safe detergent (look for the WoolSafe label).","Blot dry, then prop the area up to air dry."],eco:"Water and gentle blotting fix most fresh spots.",w:"Enzyme cleaners with protease can damage silk and wool. Spot-test or use a WoolSafe-approved product. Never use baking soda, ammonia, or oxygen bleach on silk or wool. Silk can lose dye easily: test first."});
 C("f-rug-rotate","Floors & rugs","Rotate rugs & clean underneath",180,20,{s:["Roll up or flip the rug back.","Vacuum the rug's back side and the floor underneath.","Look for clothes moths or carpet beetles (tiny larvae, webbing, bald patches), especially under furniture.","Rotate the rug 180° so sun and traffic wear evenly."],eco:"Moths love undisturbed wool. Regular vacuuming under furniture is the best prevention.",w:"If you find moths, call a rug cleaner. They can treat it without damaging fibers."});
 C("f-rug-pro","Floors & rugs","Professional rug cleaning",730,0,{s:["Book a cleaner who specializes in handmade wool and silk rugs.","Plan for every 1–2 years for high traffic, 3–5 for low."],w:"Steam cleaning or home carpet shampooers can shrink wool and bleed silk dyes. Don't DIY a full wash."});
@@ -244,12 +278,12 @@ C("f-baseboards","Floors & rugs","Wipe baseboards",60,20,{sup:"Damp microfiber c
 C("f-mats","Floors & rugs","Shake or wash doormats",30,5,{s:["Shake outdoor mats.","Machine-wash washable mats.","Sweep or vacuum under them."]});
 
 /* Whole house */
-C("h-dust","Whole house","Dust surfaces",7,20,{sup:"Damp microfiber cloth",s:["Work top to bottom, room by room.","Use a slightly damp microfiber cloth so dust sticks instead of flying.","Dust shelves, tables, lamps, picture frames, and electronics.","Vacuum the floor after."],eco:"Microfiber holds dust without spray.",w:"Don't use sprays with essential oils. They're toxic to cats."});
+C("h-dust","Whole house","Dust surfaces",7,40,{sup:"Damp microfiber cloth",s:["Work top to bottom, room by room.","Use a slightly damp microfiber cloth so dust sticks instead of flying.","Dust shelves, tables, lamps, picture frames, and electronics.","Vacuum the floor after."],eco:"Microfiber holds dust without spray.",w:"Don't use sprays with essential oils. They're toxic to cats."});
 C("h-high","Whole house","Dust ceiling fans, lights & up high",60,25,{sup:"Pillowcase, extendable duster, step stool",s:["Slide an old pillowcase over each fan blade and pull back. The dust stays inside.","Dust light fixtures, door frames, and tops of cabinets and fridge.","Vacuum the floor after."],eco:"The pillowcase trick keeps dust off beds and floors."});
 C("h-touch","Whole house","Disinfect switches, knobs & remotes",14,10,{sup:"70% isopropyl alcohol or hydrogen peroxide, cloth",s:["Wipe light switches, doorknobs, cabinet pulls, remotes, and phone screens.","Let surfaces stay wet for the time on the label.","Do this more often in cold and flu season."],eco:"Alcohol evaporates fast and is safe for electronics.",alt:"After stomach bugs, use a bleach solution. Alcohol and vinegar don't reliably kill norovirus.",w:"Spray the cloth, not the switch."});
 C("h-couch","Whole house","Vacuum couch & under cushions",30,15,{sup:"Vacuum upholstery tool, rubber glove or lint roller",s:["Pull off cushions and vacuum crumbs and toys out of the crevices.","Vacuum the cushions on all sides.","Wipe a damp rubber glove across fabric to pull up cat hair."],eco:"A rubber glove or squeegee lifts cat hair better than most attachments."});
 C("h-walls","Whole house","Spot-clean walls & doors",30,15,{sup:"Warm soapy water, melamine sponge",s:["Look for handprints around switches and doorways and crayon at kid height.","Try warm soapy water first.","Use a melamine sponge (Magic Eraser) lightly on tougher marks."],eco:"Plain soap and water won't strip paint.",w:"Melamine sponges are fine abrasives and can dull flat or matte paint. Test in a hidden spot."});
-C("h-windows","Whole house","Wash windows (inside)",90,40,{sup:"Squeegee, microfiber, dish soap",s:["Mix a few drops of dish soap in a bucket of warm water.","Wash the glass, then squeegee from the top down, wiping the blade each pass.","Wipe the edges with a dry microfiber.","Work on a cloudy day so it doesn't dry streaky."],eco:"Dish soap water and a squeegee beat any spray."});
+C("h-windows","Whole house","Wash windows (inside)",90,90,{sup:"Squeegee, microfiber, dish soap",s:["Mix a few drops of dish soap in a bucket of warm water.","Wash the glass, then squeegee from the top down, wiping the blade each pass.","Wipe the edges with a dry microfiber.","Work on a cloudy day so it doesn't dry streaky."],eco:"Dish soap water and a squeegee beat any spray."});
 C("h-tracks","Whole house","Vacuum window & door tracks",90,20,{sup:"Crevice tool, old toothbrush, damp cloth",s:["Vacuum loose dirt and dead bugs.","Scrub with a damp toothbrush.","Wipe dry."]});
 C("h-vents","Whole house","Vacuum air vents & returns",90,15,{s:["Vacuum vent covers and cold-air return grilles with a brush tool.","Wash them in soapy water if they're greasy or dusty.","Check the HVAC filter while you're at it."],eco:"Cat hair builds up fast on returns."});
 C("h-blinds","Whole house","Clean blinds & curtains",90,30,{s:["Close blinds and wipe each side with a damp microfiber cloth.","Vacuum curtains with a brush tool, or wash per the label."],w:"Make sure blind cords are tied up out of kids' reach."});
@@ -258,7 +292,7 @@ C("h-screens","Whole house","Wipe screens & electronics",30,10,{sup:"Dry microfi
 C("h-closets","Whole house","Declutter & dust closets",365,60,{s:["Take everything out of one closet at a time.","Donate what doesn't fit or isn't used.","Vacuum the floor and dust shelves.","Check wool clothing for moth holes."]});
 
 /* Bedrooms & kids */
-C("r-sheets","Bedrooms & kids","Change sheets",7,15,{s:["Strip beds and wash sheets warm or hot.","Wash kids' sheets more often after sickness or accidents."]});
+C("r-sheets","Bedrooms & kids","Change sheets (4 beds)",7,30,{s:["Strip beds and wash sheets warm or hot.","Wash kids' sheets more often after sickness or accidents."]});
 C("r-bedding","Bedrooms & kids","Wash pillows, duvets & comforters",180,20,{s:["Check care labels.","Wash two pillows at a time to balance the machine.","Dry thoroughly on low with dryer balls to keep fill fluffy."],w:"Not drying completely leads to mildew inside the fill."});
 C("r-mattress","Bedrooms & kids","Vacuum & rotate mattress",180,20,{sup:"Vacuum upholstery tool, baking soda",s:["Strip the bed.","Sprinkle baking soda over the mattress and leave 1 hour.","Vacuum thoroughly.","Rotate head to foot."],eco:"Baking soda pulls odors without fragrance."});
 C("r-toys","Bedrooms & kids","Wash & sanitize toys",30,20,{s:["Hard plastic toys: top rack of the dishwasher in a mesh bag, or soapy water.","Stuffed animals: in a pillowcase in the washer on gentle, then air dry.","Wipe electronic toys with a cloth dampened with alcohol."],eco:"Soap and water is enough for routine cleaning."});
@@ -277,6 +311,24 @@ C("l-lint-screen","Laundry","Wash dryer lint screen",60,5,{sup:"Dish soap, soft 
 C("l-lint-housing","Laundry","Vacuum the lint trap housing",90,10,{sup:"Long dryer lint brush or vacuum crevice tool",s:["With the screen out, push a long lint brush down into the slot.","Twist and pull out lint.","Vacuum the slot with a narrow crevice attachment."],eco:"Clearing this deep lint shortens drying times."});
 C("l-tub","Laundry","Scrub the laundry tub",30,10,{sup:"Baking soda, dish soap, scrub brush",s:["Rinse out debris.","Sprinkle baking soda and scrub the basin with a squirt of dish soap.","Scrub the faucet and drain. Rinse."],alt:"Oxygen bleach paste for stains, or Bar Keepers Friend on stainless.",w:"Don't leave cleaning water standing where little kids can reach it."});
 C("l-behind","Laundry","Dust behind & on top of machines",90,15,{s:["Wipe the tops of washer and dryer.","Vacuum behind and around them, where lint and cat hair collect."]});
+
+
+/* Whole house: tools */
+C("v-vac","Whole house","Clean the vacuum: bin, filter & brush roll",30,15,{sup:"Scissors or seam ripper, soft brush",s:["Unplug or remove the battery.","Empty the bin and tap out the filter over the trash. Wash the filter only if the manual says it's washable, then dry 24 hours.","Cut cat hair and string off the brush roll with scissors or a seam ripper.","Wipe the bin and check the hose for clogs."],eco:"A clean filter and brush roll keep suction strong, so you vacuum less."});
+
+/* Instruments */
+C("i-dust","Instruments","Dust instruments & wipe keys",7,10,{sup:"Soft microfiber cloths, mild dish soap",s:["Dust cases and finishes with a dry microfiber cloth, following the grain.","Piano keys: wipe with a cloth barely damp with water and a drop of dish soap, front to back, then dry right away. Do sharps with a separate cloth.","Wipe strings and fingerboards on stringed instruments after playing.","Close the piano lid when not in use to keep dust off the keys."],eco:"A dry or barely damp microfiber cloth is all most finishes need.",w:"Never spray anything on an instrument. Avoid household furniture polish, silicone sprays and alcohol, which can damage lacquer, ivory and old finishes. Use a polish made for that instrument if you use one at all."});
+C("i-humidity","Instruments","Check instrument humidity",7,2,{sup:"Hygrometer",s:["Read the hygrometer near the instruments.","Aim for 40–50% relative humidity.","In winter, run a humidifier or refill case humidifiers. In humid summers, run the AC or a dehumidifier.","Keep instruments away from heat vents, radiators, exterior doors and direct sun."],eco:"Steady humidity prevents cracked soundboards, sticking keys and pitch drift.",w:"Big swings matter more than the exact number. Avoid moving instruments between rooms with very different conditions."});
+U("i-tune","Instruments","Piano tuning",180,0,{s:["Book a piano technician. Twice a year is typical, often spring and fall after the heating or cooling season changes.","Ask them to check the action and humidity while they're there."]});
+U("i-humidifier","Instruments","Clean or refill instrument humidifiers",30,10,{s:["Refill case humidifiers or the piano humidity system (e.g. Dampp-Chaser) as the light or manual says.","Replace pads on schedule. Rinse reservoirs to stop mold."]});
+
+/* Plants */
+C("pl-water","Plants","Watering check",4,20,{sup:"Watering can, saucers",s:["Push a finger 1–2 inches into the soil. Only water if it's dry at that depth. Succulents and snake plants can go much drier.","Water slowly until it runs out the drainage holes.","Empty saucers after 30 minutes so roots don't sit in water.","Use room-temperature water. Let tap water sit overnight for sensitive plants like calatheas."],eco:"Overwatering kills more houseplants than underwatering. Checking first saves plants and water.",w:"Wipe up drips on the wood floors right away, and keep pots off wool and silk rugs unless they're on a stand with a deep saucer."});
+C("pl-dust","Plants","Dust plant leaves",30,20,{s:["Support each leaf with one hand and wipe both sides with a damp soft cloth.","Rinse small plants in the shower with lukewarm water.","Let leaves dry before putting plants back in strong sun."],eco:"Clean leaves take in more light, and wiping lets you spot pests early.",w:"Skip leaf-shine products. They clog leaf pores and attract dust."});
+C("pl-pests","Plants","Check plants for pests",14,10,{sup:"Yellow sticky traps, insecticidal soap",s:["Check undersides of leaves and stems for webbing (spider mites), white fluff (mealybugs) or bumps (scale).","Look for tiny flies over the soil (fungus gnats).","Isolate any plant with pests.","Wipe pests off with a damp cloth, then spray with insecticidal soap. Let soil dry out more to stop gnats."],eco:"Sticky traps, wiping and insecticidal soap handle most problems.",alt:"Systemic insecticides work but aren't worth the risk with cats and little kids who may chew leaves or dig in soil.",w:"Keep cats away from treated plants until dry. Neem oil and essential-oil sprays can make cats sick."});
+C("pl-rotate","Plants","Rotate plants toward the light",14,5,{s:["Give each pot a quarter turn so all sides get light.","Move plants back from cold windows in winter."]});
+C("pl-feed","Plants","Fertilize plants (spring–summer)",30,15,{s:["Feed only while plants are actively growing, about March to September. Skip this in winter: mark it done or set it aside.","Dilute liquid fertilizer to half strength.","Water first, then fertilize, so roots don't burn."],eco:"Worm castings or compost tea are gentle options."});
+C("pl-repot","Plants","Check which plants need repotting",365,60,{s:["Look for roots circling the bottom or coming out the drainage holes.","Repot in spring into a pot only 1–2 inches wider.","Use fresh potting mix suited to the plant."],w:"Repot outdoors or over a sheet. Potting soil is hard to get out of rugs."});
 
 /* Upkeep: home systems */
 U("m-hvac","Home systems","Replace HVAC filter",60,5,{s:["Turn the system off.","Note the arrow on the filter showing airflow direction.","Swap in the new filter. Write the date on its edge."],eco:"With cats, change every 60 days instead of 90.",w:"Use the size printed on the old filter. Add it to the house notes below."});
@@ -318,120 +370,170 @@ U("f-plants","Pond","Trim pond plants",30,15,{s:["Cut off yellow or dead leaves.
 U("f-uv","Pond","Replace UV clarifier bulb",365,15,{s:["Replace in spring. Bulbs lose strength after a year even if they still glow."]});
 U("f-season","Pond","Pond seasonal prep",180,30,{s:["Fall: net the pond, stop feeding below 50°F (10°C), add a floating de-icer.","Spring: remove net, clean out sludge, start feeding when water is above 50°F."],w:"Even shallow ponds are a drowning risk for toddlers. Consider a grate or fence."});
 
+
+/* ---------------- Appliances: each kind links to the library tasks that care for it ---------------- */
+var KINDS={
+  dishwasher:{label:"Dishwasher",tasks:["k-dw-filter","k-dw-deep"]},
+  washer:{label:"Washing machine",tasks:["l-washer","m-washer-hoses"]},
+  dryer:{label:"Dryer",tasks:["l-lint-screen","l-lint-housing","m-dryer-vent"]},
+  oven:{label:"Oven / range",tasks:["k-oven","k-racks","k-hood"]},
+  fridge:{label:"Refrigerator",tasks:["k-fridge-out","k-fridge-deep","k-coils","m-fridge-filter"]},
+  microwave:{label:"Microwave",tasks:["k-micro"]},
+  espresso:{label:"Espresso machine",tasks:["e-weekly","e-backflush","e-descale","e-gasket","e-filter"]},
+  grinder:{label:"Coffee grinder",tasks:["e-grinder"]},
+  hvac:{label:"Furnace / AC",tasks:["m-hvac","m-hvac-service","h-vents"]},
+  waterheater:{label:"Water heater",tasks:["m-water-heater"]},
+  vacuum:{label:"Vacuum",tasks:["v-vac"]},
+  piano:{label:"Piano",tasks:["i-dust","i-humidity","i-tune","i-humidifier"]},
+  instrument:{label:"Other instrument",tasks:["i-dust","i-humidity"]},
+  pool:{label:"Pool pump & filter",tasks:["p-pump","p-filter"]},
+  pond:{label:"Pond pump & filter",tasks:["f-filter","f-pump","f-uv"]},
+  other:{label:"Other",tasks:[]}
+};
+var SUGGEST=[["dishwasher","Dishwasher"],["washer","Top-load washer"],["dryer","Dryer"],["oven","Oven"],["espresso","Espresso machine"],["pool","Pool pump & filter"],["pond","Pond pump & filter"],["fridge","Refrigerator"],["hvac","Furnace / AC"],["waterheater","Water heater"],["vacuum","Vacuum"],["piano","Piano"]];
+var CLEAN_DEFAULT=["f-vacuum","f-mop","h-dust","b-toilet","b-sinks","b-shower","k-counters","k-sink","k-micro","f-mats"];
+
 /* ---------------- Store: db when the page runs in claude.ai, this device otherwise ---------------- */
 var LS="hk-log-v1";
-var S={state:{},custom:{},spend:{},prefs:{},mode:"local",readonly:false};
-function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");S.state=v.state||{};S.custom=v.custom||{};S.spend=v.spend||{};S.prefs=v.prefs||{}}catch(e){}}
-function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({state:S.state,custom:S.custom,spend:S.spend,prefs:S.prefs}))}catch(e){}}
-var dbref=null, chains={};
+var COLS={state:"state",custom:"custom",spend:"spend",visits:"visits",apps:"appliances"};
+var S={state:{},custom:{},spend:{},visits:{},apps:{},prefs:{},mode:"local",readonly:false};
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");Object.keys(COLS).forEach(function(k){S[k]=v[k]||{}});S.prefs=v.prefs||{}}catch(e){}}
+function lsWrite(){try{var o={prefs:S.prefs};Object.keys(COLS).forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
+var dbref=null,chains={};
 function chain(key,fn){var p=(chains[key]||Promise.resolve()).then(fn,fn);chains[key]=p.catch(function(){});return p}
 function writeErr(e){
   if(e&&e.code==="invalid_argument"){S.readonly=true;toast("You can view this list, but not change it.")}
-  else if(e&&e.code==="quota_exceeded"){toast("Storage is full. Your latest change wasn't saved.")}
-  else toast("Couldn't save that change. Check your connection and try again.");
+  else if(e&&e.code==="quota_exceeded"){toast("Storage is full. Your latest change wasn’t saved.")}
+  else toast("Couldn’t save that change. Check your connection and try again.");
 }
-function saveState(id){
-  var v=S.state[id]; lsWrite(); render();
+function save(kind,id,quiet){
+  var v=S[kind][id];lsWrite();if(!quiet)render();
   if(S.mode!=="db")return;
-  chain("s:"+id,function(){var r=dbref.collection("state").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
+  chain(kind+":"+id,function(){var r=dbref.collection(COLS[kind]).doc(id);return v?r.set(clone(v)):r.delete()}).catch(writeErr);
 }
-function saveCustom(id){
-  var v=S.custom[id]; lsWrite(); render();
-  if(S.mode!=="db")return;
-  chain("c:"+id,function(){var r=dbref.collection("custom").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
-}
-function saveSpend(id){
-  var v=S.spend[id]; lsWrite(); render();
-  if(S.mode!=="db")return;
-  chain("p:"+id,function(){var r=dbref.collection("spend").doc(id);return v?r.set(JSON.parse(JSON.stringify(v))):r.delete()}).catch(writeErr);
-}
+function saveState(id){save("state",id)}
 function savePrefs(){
-  lsWrite(); render();
+  lsWrite();render();
   if(S.mode!=="db")return;
-  chain("prefs",function(){return dbref.collection("meta").doc("prefs").set(JSON.parse(JSON.stringify(S.prefs)))}).catch(writeErr);
+  chain("prefs",function(){return dbref.collection("meta").doc("prefs").set(clone(S.prefs))}).catch(writeErr);
 }
 function connect(){
   if(!window.claude||!window.claude.use){footer();return}
   window.claude.use("db").then(function(db){
     if(!db){footer();return}
     dbref=db;S.mode="db";footer();
-    db.collection("state").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.state=m;lsWrite();render()},function(){});
-    db.collection("custom").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.custom=m;lsWrite();render()},function(){});
-    db.collection("spend").onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S.spend=m;lsWrite();render()},function(){});
+    Object.keys(COLS).forEach(function(k){
+      db.collection(COLS[k]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S[k]=m;lsWrite();render()},function(){});
+    });
     db.collection("meta").doc("prefs").onSnapshot(function(d){S.prefs=d.exists?Object.assign({},d.data()):{};lsWrite();render()},function(){});
   }).catch(function(){footer()});
 }
-function footer(){document.getElementById("foot").textContent=S.mode==="db"?"Your log is saved to your account and syncs across devices.":"Your log is saved in this browser only."}
+function footer(){document.getElementById("foot").textContent=S.mode==="db"?"Saved to your account · syncs across your devices":"Saved in this browser only"}
+
+/* ---------------- Household prefs ---------------- */
+function P(k,d){return S.prefs[k]!=null?S.prefs[k]:d}
+function houseName(){return P("houseName","The Zhang-Wolfe House")}
+function people(){return P("people",[])}
+function cleanEvery(){return +P("cleanEvery",14)}
+function cleanTasks(){return P("cleanTasks",CLEAN_DEFAULT)}
+function rate(){return +P("rate",40)}
+function me(){try{var m=localStorage.getItem("hk-me");if(m&&people().indexOf(m)>=0)return m}catch(e){}return people()[0]||""}
+function setMe(n){try{localStorage.setItem("hk-me",n)}catch(e){}}
 
 /* ---------------- Logic ---------------- */
 var DAY=864e5;
 function tasks(){var c=Object.keys(S.custom).map(function(k){var t=Object.assign({},S.custom[k]);t.id=k;t.custom=true;return t});return L.concat(c)}
 function st(id){return S.state[id]||{}}
 function every(t){return st(t.id).every||t.e}
-function lastAt(t){var h=st(t.id).hist||[];return h.length?h[0].at:null}
-function since(t){var a=lastAt(t);return a==null?null:Math.max(0,Math.floor((Date.now()-new Date(a).getTime())/DAY))}
+function last(t){var h=st(t.id).hist||[];return h[0]||null}
+function since(t){var a=last(t);return a?Math.max(0,Math.floor((Date.now()-new Date(a.at).getTime())/DAY)):null}
+function until(t){var d=since(t);return d==null?null:every(t)-d}
 function ratio(t){var d=since(t);return d==null?1:d/every(t)}
 function aside(t){var s=st(t.id);if(s.why==="supplies")return "supplies";if(s.why==="later"&&s.until&&new Date(s.until).getTime()>Date.now())return "later";return null}
 function hidden(t){return !!st(t.id).hidden}
 function status(t){
   if(aside(t))return {cls:"st-aside",label:aside(t)==="supplies"?"Need supplies":"Later"};
-  if(since(t)==null)return {cls:"st-new",label:"Not logged"};
+  if(since(t)==null)return {cls:"st-new",label:"Not set up"};
   var r=ratio(t);
   if(r>=1)return {cls:"st-due",label:r>=2?"Overdue":"Due"};
   if(r>=.75)return {cls:"st-soon",label:"Soon"};
   return {cls:"st-ok",label:"Fresh"};
 }
 function fmtEvery(n){if(n===1)return "daily";if(n%365===0)return n===365?"yearly":"every "+(n/365)+" yrs";if(n%30===0&&n>=60)return "every "+(n/30)+" mo";if(n===30)return "monthly";if(n%7===0)return n===7?"weekly":"every "+(n/7)+" wks";return "every "+n+" days"}
-function fmtAgo(d){if(d==null)return "not logged yet";if(d===0)return "today";if(d===1)return "yesterday";if(d<14)return d+" days ago";if(d<60)return Math.round(d/7)+" wks ago";if(d<730)return Math.round(d/30)+" mo ago";return Math.round(d/365)+" yrs ago"}
+function fmtAgo(d){if(d==null)return "not set up yet";if(d===0)return "today";if(d===1)return "yesterday";if(d<14)return d+" days ago";if(d<60)return Math.round(d/7)+" wks ago";if(d<730)return Math.round(d/30)+" mo ago";return Math.round(d/365)+" yrs ago"}
 function fmtDate(iso){return new Date(iso).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function fmtShort(d){return new Date(d).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}
+function fmtMin(m){m=Math.round(m);if(m<60)return m+" min";var h=Math.floor(m/60),r=m%60;return h+" h"+(r?" "+r+" min":"")}
+function fmtHrs(m){return m<60?Math.round(m)+" min":(Math.round(m/6)/10)+" hrs"}
+function money(n){var r=Math.round(n);return (r<0?"−$":"$")+Math.abs(r).toLocaleString()}
+function isoDay(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
 function tier(t){var e=every(t);return e<=14?"Routine":e<=90?"Periodic":"Deep clean"}
-function active(list){return tasks().filter(function(t){return t.list===list&&!hidden(t)})}
+function active(list){return tasks().filter(function(t){return (!list||t.list===list)&&!hidden(t)})}
 function byDue(a,b){return ratio(b)-ratio(a)||every(a)-every(b)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function findTask(id){return tasks().filter(function(t){return t.id===id})[0]}
+function appsFor(t){return Object.keys(S.apps).filter(function(k){var a=S.apps[k];return t.app===k||(KINDS[a.kind]||KINDS.other).tasks.indexOf(t.id)>=0})}
+function appTasks(id){var a=S.apps[id];if(!a)return [];var ids=(KINDS[a.kind]||KINDS.other).tasks;return tasks().filter(function(t){return ids.indexOf(t.id)>=0||t.app===id})}
 
 function markDone(id,note,atIso,x){
   var s=Object.assign({},st(id));var h=(s.hist||[]).slice();
-  h.push(Object.assign({at:atIso||new Date().toISOString(),note:note||""},x||{}));
-  h.sort(function(a,b){return new Date(b.at)-new Date(a.at)});
+  var e=Object.assign({at:atIso||new Date().toISOString(),note:note||""},x||{});
+  if(e.by==null&&people().length&&!e.est)e.by=me();
+  if(!e.by)delete e.by;
+  h.push(e);h.sort(function(a,b){return new Date(b.at)-new Date(a.at)});
   s.hist=h.slice(0,60);delete s.why;delete s.until;S.state[id]=s;saveState(id);
 }
-function undoDone(id,prev){S.state[id]=prev;saveState(id)}
 function setAside(id,why,days){var s=Object.assign({},st(id));s.why=why;if(days)s.until=new Date(Date.now()+days*DAY).toISOString();else delete s.until;S.state[id]=s;saveState(id)}
 function clearAside(id){var s=Object.assign({},st(id));delete s.why;delete s.until;S.state[id]=s;saveState(id)}
 function patch(id,obj){var s=Object.assign({},st(id),obj);Object.keys(obj).forEach(function(k){if(obj[k]==null||obj[k]==="")delete s[k]});S.state[id]=s;saveState(id)}
-function findTask(id){return tasks().filter(function(t){return t.id===id})[0]}
 
-/* ---------------- Week wrap-up math ----------------
-   Value of doing it yourself = flat pro price where one is typical, else minutes × the cleaner's hourly rate.
-   Tasks with 0 minutes are ones you usually hire out, so they add no savings. */
-var PRO={"m-dryer-vent":150,"m-gutters":175,"h-windows":200,"m-water-heater":125,"e-gasket":80,"p-filter":75,"m-hvac":40,"m-fridge-filter":40};
-function rate(){return +S.prefs.rate||40}
+/* Cleaners' visits: each visit also logs the tasks they did, marked by "Cleaners" */
+function visits(){return Object.keys(S.visits).map(function(k){return Object.assign({id:k},S.visits[k])}).sort(function(a,b){return new Date(b.at)-new Date(a.at)})}
+function logVisit(at,cost,note,ids){
+  var vid="v"+Date.now().toString(36);
+  S.visits[vid]={at:at,cost:cost||0,note:note||"",tasks:ids};save("visits",vid,true);
+  ids.forEach(function(id){
+    var s=Object.assign({},st(id)),h=(s.hist||[]).slice();
+    h.push({at:at,note:"",by:"Cleaners",visit:vid});h.sort(function(a,b){return new Date(b.at)-new Date(a.at)});
+    s.hist=h.slice(0,60);S.state[id]=s;save("state",id,true);
+  });
+  render();return vid;
+}
+function removeVisit(vid){
+  var v=S.visits[vid];if(!v)return;
+  (v.tasks||[]).forEach(function(id){var s=Object.assign({},st(id));s.hist=(s.hist||[]).filter(function(h){return h.visit!==vid});S.state[id]=s;save("state",id,true)});
+  delete S.visits[vid];save("visits",vid);
+}
+
+/* Week math. Value of doing it yourself = flat pro price where one is typical, else minutes × cleaner's hourly rate.
+   0-minute tasks are ones you hire out, and the cleaners' work is theirs, so neither adds savings. */
+var PRO={"m-dryer-vent":150,"m-gutters":175,"h-windows":250,"m-water-heater":125,"e-gasket":80,"p-filter":75,"m-hvac":40,"m-fridge-filter":40};
 function proValue(t,min){if(PRO[t.id]!=null)return PRO[t.id];if(!t.m)return 0;return min/60*rate()}
 function weekStart(off){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7+off*7);return d}
 function weekData(off){
   var s=weekStart(off),e=new Date(s);e.setDate(e.getDate()+7);
-  var items=[],buys=[];
-  tasks().forEach(function(t){(st(t.id).hist||[]).forEach(function(h,i){var at=new Date(h.at);
-    if(at>=s&&at<e&&!h.est){var min=h.min!=null?+h.min:(t.m||0);items.push({t:t,h:h,i:i,at:at,min:min,cost:+h.cost||0,pro:proValue(t,min)})}})});
+  var items=[],buys=[],vis=[];
+  tasks().forEach(function(t){(st(t.id).hist||[]).forEach(function(h){var at=new Date(h.at);
+    if(at>=s&&at<e&&!h.est&&h.by!=="Cleaners"){var min=h.min!=null?+h.min:(t.m||0);items.push({t:t,h:h,at:at,min:min,cost:+h.cost||0,pro:proValue(t,min)})}})});
   Object.keys(S.spend).forEach(function(k){var b=S.spend[k],at=new Date(b.at);if(at>=s&&at<e)buys.push({id:k,at:at,what:b.what,amt:+b.amt||0})});
+  visits().forEach(function(v){var at=new Date(v.at);if(at>=s&&at<e)vis.push(v)});
   items.sort(function(a,b){return a.at-b.at});buys.sort(function(a,b){return a.at-b.at});
   var sum=function(a,f){return a.reduce(function(n,x){return n+f(x)},0)};
   var min=sum(items,function(x){return x.min}),spent=sum(items,function(x){return x.cost})+sum(buys,function(x){return x.amt}),pro=sum(items,function(x){return x.pro});
-  return {s:s,e:e,items:items,buys:buys,min:min,spent:spent,pro:pro,saved:pro-spent};
+  return {s:s,e:e,items:items,buys:buys,vis:vis,min:min,spent:spent,pro:pro,saved:pro-spent,cleanCost:sum(vis,function(v){return +v.cost||0})};
 }
-function money(n){var r=Math.round(n);return (r<0?"−$":"$")+Math.abs(r).toLocaleString()}
-function fmtMin(m){m=Math.round(m);if(m<60)return m+" min";var h=Math.floor(m/60),r=m%60;return h+" h"+(r?" "+r+" min":"")}
-function fmtHrs(m){return m<60?Math.round(m)+" min":(Math.round(m/6)/10)+" hrs"}
 function delta(a,b,f){var d=a-b;if(!b&&!a)return "";return (d>0?"+":d<0?"−":"±")+f(Math.abs(d))+" vs last week"}
 
 /* ---------------- Rendering ---------------- */
-var ui={tab:"today",budget:null,area:"All",q:"",upArea:"All",weekOff:0};
-try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=saved.tab}catch(e){}
+var ui={tab:"today",budget:null,range:"now",area:"All",q:"",upArea:"All",weekOff:0};
+try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=saved.tab;if(saved.range)ui.range=saved.range}catch(e){}
+function rememberUi(){try{localStorage.setItem("hk-ui",JSON.stringify({tab:ui.tab,range:ui.range}))}catch(e){}}
 var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function row(t){
-  var s=status(t),d=since(t),pct=Math.min(100,Math.round(ratio(t)*100));
-  var meta=esc(t.area)+" · "+fmtAgo(d)+" · "+fmtEvery(every(t))+(t.m?" · ~"+t.m+" min":"");
-  if(aside(t)==="later")meta=esc(t.area)+" · back "+fmtDate(st(t.id).until);
+  var s=status(t),d=since(t),pct=Math.min(100,Math.round(ratio(t)*100)),l=last(t);
+  var meta=esc(t.area)+" · "+fmtAgo(d)+(l&&l.by?" by "+esc(l.by):"")+" · "+fmtEvery(every(t))+(t.m?" · ~"+t.m+" min":"");
+  if(aside(t)==="later")meta=esc(t.area)+" · back "+fmtShort(st(t.id).until);
   return '<li class="row '+s.cls+'" data-id="'+esc(t.id)+'">'+
     '<button class="tick" data-act="quick" aria-label="Mark '+esc(t.name)+' done">'+TICK+'</button>'+
     '<button class="main" data-act="open"><span class="name">'+esc(t.name)+'</span><span class="meta">'+meta+'</span></button>'+
@@ -439,38 +541,48 @@ function row(t){
     (d!=null&&!aside(t)?'<span class="meter" style="width:'+pct+'%"></span>':'')+'</li>';
 }
 function rows(list){return '<ul class="rows">'+list.map(row).join("")+'</ul>'}
+function mins(list){return list.reduce(function(n,t){return n+(t.m||0)},0)}
 
-function pickForBudget(min){
-  var c=active("clean").filter(function(t){return !aside(t)&&ratio(t)>=.6}).sort(byDue),out=[],used=0;
-  c.forEach(function(t){var m=t.m||10;if(used+m<=min){out.push(t);used+=m}});
-  return {list:out,used:used};
+function cleanersCard(){
+  var vs=visits(),v=vs[0];
+  var h='<section class="cleaners"><p class="eyebrow">House cleaners · '+fmtEvery(cleanEvery())+'</p>';
+  if(v){
+    var ago=Math.floor((Date.now()-new Date(v.at))/DAY),next=new Date(new Date(v.at).getTime()+cleanEvery()*DAY),nd=Math.ceil((next-Date.now())/DAY);
+    h+='<p class="big">'+(ago===0?"Came today":"Last came "+fmtShort(v.at))+'</p><p class="fineprint">'+(v.tasks||[]).length+' tasks covered'+(ago>0?' · '+ago+' day'+(ago>1?'s':'')+' ago':'')+' · next visit '+(nd<=0?'is due':'around '+fmtShort(next))+'</p>';
+  }else h+='<p class="big">No visits logged yet</p><p class="fineprint">Log each visit and the tasks they handle reset on their own.</p>';
+  h+='<div class="btnrow"><button class="btn small wood" data-act="visit">'+(v&&Math.floor((Date.now()-new Date(v.at))/DAY)===0?"Log another visit":"They came today")+'</button>'+(vs.length?'<button class="btn small ghost" data-act="visit">Visits & checklist</button>':'')+'</div></section>';
+  return h;
 }
 function viewToday(){
-  var all=active("clean"),live=all.filter(function(t){return !aside(t)});
-  var due=live.filter(function(t){return since(t)!=null&&ratio(t)>=1}).length;
-  var logged=all.filter(function(t){return since(t)!=null}).length;
-  document.getElementById("sub").textContent=due?due+" due":"";
+  var all=active(),live=all.filter(function(t){return !aside(t)});
+  var logged=all.filter(function(t){return since(t)!=null}),unset=all.filter(function(t){return since(t)==null&&!aside(t)});
+  var dueNow=live.filter(function(t){return since(t)!=null&&ratio(t)>=1}).length;
+  document.getElementById("sub").textContent=dueNow?dueNow+" due now":"all caught up";
   var h="";
-  if(logged<5)h+='<div class="banner"><p class="eyebrow">Getting started</p><p>Everything starts as “not logged.” Tap a task and pick roughly when you last did it, so the list knows what’s actually due.</p></div>';
+  if(logged.length<8)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>Open a few tasks and tap roughly when you last did them. Your to-do list fills in from there. The “Not set up yet” list at the bottom has them all.</p></div>';
   var dow=new Date().getDay();
   if(dow===0||dow>=5){var wk=weekData(0);if(wk.items.length)h+='<div class="banner"><p class="eyebrow">Your week so far</p><p>'+wk.items.length+' task'+(wk.items.length>1?"s":"")+' · '+fmtHrs(wk.min)+' · saved about '+money(wk.saved)+'</p><div class="btnrow"><button class="btn small" data-act="tab" data-v="week">See the wrap-up</button></div></div>'}
-  var chips=[[null,"Just show me"],[5,"5 min"],[15,"15 min"],[30,"30 min"],[60,"1 hr"]];
-  h+='<section class="timebar"><span class="q">How much time do you have?</span><div class="chips" role="group" aria-label="Time available">'+
-    chips.map(function(c){return '<button class="chip" data-act="budget" data-v="'+(c[0]||"")+'" aria-pressed="'+(ui.budget===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
-  var list;
-  if(ui.budget){var p=pickForBudget(ui.budget);list=p.list;h+='<span class="fit">'+(list.length?list.length+" task"+(list.length>1?"s":"")+" · about "+p.used+" min":"Nothing due fits in that time. Try a longer window.")+'</span>'}
-  else{list=live.slice().sort(byDue).filter(function(t){return ratio(t)>=.75}).slice(0,5)}
-  h+='</section>';
-  h+='<section><div class="section-h"><h2>Up next</h2><span class="aside">'+(ui.budget?"most overdue that fit":"most overdue first")+'</span></div>';
-  h+=list.length?rows(list):'<div class="empty"><strong>You’re caught up.</strong> Nothing in cleaning is due right now.</div>';
-  h+='</section>';
-  var later=all.filter(function(t){return aside(t)==="later"}),sup=all.concat(active("upkeep")).filter(function(t){return aside(t)==="supplies"});
+  h+=cleanersCard();
+  var ranges=[["now","Due now"],["week","This week"],["month","This month"]];
+  var times=[[null,"Any time"],[10,"10 min"],[20,"20 min"],[30,"30 min"],[60,"1 hr"],[120,"2 hrs"]];
+  h+='<section class="finder"><div class="seg" role="group" aria-label="When">'+ranges.map(function(r){return '<button data-act="range" data-v="'+r[0]+'" aria-pressed="'+(ui.range===r[0])+'">'+r[1]+'</button>'}).join("")+'</div>'+
+    '<span class="lab">How much time do you have?</span><div class="chips wrap" role="group" aria-label="Time available">'+times.map(function(c){return '<button class="chip" data-act="budget" data-v="'+(c[0]||"")+'" aria-pressed="'+(ui.budget===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
+  var lim=ui.range==="now"?0:ui.range==="week"?7:30;
+  var pool=live.filter(function(t){var u=until(t);return u!=null&&u<=lim}).sort(byDue),pick=pool;
+  if(ui.budget){var used=0;pick=[];pool.forEach(function(t){var m=t.m||10;if(used+m<=ui.budget){pick.push(t);used+=m}})}
+  var cl=pick.filter(function(t){return t.list==="clean"}),up=pick.filter(function(t){return t.list==="upkeep"});
+  if(ui.budget||pick.length)h+='<p class="fit">'+(ui.budget?(pick.length?pick.length+" task"+(pick.length>1?"s":"")+" fit · about "+fmtMin(mins(pick))+" of "+fmtMin(ui.budget):"Nothing on this list fits in "+fmtMin(ui.budget)+". Try more time or a wider window."):pick.length+" task"+(pick.length===1?"":"s")+" · about "+fmtMin(mins(pick)))+'</p>';h+='</section>';
+  if(!pick.length&&!ui.budget)h+='<div class="empty"><strong>'+(lim?"Nothing coming due in that window.":"Nothing is due right now.")+'</strong> '+(logged.length?"Enjoy the clean house.":"Set up a few tasks below to get started.")+'</div>';
+  if(cl.length)h+='<section><div class="section-h"><h2>Cleaning</h2><span class="aside">'+cl.length+' · ~'+fmtMin(mins(cl))+'</span></div>'+rows(cl)+'</section>';
+  if(up.length)h+='<section><div class="section-h"><h2>Home upkeep</h2><span class="aside">'+up.length+' · ~'+fmtMin(mins(up))+'</span></div>'+rows(up)+'</section>';
+  var later=all.filter(function(t){return aside(t)==="later"}),sup=all.filter(function(t){return aside(t)==="supplies"});
   if(sup.length){
     var items={};sup.forEach(function(t){(t.sup||"Supplies for "+t.name).split(/,\s*/).forEach(function(x){items[x.trim()]=1})});
-    h+='<section><div class="section-h"><h2>Shopping list</h2><span class="aside">from “Need supplies”</span></div><div class="shop"><span class="eyebrow">Probably need</span><ul>'+Object.keys(items).map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul></div></section>';
+    h+='<section><div class="section-h"><h2>Shopping list</h2><span class="aside">from “Need supplies”</span></div><div class="shop"><p class="eyebrow">Probably need</p><ul>'+Object.keys(items).map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul></div></section>';
     h+='<details class="aside" open><summary>Waiting on supplies <span>'+sup.length+'</span></summary>'+rows(sup)+'</details>';
   }
   if(later.length)h+='<details class="aside"><summary>Set aside for later <span>'+later.length+'</span></summary>'+rows(later)+'</details>';
+  if(unset.length)h+='<details class="aside"'+(logged.length<8?" open":"")+'><summary><span>Not set up yet <span class="hint">· tap one, say when you last did it</span></span><span>'+unset.length+'</span></summary>'+rows(unset.sort(function(a,b){return a.list.localeCompare(b.list)||a.area.localeCompare(b.area)}))+'</details>';
   return h;
 }
 function areaChips(list,cur,act){
@@ -482,163 +594,251 @@ function viewAll(){
   var list=all.filter(function(t){return (ui.area==="All"||t.area===ui.area)&&(!q||t.name.toLowerCase().indexOf(q)>=0)}).sort(byDue);
   var hid=tasks().filter(function(t){return t.list==="clean"&&hidden(t)});
   document.getElementById("sub").textContent=all.length+" tasks";
-  var h='<input class="search" id="q" type="search" placeholder="Search tasks" value="'+esc(ui.q)+'" aria-label="Search tasks">'+areaChips(all,ui.area,"area");
+  var h='<input class="search" id="q" type="search" placeholder="Search cleaning tasks" value="'+esc(ui.q)+'" aria-label="Search tasks">'+areaChips(all,ui.area,"area");
   h+=list.length?rows(list):'<div class="empty">No tasks match.</div>';
   h+='<div class="btnrow"><button class="btn" data-act="add" data-list="clean">Add a task</button></div>';
   if(hid.length)h+='<details class="aside"><summary>Hidden from your list <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
   return h;
 }
+function appRow(id){
+  var a=S.apps[id],ts=appTasks(id).filter(function(t){return !hidden(t)}),due=ts.filter(function(t){return since(t)!=null&&ratio(t)>=1&&!aside(t)}).length;
+  var model=[a.brand,a.model].filter(Boolean).join(" ");
+  var pill=due?'<span class="pill st-due" style="--st:var(--due);--st-soft:var(--due-soft)">'+due+' due</span>':'<span class="pill st-ok">'+(ts.length?"OK":"—")+'</span>';
+  return '<li class="row noTick" data-app="'+esc(id)+'"><button class="main" data-act="openapp"><span class="name">'+esc(a.name||(KINDS[a.kind]||KINDS.other).label)+'</span><span class="meta">'+(model?esc(model):"Add the model number")+' · '+ts.length+' care task'+(ts.length===1?"":"s")+'</span></button>'+pill+'</li>';
+}
 function viewUpkeep(){
   var all=active("upkeep"),list=all.filter(function(t){return ui.upArea==="All"||t.area===ui.upArea}).sort(byDue);
   var hid=tasks().filter(function(t){return t.list==="upkeep"&&hidden(t)});
   var due=all.filter(function(t){return since(t)!=null&&ratio(t)>=1&&!aside(t)}).length;
-  document.getElementById("sub").textContent=due?due+" due":"";
-  var h='<p style="margin:0;color:var(--muted)">Home maintenance, the pool, and the pond. Kept separate from cleaning so it doesn’t crowd your Today list.</p>'+areaChips(all,ui.upArea,"uparea");
-  h+=rows(list)+'<div class="btnrow"><button class="btn" data-act="add" data-list="upkeep">Add a task</button></div>';
+  document.getElementById("sub").textContent=due?due+" upkeep due":"";
+  var ids=Object.keys(S.apps).sort(function(a,b){return String(S.apps[a].name).localeCompare(String(S.apps[b].name))});
+  var have={};ids.forEach(function(k){have[S.apps[k].kind]=1});
+  var sug=SUGGEST.filter(function(s){return !have[s[0]]});
+  var h='<section><div class="section-h"><h2>Appliances</h2><span class="aside">'+ids.length+' saved</span></div>';
+  h+=ids.length?'<ul class="rows">'+ids.map(appRow).join("")+'</ul>':'<div class="empty"><strong>Add your appliances.</strong> Save the brand, model and serial number, warranty dates and the manual link. Each one comes with its own care tasks.</div>';
+  if(sug.length)h+='<p class="fineprint" style="margin-top:10px">Quick add</p><div class="chips wrap" style="margin-top:6px">'+sug.map(function(s){return '<button class="chip" data-act="quickapp" data-kind="'+s[0]+'" data-name="'+esc(s[1])+'">+ '+esc(s[1])+'</button>'}).join("")+'<button class="chip" data-act="newapp">+ Something else</button></div>';
+  h+='</section>';
+  h+='<section><div class="section-h"><h2>Upkeep</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button></div></section>';
   if(hid.length)h+='<details class="aside"><summary>Hidden <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
   return h;
 }
-function viewGuide(){
-  document.getElementById("sub").textContent="";
-  var kit=[
-    ["White vinegar","Hard-water scale, faucets, showerheads, glass, rinse aid in laundry.","Natural stone (marble, granite, quartz), hardwood floors, waxed or oiled wood, cast iron, espresso machines, rubber seals for long soaks."],
-    ["Baking soda","Gentle scrubbing paste, deodorizing, oven, sinks, tubs, mattresses.","Silk and wool rugs (hard to rinse out, alkaline), aluminum (can darken), glass you need streak-free."],
-    ["Dish soap","Grease, everyday wiping, windows, cabinets. The most useful bottle you own.","Espresso machines (leaves residue). Too much on floors leaves film."],
-    ["Castile soap","All-purpose spray (1 tbsp per 2 cups water), toilets, counters.","Mixing with vinegar (it curdles into a greasy mess). Hardwood floors (can leave film)."],
-    ["3% hydrogen peroxide","Disinfecting, whitening grout, mildew, cutting boards.","Colored fabrics and rugs (bleaches), mixing with vinegar. Keep in the brown bottle; light breaks it down."],
-    ["Citric acid","Descaling kettles, dishwashers, and (if the manual allows) espresso machines. Stronger than vinegar, no smell.","Natural stone, and aluminum for long soaks."],
-    ["Oxygen bleach (OxiClean)","Laundry stains, grout paste, deck and patio.","Wool, silk, leather."],
-    ["70% isopropyl alcohol","Electronics, light switches, stainless streaks, quick disinfecting.","Painted, lacquered, or acrylic surfaces. Flammable."],
-    ["Microfiber cloths","Dusting and wiping with just water. Wash without fabric softener.",""],
-    ["Enzyme cleaner","Cat urine and vomit on washable surfaces and synthetic carpet.","Silk and wool unless labeled WoolSafe. Protease enzymes break down protein fibers."]
-  ];
-  var strong=[
-    ["Bar Keepers Friend","Rust, hard-water rings, stainless pans, baking sheets, sinks.","Gloves, rinse well, don't use on stone or nonstick."],
-    ["Bleach (diluted)","Mold inside caulk, disinfecting after stomach bugs (vinegar and peroxide don't reliably kill norovirus).","1 tbsp per quart water. Ventilate, keep cats and kids out until rinsed and dry."],
-    ["Commercial oven cleaner","Heavy baked-on carbon in non-self-cleaning ovens.","Fumes are strong. Pick a fume-free formula, ventilate, keep everyone out of the kitchen."],
-    ["CLR / lime remover","Thick scale that vinegar doesn't move.","Not on stone, painted metal, or brass. Rinse thoroughly."],
-    ["Washer cleaner tablets","Musty top-loader smells.","Follow the label. Don't combine with bleach."]
-  ];
-  function k(r){return '<div class="card"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p>'+(r[2]?'<p><span class="bad">Avoid:</span> '+r[2]+'</p>':'')+'</div>'}
-  var h='<div class="guide view">';
-  h+='<section><h2>Never mix</h2><div class="mix">'+
-    '<div class="card"><p><b>Bleach + vinegar or any acid</b> makes chlorine gas. That includes toilet bowl cleaners and lime removers.</p></div>'+
-    '<div class="card"><p><b>Bleach + ammonia</b> makes chloramine gas. Some glass cleaners contain ammonia.</p></div>'+
-    '<div class="card"><p><b>Bleach + rubbing alcohol</b> makes chloroform and other toxic compounds.</p></div>'+
-    '<div class="card"><p><b>Hydrogen peroxide + vinegar</b> in the same bottle makes peracetic acid, which burns skin and lungs. Using them one after another with a rinse is fine.</p></div>'+
-    '<div class="card"><p><b>Different drain cleaners</b>, or different pool chlorine types. They can react violently.</p></div></div></section>';
-  h+='<section><h2>Your house</h2><div class="kit">'+
-    '<div class="card"><h3>Cats</h3><ul><li>Essential oils are toxic to cats, including tea tree, eucalyptus, citrus, pine, peppermint, and wintergreen. That covers “natural” cleaners scented with them and diffusers.</li><li>Phenol cleaners (some Pine-Sol and Lysol formulas) are dangerous to cats.</li><li>Let floors and surfaces dry before cats walk on them. They lick their paws.</li><li>ASPCA Animal Poison Control: <b>(888) 426-4435</b></li></ul></div>'+
-    '<div class="card"><h3>Little kids</h3><ul><li>Store all cleaners up high or locked, in their original bottles.</li><li>Laundry and dishwasher pods are a top poisoning risk. Keep them closed and out of reach.</li><li>Never leave a bucket of water or a filled tub unattended.</li><li>Poison Control (US): <b>1-800-222-1222</b></li></ul></div>'+
-    '<div class="card"><h3>Hardwood floors</h3><ul><li>Barely damp microfiber and a pH-neutral cleaner.</li><li>No vinegar, steam mops, oil soaps, or standing water.</li><li>Felt pads under furniture, and doormats at every entry for grit.</li></ul></div>'+
-    '<div class="card"><h3>Silk & wool rugs</h3><ul><li>Vacuum with suction only, never a spinning beater bar.</li><li>Blot spills with cool water. Never rub.</li><li>Only WoolSafe-labeled spot cleaners. No baking soda, oxygen bleach, ammonia, or protease enzymes.</li><li>Silk dyes can run. Test hidden spots first.</li><li>Rotate yearly; vacuum underneath to prevent moths; professional wash every 1–3 years.</li></ul></div>'+
-    '</div></section>';
-  h+='<section><h2>Gentle kit</h2><div class="kit">'+kit.map(k).join("")+'</div></section>';
-  h+='<section><h2>When stronger is worth it</h2><div class="kit">'+strong.map(function(r){return '<div class="card alt"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p><p><span class="bad">Care:</span> '+r[2]+'</p></div>'}).join("")+'</div></section>';
-  h+='<section><h2>Your data</h2><div class="card"><p>Copy a backup of your full log, or paste one back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div></section>';
-  return h+'</div>';
-}
 function viewWeek(){
-  var off=ui.weekOff,w=weekData(off),p=weekData(off-1),last=new Date(w.e-DAY);
+  var off=ui.weekOff,w=weekData(off),p=weekData(off-1),lastDay=new Date(w.e-DAY);
   var fmt=function(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})};
   document.getElementById("sub").textContent=off===0?"this week":off===-1?"last week":"";
-  var h='<div class="weeknav"><button class="btn small" data-act="wk" data-v="-1" aria-label="Previous week">‹ Prev</button><span class="range">'+fmt(w.s)+' – '+fmt(last)+'</span><button class="btn small" data-act="wk" data-v="1" aria-label="Next week"'+(off>=0?" disabled":"")+'>Next ›</button></div>';
-  if(!w.items.length&&!w.buys.length){
-    h+='<div class="empty"><strong>Nothing logged '+(off===0?"yet this week":"this week")+'.</strong> Tasks you mark done show up here with the time they took and what you spent.</div>';
-  }
+  var h='<div class="weeknav"><button class="btn small" data-act="wk" data-v="-1" aria-label="Previous week">‹ Prev</button><span class="range">'+fmt(w.s)+' – '+fmt(lastDay)+'</span><button class="btn small" data-act="wk" data-v="1" aria-label="Next week"'+(off>=0?" disabled":"")+'>Next ›</button></div>';
+  if(!w.items.length&&!w.buys.length&&!w.vis.length)h+='<div class="empty"><strong>Nothing logged '+(off===0?"yet this week":"this week")+'.</strong> Tasks you mark done show up here with the time they took and what you spent.</div>';
   h+='<div class="tiles">'+
-    '<div class="tile"><span class="k">Tasks done</span><span class="v">'+w.items.length+'</span><span class="d">'+delta(w.items.length,p.items.length,String)+'</span></div>'+
+    '<div class="tile"><span class="k">Tasks you did</span><span class="v">'+w.items.length+'</span><span class="d">'+delta(w.items.length,p.items.length,String)+'</span></div>'+
     '<div class="tile"><span class="k">Time spent</span><span class="v">'+fmtHrs(w.min)+'</span><span class="d">'+delta(w.min,p.min,fmtMin)+'</span></div>'+
     '<div class="tile"><span class="k">Spent on supplies</span><span class="v">'+money(w.spent)+'</span><span class="d">'+(w.buys.length?w.buys.length+" purchase"+(w.buys.length>1?"s":""):"")+'</span></div>'+
-    '<div class="tile save"><span class="k">Saved by doing it yourself</span><span class="v">'+money(w.saved)+'</span><span class="d">a pro would charge ~'+money(w.pro)+'</span></div></div>';
+    '<div class="tile save"><span class="k">Saved by doing it yourselves</span><span class="v">'+money(w.saved)+'</span><span class="d">a pro would charge ~'+money(w.pro)+'</span></div></div>';
+  if(w.vis.length){var n=w.vis.reduce(function(a,v){return a+(v.tasks||[]).length},0);
+    h+='<section class="cleaners"><p class="eyebrow">House cleaners</p><p>Came '+w.vis.map(function(v){return fmtShort(v.at)}).join(" and ")+' · covered '+n+' task'+(n===1?"":"s")+(w.cleanCost?' · '+money(w.cleanCost):'')+'</p>'+w.vis.filter(function(v){return v.note}).map(function(v){return '<p class="fineprint">'+esc(v.note)+'</p>'}).join("")+'</section>'}
   if(w.items.length){
-    var areas={};w.items.forEach(function(x){var a=areas[x.t.area]=areas[x.t.area]||{n:0,m:0};a.n++;a.m+=x.min});
-    var keys=Object.keys(areas).sort(function(a,b){return areas[b].m-areas[a].m||areas[b].n-areas[a].n}),max=Math.max.apply(null,keys.map(function(k){return areas[k].m}))||1;
-    h+='<section><div class="section-h"><h2>Where the time went</h2></div><div class="card"><div class="bars">'+keys.map(function(k){var a=areas[k];
-      return '<div class="bar"><span>'+esc(k)+'</span><span class="n">'+a.n+' · '+fmtMin(a.m)+'</span><div class="track"><div class="fill" style="width:'+Math.max(3,Math.round(a.m/max*100))+'%"></div></div></div>'}).join("")+'</div></div></section>';
+    var bars=function(key,cls){var g={};w.items.forEach(function(x){var k=key(x);if(!k)return;var a=g[k]=g[k]||{n:0,m:0};a.n++;a.m+=x.min});
+      var ks=Object.keys(g).sort(function(a,b){return g[b].m-g[a].m||g[b].n-g[a].n}),mx=Math.max.apply(null,ks.map(function(k){return g[k].m}))||1;
+      return {n:ks.length,html:'<div class="card"><div class="bars">'+ks.map(function(k){return '<div class="bar '+(cls||"")+'"><span>'+esc(k)+'</span><span class="n">'+g[k].n+' · '+fmtMin(g[k].m)+'</span><div class="track"><div class="fill" style="width:'+Math.max(3,Math.round(g[k].m/mx*100))+'%"></div></div></div>'}).join("")+'</div></div>'}};
+    var who=bars(function(x){return x.h.by},"wood");
+    if(who.n)h+='<section><div class="section-h"><h2>Who did what</h2></div>'+who.html+'</section>';
+    h+='<section><div class="section-h"><h2>Where the time went</h2></div>'+bars(function(x){return x.t.area}).html+'</section>';
     var deep=w.items.filter(function(x){return every(x.t)>=90});
     if(deep.length)h+='<div class="banner"><p class="eyebrow">Big ones this week</p><p>'+deep.map(function(x){return esc(x.t.name)}).join(", ")+'</p></div>';
     var day="",lis="";
     w.items.forEach(function(x){var d=x.at.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});
       if(d!==day){day=d;lis+='<li><span class="day">'+d+'</span></li>'}
-      lis+='<li><span>'+esc(x.t.name)+'</span><span class="x">'+fmtMin(x.min)+(x.cost?" · "+money(x.cost):"")+'</span>'+(x.h.note?'<span class="nt">'+esc(x.h.note)+'</span>':'')+'</li>'});
+      lis+='<li><span>'+esc(x.t.name)+(x.h.by?' <span class="fineprint">· '+esc(x.h.by)+'</span>':'')+'</span><span class="x">'+fmtMin(x.min)+(x.cost?" · "+money(x.cost):"")+'</span>'+(x.h.note?'<span class="nt">'+esc(x.h.note)+'</span>':'')+'</li>'});
     h+='<section><div class="section-h"><h2>What you did</h2></div><div class="card"><ul class="daylog">'+lis+'</ul></div></section>';
   }
   h+='<section><div class="section-h"><h2>Purchases</h2><span class="aside">supplies, tools, refills</span></div><div class="card">'+
     (w.buys.length?'<ul class="daylog">'+w.buys.map(function(b){return '<li><span>'+esc(b.what||"Purchase")+'<span class="when">'+fmt(b.at)+'</span></span><span class="x">'+money(b.amt)+' <button class="btn small ghost danger" data-act="delbuy" data-v="'+esc(b.id)+'">Remove</button></span></li>'}).join("")+'</ul>':'<p class="fineprint">No purchases logged this week.</p>')+
-    '<form class="form" id="buyform"><div class="grid2"><div><label class="lbl" for="b-what">What</label><input type="text" id="b-what" placeholder="e.g. vinegar, microfiber cloths"></div>'+
-    '<div class="grid2"><div><label class="lbl" for="b-amt">Amount ($)</label><input type="number" id="b-amt" min="0" step="0.01" inputmode="decimal"></div><div><label class="lbl" for="b-date">Date</label><input type="date" id="b-date" value="'+isoDay(off===0?new Date():last)+'"></div></div></div>'+
+    '<form class="form" id="buyform"><div><label class="lbl" for="b-what">What</label><input type="text" id="b-what" placeholder="e.g. Bona refill, microfiber cloths"></div>'+
+    '<div class="grid2"><div><label class="lbl" for="b-amt">Amount ($)</label><input type="number" id="b-amt" min="0" step="0.01" inputmode="decimal"></div><div><label class="lbl" for="b-date">Date</label><input type="date" id="b-date" value="'+isoDay(off===0?new Date():lastDay)+'"></div></div>'+
     '<div class="btnrow"><button class="btn small primary" type="submit">Add purchase</button></div></form></div></section>';
   if(off===0){
-    var soon=tasks().filter(function(t){return !hidden(t)&&!aside(t)&&since(t)!=null}).map(function(t){return {t:t,d:every(t)-since(t)}}).filter(function(x){return every(x.t)>7&&x.d>=1&&x.d<=7}).sort(function(a,b){return a.d-b.d||b.t.m-a.t.m});
-    if(soon.length)h+='<section><div class="section-h"><h2>Coming up next week</h2><span class="aside">~'+fmtMin(soon.reduce(function(n,x){return n+(x.t.m||0)},0))+'</span></div>'+rows(soon.slice(0,6).map(function(x){return x.t}))+'</section>';
+    var soon=active().filter(function(t){return !aside(t)&&since(t)!=null&&every(t)>7}).map(function(t){return {t:t,d:until(t)}}).filter(function(x){return x.d>=1&&x.d<=7}).sort(function(a,b){return a.d-b.d});
+    if(soon.length)h+='<section><div class="section-h"><h2>Coming up next week</h2><span class="aside">~'+fmtMin(mins(soon.map(function(x){return x.t})))+'</span></div>'+rows(soon.slice(0,6).map(function(x){return x.t}))+'</section>';
   }
-  h+='<section><div class="card"><h3>How savings are counted</h3><p class="fineprint">Each task is valued at what you’d pay someone else: a typical flat price for jobs like dryer vents, gutters and windows, otherwise its time at a house cleaner’s hourly rate. Supplies you log are subtracted. Hired-out jobs (like rug cleaning) add no savings.</p>'+
-    '<div class="grid2"><div><label class="lbl" for="rate">Cleaner’s hourly rate ($)</label><input type="number" id="rate" min="0" step="1" inputmode="numeric" value="'+rate()+'"></div><div style="display:flex;align-items:flex-end"><button class="btn small" data-act="saverate">Save rate</button></div></div></div></section>';
+  h+='<p class="fineprint">Savings count each job at what you’d pay someone: a typical flat price for things like dryer vents, gutters and windows, otherwise its time at '+money(rate())+'/hr. Supplies are subtracted. The cleaners’ work and jobs you always hire out aren’t counted. Change the rate in settings (the gear at the top).</p>';
   return h;
 }
-function isoDay(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
-var titles={today:"Today",all:"Cleaning",upkeep:"Upkeep",week:"Week wrap-up",guide:"Cleaning guide"};
+function viewGuide(){
+  document.getElementById("sub").textContent="";
+  var kit=[
+    ["White vinegar","Hard-water scale, faucets, showerheads, glass, rinse aid in laundry.","Your wood floors, natural stone, waxed or oiled wood, instruments, cast iron, espresso machines, long soaks on rubber seals."],
+    ["Baking soda","Gentle scrubbing paste, deodorizing, oven, sinks, tubs, mattresses.","The silk and wool rugs (alkaline and hard to rinse out), aluminum (can darken)."],
+    ["Dish soap","Grease, everyday wiping, windows, cabinets, piano keys (a drop in water).","Espresso machines (leaves residue). Too much on wood floors leaves film."],
+    ["Castile soap","All-purpose spray (1 tbsp per 2 cups water), toilets, counters.","Mixing with vinegar (it curdles). Wood floors (can leave film)."],
+    ["3% hydrogen peroxide","Disinfecting, whitening grout, mildew, cutting boards.","Colored fabrics and rugs (bleaches), mixing with vinegar. Keep it in the brown bottle."],
+    ["Citric acid","Descaling kettles, dishwashers and (if the manual allows) espresso machines. No smell.","Natural stone, long soaks on aluminum."],
+    ["Oxygen bleach (OxiClean)","Laundry stains, grout paste, patio.","Wool, silk, leather."],
+    ["70% isopropyl alcohol","Electronics, light switches, stainless streaks, quick disinfecting.","Instrument finishes, lacquer, painted or acrylic surfaces. Flammable."],
+    ["Microfiber cloths","Dusting and wiping with just water. Wash without fabric softener.",""],
+    ["Enzyme cleaner","Cat urine and vomit on washable surfaces.","Silk and wool unless labeled WoolSafe. Protease enzymes break down protein fibers."]
+  ];
+  var strong=[
+    ["Bar Keepers Friend","Rust, hard-water rings, stainless pans, baking sheets, sinks.","Gloves, rinse well, not on stone or nonstick."],
+    ["Bleach (diluted)","Mold inside caulk, disinfecting after stomach bugs (vinegar and peroxide don’t reliably kill norovirus).","1 tbsp per quart water. Ventilate, keep cats and kids out until rinsed and dry."],
+    ["Commercial oven cleaner","Heavy baked-on carbon in non-self-cleaning ovens.","Pick a fume-free formula, ventilate, keep everyone out of the kitchen."],
+    ["CLR / lime remover","Thick scale that vinegar doesn’t move.","Not on stone, painted metal or brass. Rinse thoroughly."]
+  ];
+  function k(r){return '<div class="card"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p>'+(r[2]?'<p><span class="bad">Avoid:</span> '+r[2]+'</p>':'')+'</div>'}
+  var h='<section><div class="section-h"><h2>Never mix</h2></div><div class="mix">'+
+    '<div class="card"><p><b>Bleach + vinegar or any acid</b> makes chlorine gas. That includes toilet bowl cleaners and lime removers.</p></div>'+
+    '<div class="card"><p><b>Bleach + ammonia</b> makes chloramine gas. Some glass cleaners contain ammonia.</p></div>'+
+    '<div class="card"><p><b>Bleach + rubbing alcohol</b> makes chloroform and other toxic compounds.</p></div>'+
+    '<div class="card"><p><b>Hydrogen peroxide + vinegar</b> in one bottle makes peracetic acid. One after the other with a rinse is fine.</p></div>'+
+    '<div class="card"><p><b>Different drain cleaners</b>, or different pool chlorine types. They can react violently.</p></div></div></section>';
+  h+='<section><div class="section-h"><h2>In this house</h2></div><div class="kit">'+
+    '<div class="card"><h3>Wood floors, every room</h3><ul><li>Barely damp microfiber and a pH-neutral cleaner.</li><li>No vinegar, steam mops, oil soaps or standing water.</li><li>Felt pads under furniture, mats at every entry, and saucers under every plant.</li></ul></div>'+
+    '<div class="card"><h3>Silk & wool rugs</h3><ul><li>Vacuum with suction only, never a spinning beater bar. Keep the vacuum off fringe.</li><li>Blot spills with cool water. Never rub.</li><li>Only WoolSafe-labeled spot cleaners. No baking soda, oxygen bleach, ammonia or protease enzymes.</li><li>Silk dyes can run. Test hidden spots first.</li><li>Rotate twice a year, vacuum underneath to prevent moths, professional wash every 1–3 years.</li></ul></div>'+
+    '<div class="card"><h3>Instruments</h3><ul><li>Keep the room at 40–50% humidity, away from vents, radiators and sunny windows.</li><li>Dust with a dry microfiber cloth. Never spray anything on an instrument.</li><li>No furniture polish, silicone or alcohol on finishes or keys.</li></ul></div>'+
+    '<div class="card"><h3>Plants, with cats and little kids</h3><ul><li><b>Lilies</b> (true lilies and daylilies) can cause fatal kidney failure in cats, even from pollen or vase water. Keep them out of the house entirely.</li><li>Pothos, philodendron, monstera, peace lily, dieffenbachia, ZZ, snake plant and aloe irritate mouths and stomachs. Keep them high or in rooms the cats don’t use.</li><li>Generally safe picks: spider plant, calathea and prayer plants, parlor palm, Boston fern, peperomia, haworthia, African violet.</li><li>No leaf shine, systemic pesticides or essential-oil sprays.</li></ul></div>'+
+    '<div class="card"><h3>Cats</h3><ul><li>Essential oils are toxic to cats, including tea tree, eucalyptus, citrus, pine, peppermint and wintergreen. That covers “natural” cleaners scented with them and diffusers.</li><li>Phenol cleaners (some Pine-Sol and Lysol formulas) are dangerous to cats.</li><li>Let floors dry before cats walk on them. They lick their paws.</li><li>ASPCA Animal Poison Control: <b>(888) 426-4435</b></li></ul></div>'+
+    '<div class="card"><h3>Little kids</h3><ul><li>Store all cleaners up high or locked, in their original bottles.</li><li>Laundry and dishwasher pods are a top poisoning risk.</li><li>Never leave a bucket of water or a filled tub unattended. The pool and pond need the same watchfulness.</li><li>Poison Control (US): <b>1-800-222-1222</b></li></ul></div>'+
+    '</div></section>';
+  h+='<section><div class="section-h"><h2>Gentle kit</h2></div><div class="kit">'+kit.map(k).join("")+'</div></section>';
+  h+='<section><div class="section-h"><h2>When stronger is worth it</h2></div><div class="kit">'+strong.map(function(r){return '<div class="card alt"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p><p><span class="bad">Care:</span> '+r[2]+'</p></div>'}).join("")+'</div></section>';
+  return h;
+}
+var titles={today:"To do",all:"Cleaning",upkeep:"Home",week:"Week wrap-up",guide:"Guide"};
+function masthead(){
+  var n=houseName(),hr=new Date().getHours();
+  document.getElementById("house").textContent=n;
+  var ini=n.replace(/^the\s+/i,"").replace(/\s+(house|home|household|family)$/i,"").split(/[\s\-–]+/).filter(Boolean).map(function(w){return w[0].toUpperCase()}).join("").slice(0,3);
+  document.getElementById("mono").textContent=ini||"⌂";
+  document.getElementById("greet").textContent=(hr<12?"Good morning":hr<17?"Good afternoon":"Good evening")+" · "+new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  document.title=n;
+}
+// A live update re-renders while someone may be typing: carry over anything changed in a field.
+function typed(root){var k={};root.querySelectorAll("input[id],textarea[id],select[id]").forEach(function(x){
+  if(x.id==="q")return;
+  if(x.type==="checkbox"){if(x.checked!==x.defaultChecked)k[x.id]=x.checked;return}
+  if(x.tagName==="SELECT"){var d=[].filter.call(x.options,function(o){return o.defaultSelected})[0];if(d&&x.value!==d.value)k[x.id]=x.value;return}
+  if(x.value!==x.defaultValue)k[x.id]=x.value});return k}
+function put(k){Object.keys(k).forEach(function(id){var x=document.getElementById(id);if(!x)return;if(x.type==="checkbox")x.checked=k[id];else x.value=k[id]})}
 function render(){
   if(!document.getElementById("view"))return;
+  masthead();
   var focusQ=document.activeElement&&document.activeElement.id==="q",pos=focusQ?document.activeElement.selectionStart:0;
   document.getElementById("title").textContent=titles[ui.tab];
   document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="upkeep"?viewUpkeep():ui.tab==="week"?viewWeek():viewGuide();
-  // A live update re-renders while someone may be typing: carry over anything typed into a field.
-  var typed=function(root){var k={};root.querySelectorAll("input[id],textarea[id]").forEach(function(x){if(x.id!=="q"&&x.value!==x.defaultValue)k[x.id]=x.value});return k};
-  var put=function(k){Object.keys(k).forEach(function(id){var x=document.getElementById(id);if(x)x.value=k[id]})};
   var view=document.getElementById("view"),keepV=typed(view);
   view.innerHTML=v;put(keepV);
   if(focusQ){var q=document.getElementById("q");q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}
-  if(openId){
-    var sh=document.getElementById("sheet"),keep=typed(sh),sc=sh.scrollTop;
-    renderSheet();sh.scrollTop=sc;put(keep);
-  }
+  if(cur){var sh=document.getElementById("sheet"),keep=typed(sh),sc=sh.scrollTop;renderSheet();sh.scrollTop=sc;put(keep)}
 }
 
-/* ---------------- Task sheet ---------------- */
-var openId=null,sheetMode=null;
+/* ---------------- Sheets: task, appliance, new task, cleaners' visit, settings ---------------- */
+var cur=null,stack=[],lastFocus=null;
 var EVERY=[1,2,3,4,7,10,14,21,30,45,60,90,120,180,270,365,730];
+function sheetTop(back){return '<div class="sheet-top"><button class="btn small ghost" data-act="back">← '+(stack.length?"Back":"Close")+'</button>'+(back||"")+'</div>'}
 function renderSheet(){
-  var el=document.getElementById("sheet");
-  if(sheetMode==="add"){el.innerHTML=addForm();el.hidden=false;return}
-  var t=findTask(openId);if(!t){closeSheet();return}
-  var s=st(t.id),stt=status(t),d=since(t),h=s.hist||[];
+  var el=document.getElementById("sheet"),m=cur.mode,out;
+  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else out=settingsSheet();
+  if(out==null){back();return}
+  el.innerHTML='<div class="sheet-in">'+out+'</div>';el.hidden=false;
+}
+function openSheet(mode,id,extra){
+  if(!cur)lastFocus=document.activeElement;else stack.push(cur);
+  cur={mode:mode,id:id,extra:extra||{}};renderSheet();
+  var el=document.getElementById("sheet");el.scrollTop=0;document.body.style.overflow="hidden";
+  var b=el.querySelector("[data-act=back]");if(b)b.focus();
+}
+function back(){if(stack.length){cur=stack.pop();renderSheet();document.getElementById("sheet").scrollTop=0}else closeSheet()}
+function closeSheet(){cur=null;stack=[];var el=document.getElementById("sheet");el.hidden=true;el.innerHTML="";document.body.style.overflow="";render();if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+
+function taskSheet(){
+  var t=findTask(cur.id);if(!t)return null;
+  var s=st(t.id),stt=status(t),d=since(t),h=s.hist||[],ps=people();
   var opts=EVERY.slice();if(opts.indexOf(every(t))<0)opts.push(every(t));opts.sort(function(a,b){return a-b});
-  var out='<div class="sheet-in"><div class="sheet-top"><button class="btn small ghost" data-act="close">← Back</button><span class="pill '+stt.cls+'">'+stt.label+'</span></div>';
-  out+='<div style="display:flex;flex-direction:column;gap:8px"><div class="badges"><span class="badge">'+esc(t.area)+'</span><span class="badge">'+(t.list==="upkeep"?"Upkeep":tier(t))+'</span>'+(t.m?'<span class="badge">~'+t.m+' min</span>':'')+'</div><h2 id="sheet-title">'+esc(t.name)+'</h2>';
-  out+='<p class="status-line">'+(d==null?"Not logged yet.":"Last done <b>"+fmtAgo(d)+"</b> ("+fmtDate(h[0].at)+").")+' Repeats '+fmtEvery(every(t))+'.</p></div>';
-  if(aside(t))out+='<div class="banner"><p>'+(aside(t)==="supplies"?"Set aside until you get supplies.":"Set aside until "+fmtDate(s.until)+".")+'</p><div class="btnrow"><button class="btn small" data-act="unaside">Put it back on the list</button></div></div>';
-  out+='<div class="card donebox"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea><div class="grid2" style="grid-template-columns:1fr 1fr"><div><label class="lbl" for="dmin">Minutes it took</label><input type="number" id="dmin" min="0" inputmode="numeric" value="'+(t.m||"")+'"></div><div><label class="lbl" for="dcost">Spent on it ($)</label><input type="number" id="dcost" min="0" step="0.01" inputmode="decimal" placeholder="0"></div></div><div class="btnrow"><button class="btn primary" data-act="done">Mark done</button></div>';
+  var out=sheetTop('<span class="pill '+stt.cls+'">'+stt.label+'</span>');
+  var apps=appsFor(t);
+  out+='<div style="display:flex;flex-direction:column;gap:8px"><div class="badges"><span class="badge">'+esc(t.area)+'</span><span class="badge">'+(t.list==="upkeep"?"Upkeep":tier(t))+'</span>'+(t.m?'<span class="badge">~'+t.m+' min</span>':'')+
+    apps.map(function(k){return '<button class="badge" data-act="openapp" data-app="'+esc(k)+'">'+esc(S.apps[k].name||"Appliance")+(S.apps[k].model?" · "+esc(S.apps[k].model):"")+'</button>'}).join("")+'</div><h2 id="sheet-title">'+esc(t.name)+'</h2>';
+  out+='<p>'+(d==null?"Not set up yet.":"Last done <b>"+fmtAgo(d)+"</b>"+(h[0].by?" by "+esc(h[0].by):"")+" ("+fmtDate(h[0].at)+").")+' Repeats '+fmtEvery(every(t))+'.'+(cleanTasks().indexOf(t.id)>=0?' The cleaners usually do this.':'')+'</p></div>';
+  if(aside(t))out+='<div class="banner"><p>'+(aside(t)==="supplies"?"Set aside until you get supplies.":"Set aside until "+fmtShort(s.until)+".")+'</p><div class="btnrow"><button class="btn small" data-act="unaside">Put it back on the list</button></div></div>';
+  out+='<div class="card"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea>';
+  if(ps.length){var mm=me();out+='<div><span class="lbl">Who did it</span><div class="chips wrap" role="group" aria-label="Who did it">'+ps.map(function(p){return '<button class="chip" data-act="who" data-v="'+esc(p)+'" aria-pressed="'+(p===mm)+'">'+esc(p)+'</button>'}).join("")+'</div></div>'}
+  out+='<div class="grid2"><div><label class="lbl" for="dmin">Minutes it took</label><input type="number" id="dmin" min="0" inputmode="numeric" value="'+(t.m||"")+'"></div><div><label class="lbl" for="dcost">Spent on it ($)</label><input type="number" id="dcost" min="0" step="0.01" inputmode="decimal" placeholder="0"></div></div>'+
+    '<div class="btnrow"><button class="btn primary" data-act="done">Mark done</button></div>';
   if(!aside(t))out+='<div class="btnrow"><button class="btn small" data-act="later" data-v="1">Tomorrow</button><button class="btn small" data-act="later" data-v="3">In 3 days</button><button class="btn small" data-act="later" data-v="7">Next week</button><button class="btn small" data-act="supplies">Need supplies</button></div>';
   out+='</div>';
-  if(d==null)out+='<div class="card"><h3>When did you last do this?</h3><p style="color:var(--muted);font-size:.9rem">A rough guess is fine.</p><div class="btnrow">'+[[0,"Today"],[7,"~1 week"],[30,"~1 month"],[90,"~3 months"],[180,"~6 months"],[400,"Over a year"]].map(function(x){return '<button class="btn small" data-act="ago" data-v="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div></div>';
+  if(d==null)out+='<div class="card"><h3>When did you last do this?</h3><p class="fineprint">A rough guess is fine. It won’t count toward any week’s totals.</p><div class="btnrow">'+[[0,"Today"],[7,"~1 week"],[30,"~1 month"],[90,"~3 months"],[180,"~6 months"],[400,"Over a year"]].map(function(x){return '<button class="btn small" data-act="ago" data-v="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div></div>';
   if(t.sup)out+='<div class="card"><h3>Supplies</h3><p>'+esc(t.sup)+'</p></div>';
   if(t.s&&t.s.length)out+='<div class="card"><h3>How to</h3><ol>'+t.s.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ol></div>';
   if(t.eco)out+='<div class="card eco"><h3>Gentle way</h3><p>'+esc(t.eco)+'</p></div>';
   if(t.alt)out+='<div class="card alt"><h3>Stronger option</h3><p>'+esc(t.alt)+'</p></div>';
   if(t.w)out+='<div class="card warn"><h3>Watch out</h3><p>'+esc(t.w)+'</p></div>';
   out+='<div class="card"><h3>House notes</h3><label class="lbl" for="hnote">Sizes, model numbers, where things are</label><textarea id="hnote" placeholder="e.g. filter size 16×25×1, buy at …">'+esc(s.notes||"")+'</textarea><div class="btnrow"><button class="btn small" data-act="savenotes">Save notes</button></div></div>';
-  out+='<div class="card"><h3>History</h3>'+(h.length?'<ul class="hist">'+h.map(function(x,i){return '<li><span class="d">'+fmtDate(x.at)+'</span>'+(x.note?'<span class="n">'+esc(x.note)+'</span>':'')+'<span><button class="btn small ghost danger" data-act="delhist" data-v="'+i+'">Remove</button></span></li>'}).join("")+'</ul>':'<p style="color:var(--muted)">Nothing logged yet.</p>')+
-    '<div class="grid2"><div><label class="lbl" for="pastdate">Log an earlier date</label><input type="date" id="pastdate" max="'+new Date().toISOString().slice(0,10)+'"></div><div style="display:flex;align-items:flex-end"><button class="btn small" data-act="logpast">Add to history</button></div></div></div>';
+  out+='<div class="card"><h3>History</h3>'+(h.length?'<ul class="hist">'+h.map(function(x,i){return '<li><span class="d">'+fmtDate(x.at)+(x.by?' · '+esc(x.by):'')+(x.est?' · rough guess':'')+(x.min!=null?' · '+fmtMin(x.min):'')+(x.cost?' · '+money(x.cost):'')+'</span>'+(x.note?'<span class="n">'+esc(x.note)+'</span>':'')+(x.visit?'':'<span><button class="btn small ghost danger" data-act="delhist" data-v="'+i+'">Remove</button></span>')+'</li>'}).join("")+'</ul>':'<p class="fineprint">Nothing logged yet.</p>')+
+    '<div class="grid2"><div><label class="lbl" for="pastdate">Log an earlier date</label><input type="date" id="pastdate" max="'+isoDay(new Date())+'"></div><div style="display:flex;align-items:flex-end"><button class="btn small" data-act="logpast">Add to history</button></div></div></div>';
   out+='<div class="card"><h3>Settings</h3><label class="lbl" for="every">Repeat</label><select id="every">'+opts.map(function(n){return '<option value="'+n+'"'+(n===every(t)?" selected":"")+'>'+fmtEvery(n)+(n===t.e?" (default)":"")+'</option>'}).join("")+'</select>'+
-    '<div class="btnrow">'+(hidden(t)?'<button class="btn small" data-act="unhide">Show on my list</button>':'<button class="btn small ghost" data-act="hide">Not for our house — hide</button>')+(t.custom?'<button class="btn small ghost danger" data-act="delcustom">Delete task</button>':'')+'</div></div>';
-  el.innerHTML=out+'</div>';el.hidden=false;
+    '<div class="btnrow">'+(hidden(t)?'<button class="btn small" data-act="unhide">Show on my list</button>':'<button class="btn small ghost" data-act="hide">Not for our house · hide</button>')+(t.custom?'<button class="btn small ghost danger" data-act="delcustom">Delete task</button>':'')+'</div></div>';
+  return out;
 }
-function addForm(){
-  var areas={};tasks().forEach(function(t){if(t.list===addList)areas[t.area]=1});
-  return '<div class="sheet-in"><div class="sheet-top"><button class="btn small ghost" data-act="close">← Back</button></div><h2 id="sheet-title">New '+(addList==="upkeep"?"upkeep":"cleaning")+' task</h2>'+
-  '<form class="form" id="addform"><div><label class="lbl" for="a-name">Task</label><input type="text" id="a-name" required placeholder="e.g. Wipe down patio furniture"></div>'+
-  '<div class="grid2"><div><label class="lbl" for="a-area">Area</label><input type="text" id="a-area" list="a-areas" placeholder="e.g. Outdoors"><datalist id="a-areas">'+Object.keys(areas).map(function(a){return '<option value="'+esc(a)+'">'}).join("")+'</datalist></div>'+
+function addSheet(){
+  var list=cur.extra.list||"clean",app=cur.extra.app,areas={};
+  tasks().forEach(function(t){if(t.list===list)areas[t.area]=1});
+  var area=app&&S.apps[app]?(S.apps[app].name||""):"";
+  return sheetTop()+'<h2 id="sheet-title">New '+(app?"care":list==="upkeep"?"upkeep":"cleaning")+' task</h2>'+(app?'<p class="fineprint">For '+esc(area)+'</p>':'')+
+  '<form class="form" id="addform"><div><label class="lbl" for="a-name">Task</label><input type="text" id="a-name" required placeholder="'+(app?"e.g. Clean the door gasket":"e.g. Wipe down patio furniture")+'"></div>'+
+  '<div class="grid2 stack"><div><label class="lbl" for="a-area">Area</label><input type="text" id="a-area" list="a-areas" value="'+esc(area)+'" placeholder="e.g. Outdoors"><datalist id="a-areas">'+Object.keys(areas).map(function(a){return '<option value="'+esc(a)+'">'}).join("")+'</datalist></div>'+
   '<div><label class="lbl" for="a-every">Repeat</label><select id="a-every">'+EVERY.map(function(n){return '<option value="'+n+'"'+(n===30?" selected":"")+'>'+fmtEvery(n)+'</option>'}).join("")+'</select></div></div>'+
   '<div class="grid2"><div><label class="lbl" for="a-min">Minutes</label><input type="number" id="a-min" min="0" value="15"></div><div><label class="lbl" for="a-sup">Supplies</label><input type="text" id="a-sup" placeholder="comma separated"></div></div>'+
   '<div><label class="lbl" for="a-steps">How to (one step per line)</label><textarea id="a-steps"></textarea></div>'+
-  '<div class="btnrow"><button class="btn primary" type="submit">Add task</button></div></form></div>';
+  '<div class="btnrow"><button class="btn primary" type="submit">Add task</button></div></form>';
 }
-var addList="clean",lastFocus=null;
-function openSheet(id){lastFocus=document.activeElement;openId=id;sheetMode="task";renderSheet();document.getElementById("sheet").scrollTop=0;document.body.style.overflow="hidden";var b=document.querySelector("#sheet [data-act=close]");if(b)b.focus()}
-function closeSheet(){openId=null;sheetMode=null;var el=document.getElementById("sheet");el.hidden=true;el.innerHTML="";document.body.style.overflow="";render();if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+function appSheet(){
+  var id=cur.id,a=S.apps[id];if(!a)return null;
+  var k=KINDS[a.kind]||KINDS.other,ts=appTasks(id),now=isoDay(new Date());
+  var war=a.warranty?(a.warranty>=now?'<span class="good">Under warranty until '+fmtDate(a.warranty+"T12:00")+'</span>':'<span class="bad">Warranty ended '+fmtDate(a.warranty+"T12:00")+'</span>'):"";
+  var q=encodeURIComponent([a.brand,a.model||k.label,"manual"].filter(Boolean).join(" "));
+  var out=sheetTop()+'<div style="display:flex;flex-direction:column;gap:6px"><p class="eyebrow">'+esc(k.label)+(a.location?' · '+esc(a.location):'')+'</p><h2 id="sheet-title">'+esc(a.name||k.label)+'</h2>'+(war?'<p>'+war+'</p>':'')+'</div>';
+  var facts=[["Brand",a.brand],["Model",a.model],["Serial",a.serial],["Bought",a.bought&&fmtDate(a.bought+"T12:00")]].filter(function(f){return f[1]});
+  if(facts.length)out+='<div class="card"><dl class="facts">'+facts.map(function(f){return '<dt>'+f[0]+'</dt><dd>'+esc(f[1])+'</dd>'}).join("")+'</dl></div>';
+  out+='<div class="btnrow">'+(a.manual?'<a class="btn small" href="'+esc(a.manual)+'" target="_blank" rel="noopener">Open the manual</a>':'')+'<a class="btn small ghost" href="https://www.google.com/search?q='+q+'" target="_blank" rel="noopener">Find the manual online</a></div>';
+  out+='<section><div class="section-h"><h2>Care</h2><span class="aside">'+ts.length+' task'+(ts.length===1?"":"s")+'</span></div>'+(ts.length?rows(ts.sort(byDue)):'<div class="empty">No care tasks yet.</div>')+'<div class="btnrow" style="margin-top:10px"><button class="btn small" data-act="addcare">Add a care task</button></div></section>';
+  if(a.notes)out+='<div class="card"><h3>Notes</h3><p style="white-space:pre-wrap">'+esc(a.notes)+'</p></div>';
+  out+='<div class="card"><h3>Details</h3><form class="form" id="appform">'+
+    '<div><label class="lbl" for="ap-name">Name</label><input type="text" id="ap-name" value="'+esc(a.name||"")+'"></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="ap-kind">Type</label><select id="ap-kind">'+Object.keys(KINDS).map(function(x){return '<option value="'+x+'"'+(x===a.kind?" selected":"")+'>'+KINDS[x].label+'</option>'}).join("")+'</select></div>'+
+    '<div><label class="lbl" for="ap-loc">Where it is</label><input type="text" id="ap-loc" value="'+esc(a.location||"")+'" placeholder="e.g. Kitchen, garage"></div></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="ap-brand">Brand</label><input type="text" id="ap-brand" value="'+esc(a.brand||"")+'"></div><div><label class="lbl" for="ap-model">Model number</label><input type="text" id="ap-model" value="'+esc(a.model||"")+'"></div></div>'+
+    '<div><label class="lbl" for="ap-serial">Serial number</label><input type="text" id="ap-serial" value="'+esc(a.serial||"")+'"></div>'+
+    '<div class="grid2"><div><label class="lbl" for="ap-bought">Bought</label><input type="date" id="ap-bought" value="'+esc(a.bought||"")+'"></div><div><label class="lbl" for="ap-war">Warranty until</label><input type="date" id="ap-war" value="'+esc(a.warranty||"")+'"></div></div>'+
+    '<div><label class="lbl" for="ap-man">Manual link</label><input type="url" id="ap-man" value="'+esc(a.manual||"")+'" placeholder="https://"></div>'+
+    '<div><label class="lbl" for="ap-notes">Notes</label><textarea id="ap-notes" placeholder="Filter part numbers, error codes, who services it">'+esc(a.notes||"")+'</textarea></div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">Save details</button><button class="btn small ghost danger" type="button" data-act="delapp">Remove appliance</button></div></form></div>';
+  return out;
+}
+function visitSheet(){
+  var cl=active("clean"),on=cleanTasks(),vs=visits();
+  var usual=cl.filter(function(t){return on.indexOf(t.id)>=0}),rest=cl.filter(function(t){return on.indexOf(t.id)<0}).sort(function(a,b){return a.area.localeCompare(b.area)});
+  var box=function(t){return '<label class="check"><input type="checkbox" id="vc-'+esc(t.id)+'" data-task="'+esc(t.id)+'"'+(on.indexOf(t.id)>=0?" checked":"")+'><span>'+esc(t.name)+'</span><span class="m">'+esc(t.area)+'</span></label>'};
+  var out=sheetTop()+'<h2 id="sheet-title">Cleaners’ visit</h2><p class="fineprint">Each task you check here gets marked done “by Cleaners.” Their work doesn’t count toward your own time or savings.</p>';
+  out+='<form class="form" id="visitform"><div class="card"><div class="grid2"><div><label class="lbl" for="v-date">Date</label><input type="date" id="v-date" value="'+isoDay(new Date())+'" max="'+isoDay(new Date())+'"></div><div><label class="lbl" for="v-cost">Paid ($)</label><input type="number" id="v-cost" min="0" step="1" inputmode="decimal" value="'+(P("cleanCost","")||"")+'"></div></div>'+
+    '<div><label class="lbl" for="v-note">Note</label><input type="text" id="v-note" placeholder="Anything missed, or extra they did"></div></div>'+
+    '<div class="card"><h3>What they did</h3><div>'+usual.map(box).join("")+'</div>'+
+    '<details><summary class="fineprint" style="cursor:pointer;padding:6px 0">Other tasks ('+rest.length+')</summary><div>'+rest.map(box).join("")+'</div></details>'+
+    '<label class="check"><input type="checkbox" id="v-remember" checked><span>Remember these as their usual list</span></label></div>'+
+    '<div class="btnrow"><button class="btn wood" type="submit">Save visit</button></div></form>';
+  var notes=P("cleanNotes","");
+  out+='<div class="card"><h3>Notes for the cleaners</h3>'+(notes?'<p style="white-space:pre-wrap">'+esc(notes)+'</p><div class="btnrow"><button class="btn small" data-act="copynotes">Copy to send</button></div>':'<p class="fineprint">Add house rules in settings, like “no vinegar on the wood floors” or “suction only on the silk rugs.”</p>')+'</div>';
+  if(vs.length)out+='<div class="card"><h3>Past visits</h3><ul class="daylog">'+vs.slice(0,12).map(function(v){return '<li><span>'+fmtShort(v.at)+'<span class="when">'+(v.tasks||[]).length+' tasks'+(v.cost?' · '+money(v.cost):'')+(v.note?' · '+esc(v.note):'')+'</span></span><span class="x"><button class="btn small ghost danger" data-act="delvisit" data-v="'+esc(v.id)+'">Remove</button></span></li>'}).join("")+'</ul></div>';
+  return out;
+}
+function settingsSheet(){
+  return sheetTop()+'<h2 id="sheet-title">Household</h2><form class="form" id="setform">'+
+  '<div class="card"><div><label class="lbl" for="s-name">House name</label><input type="text" id="s-name" value="'+esc(houseName())+'"></div>'+
+  '<div><label class="lbl" for="s-people">Who logs tasks (comma separated)</label><input type="text" id="s-people" value="'+esc(people().join(", "))+'" placeholder="e.g. Katrina, Wei"><p class="fineprint" style="margin-top:4px">Adds a “Who did it” choice and a “Who did what” chart to the week. This phone remembers the last name picked.</p></div></div>'+
+  '<div class="card"><h3>House cleaners</h3><div class="grid2"><div><label class="lbl" for="s-every">They come</label><select id="s-every">'+[7,14,21,28,30].map(function(n){return '<option value="'+n+'"'+(n===cleanEvery()?" selected":"")+'>'+fmtEvery(n)+'</option>'}).join("")+'</select></div><div><label class="lbl" for="s-ccost">Usual cost ($)</label><input type="number" id="s-ccost" min="0" step="1" value="'+esc(P("cleanCost",""))+'"></div></div>'+
+  '<div><label class="lbl" for="s-cnotes">Notes for the cleaners</label><textarea id="s-cnotes" placeholder="e.g. Wood floors: barely damp mop, no vinegar or steam. Silk & wool rugs: vacuum on suction only, stay off the fringe. Don’t move the piano.">'+esc(P("cleanNotes",""))+'</textarea></div></div>'+
+  '<div class="card"><h3>Savings</h3><div><label class="lbl" for="s-rate">Hourly rate to compare against ($)</label><input type="number" id="s-rate" min="0" step="1" value="'+rate()+'"></div></div>'+
+  '<div class="btnrow"><button class="btn primary" type="submit">Save</button></div></form>'+
+  '<div class="card"><h3>Backup</h3><p class="fineprint">Copy everything (tasks, history, appliances, visits, purchases) to keep in a note, or paste a backup back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div>';
+}
 
 /* ---------------- Toast ---------------- */
 var toastTimer;
@@ -647,31 +847,41 @@ function toast(msg,undo){
   if(undo){var b=document.createElement("button");b.textContent="Undo";b.onclick=function(){undo();el.hidden=true};el.appendChild(b)}
   el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.hidden=true},5000);
 }
+function copyText(text,okMsg){
+  var fall=function(){var io=document.getElementById("io")||document.querySelector(".sheet-in");var ta=document.createElement("textarea");ta.readOnly=true;ta.value=text;io.appendChild(ta);ta.select();toast("Select all and copy")};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(function(){toast(okMsg)},fall);else fall();
+}
 
 /* ---------------- Events ---------------- */
 function guard(){if(S.readonly){toast("You can view this list, but not change it.");return false}return true}
+function newApp(kind,name){
+  var id="a"+Date.now().toString(36);S.apps[id]={kind:kind,name:name||KINDS[kind].label};save("apps",id);return id;
+}
 document.addEventListener("click",function(e){
   var tab=e.target.closest("nav.tabs button");
-  if(tab){ui.tab=tab.dataset.tab;try{localStorage.setItem("hk-ui",JSON.stringify({tab:ui.tab}))}catch(x){}render();window.scrollTo(0,0);return}
+  if(tab){ui.tab=tab.dataset.tab;rememberUi();render();window.scrollTo(0,0);return}
   var b=e.target.closest("[data-act]");if(!b)return;
-  var act=b.dataset.act,r=b.closest(".row"),id=r?r.dataset.id:openId;
+  var act=b.dataset.act,r=b.closest(".row"),id=r&&r.dataset.id?r.dataset.id:cur&&cur.id;
   switch(act){
-    case "open":openSheet(id);break;
-    case "quick":{if(!guard())return;var t=findTask(id),prev=S.state[id]?JSON.parse(JSON.stringify(S.state[id])):undefined;markDone(id);toast("Done: "+t.name,function(){undoDone(id,prev)});break}
+    case "open":openSheet("task",id);break;
+    case "openapp":openSheet("app",b.dataset.app||(r&&r.dataset.app));break;
+    case "back":back();break;
+    case "settings":openSheet("settings");break;
+    case "visit":openSheet("visit");break;
+    case "quick":{if(!guard())return;var t=findTask(id),prev=S.state[id]?clone(S.state[id]):undefined;markDone(id);toast("Done: "+t.name,function(){S.state[id]=prev;saveState(id)});break}
     case "budget":ui.budget=b.dataset.v?+b.dataset.v:null;render();break;
+    case "range":ui.range=b.dataset.v;rememberUi();render();break;
     case "area":ui.area=b.dataset.v;render();break;
     case "uparea":ui.upArea=b.dataset.v;render();break;
-    case "close":closeSheet();break;
+    case "tab":ui.tab=b.dataset.v;rememberUi();render();window.scrollTo(0,0);break;
+    case "wk":ui.weekOff=Math.min(0,ui.weekOff+(+b.dataset.v));render();break;
+    case "who":setMe(b.dataset.v);b.parentNode.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",String(c===b))});break;
     case "done":{if(!guard())return;var n=document.getElementById("note").value.trim(),t2=findTask(id),x={},
       dm=document.getElementById("dmin").value,dc=parseFloat(document.getElementById("dcost").value);
       if(dm!==""&&+dm!==(t2.m||0))x.min=Math.max(0,Math.round(+dm));if(dc>0)x.cost=Math.round(dc*100)/100;
-      markDone(id,n,null,x);closeSheet();toast("Done: "+t2.name);break}
-    case "tab":ui.tab=b.dataset.v;render();window.scrollTo(0,0);break;
-    case "wk":ui.weekOff=Math.min(0,ui.weekOff+(+b.dataset.v));render();break;
-    case "delbuy":if(!guard())return;delete S.spend[b.dataset.v];saveSpend(b.dataset.v);break;
-    case "saverate":{if(!guard())return;var rv=parseFloat(document.getElementById("rate").value);if(!(rv>=0)){toast("Enter an hourly rate in dollars.");return}S.prefs=Object.assign({},S.prefs,{rate:rv});savePrefs();toast("Rate saved");break}
-    case "later":if(!guard())return;setAside(id,"later",+b.dataset.v);closeSheet();toast("Set aside");break;
-    case "supplies":if(!guard())return;setAside(id,"supplies");closeSheet();toast("Added to your shopping list on Today");break;
+      markDone(id,n,null,x);back();toast("Done: "+t2.name);break}
+    case "later":if(!guard())return;setAside(id,"later",+b.dataset.v);back();toast("Set aside");break;
+    case "supplies":if(!guard())return;setAside(id,"supplies");back();toast("Added to the shopping list on To do");break;
     case "unaside":if(!guard())return;clearAside(id);break;
     case "ago":if(!guard())return;markDone(id,"",new Date(Date.now()-(+b.dataset.v)*DAY).toISOString(),+b.dataset.v?{est:true}:null);break;
     case "logpast":{if(!guard())return;var v=document.getElementById("pastdate").value;if(!v){toast("Pick a date first.");return}markDone(id,"",new Date(v+"T12:00:00").toISOString());break}
@@ -679,35 +889,64 @@ document.addEventListener("click",function(e){
     case "savenotes":if(!guard())return;patch(id,{notes:document.getElementById("hnote").value.trim()});toast("Notes saved");break;
     case "hide":if(!guard())return;patch(id,{hidden:true});toast("Hidden. Find it at the bottom of the list.");break;
     case "unhide":if(!guard())return;patch(id,{hidden:null});break;
-    case "delcustom":if(!guard())return;delete S.custom[id];S.state[id]=undefined;delete S.state[id];saveState(id);saveCustom(id);closeSheet();toast("Task deleted");break;
-    case "add":lastFocus=b;addList=b.dataset.list;sheetMode="add";renderSheet();document.body.style.overflow="hidden";break;
-    case "export":{var data=JSON.stringify({state:S.state,custom:S.custom,spend:S.spend,prefs:S.prefs});var io=document.getElementById("io");
-      var done=function(){toast("Backup copied. Paste it into a note to keep it.")};
-      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(data).then(done,function(){io.innerHTML='<textarea readonly id="iotext"></textarea>';var ta=document.getElementById("iotext");ta.value=data;ta.select()});
-      else{io.innerHTML='<textarea readonly id="iotext"></textarea>';var ta=document.getElementById("iotext");ta.value=data;ta.select()}break}
+    case "delcustom":if(!guard())return;delete S.custom[id];delete S.state[id];save("state",id,true);save("custom",id,true);back();toast("Task deleted");break;
+    case "add":openSheet("add",null,{list:b.dataset.list});break;
+    case "addcare":openSheet("add",null,{list:"upkeep",app:cur.id});break;
+    case "quickapp":{if(!guard())return;var aid=newApp(b.dataset.kind,b.dataset.name);openSheet("app",aid);break}
+    case "newapp":{if(!guard())return;openSheet("app",newApp("other","New appliance"));break}
+    case "delapp":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}
+      var gone=cur.id;Object.keys(S.custom).forEach(function(k){if(S.custom[k].app===gone){var c=Object.assign({},S.custom[k]);delete c.app;S.custom[k]=c;save("custom",k,true)}});
+      delete S.apps[gone];save("apps",gone);back();toast("Appliance removed");break}
+    case "delvisit":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again";return}removeVisit(b.dataset.v);toast("Visit removed");break}
+    case "copynotes":copyText(P("cleanNotes",""),"Copied. Paste it into a text to the cleaners.");break;
+    case "delbuy":if(!guard())return;delete S.spend[b.dataset.v];save("spend",b.dataset.v);break;
+    case "export":copyText(JSON.stringify({state:S.state,custom:S.custom,spend:S.spend,visits:S.visits,apps:S.apps,prefs:S.prefs}),"Backup copied. Paste it into a note to keep it.");break;
     case "import":document.getElementById("io").innerHTML='<label class="lbl" for="iotext">Paste your backup</label><textarea id="iotext"></textarea><div class="btnrow"><button class="btn small primary" data-act="doimport">Restore</button></div>';break;
     case "doimport":{if(!guard())return;try{var d=JSON.parse(document.getElementById("iotext").value);if(!d||typeof d.state!=="object")throw 0;
-      Object.keys(d.state).forEach(function(k){S.state[k]=d.state[k];saveState(k)});Object.keys(d.custom||{}).forEach(function(k){S.custom[k]=d.custom[k];saveCustom(k)});
-      Object.keys(d.spend||{}).forEach(function(k){S.spend[k]=d.spend[k];saveSpend(k)});if(d.prefs&&d.prefs.rate){S.prefs=d.prefs;savePrefs()}toast("Backup restored")}catch(x){toast("That doesn't look like a backup from this app.")}break}
+      Object.keys(COLS).forEach(function(kk){Object.keys(d[kk]||{}).forEach(function(i){S[kk][i]=d[kk][i];save(kk,i,true)})});
+      if(d.prefs){S.prefs=Object.assign({},S.prefs,d.prefs);savePrefs()}render();toast("Backup restored")}catch(x){toast("That doesn’t look like a backup from this app.")}break}
   }
 });
-document.addEventListener("change",function(e){if(e.target.id==="every"&&openId){if(!guard())return;var t=findTask(openId),n=+e.target.value;patch(openId,{every:n===t.e?null:n})}});
+document.addEventListener("change",function(e){if(e.target.id==="every"&&cur&&cur.mode==="task"){if(!guard())return;var t=findTask(cur.id),n=+e.target.value;patch(cur.id,{every:n===t.e?null:n})}});
 document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
+function val(id){var x=document.getElementById(id);return x?x.value.trim():""}
 document.addEventListener("submit",function(e){
-  if(e.target.id==="buyform"){e.preventDefault();if(!guard())return;
-    var what=document.getElementById("b-what"),amt=document.getElementById("b-amt"),dt=document.getElementById("b-date").value,a=parseFloat(amt.value);
-    if(!(a>0)){toast("Enter how much it cost.");return}
-    var bid="b"+Date.now().toString(36);
-    S.spend[bid]={what:what.value.trim(),amt:Math.round(a*100)/100,at:(dt?new Date(dt+"T12:00:00"):new Date()).toISOString()};
-    what.value="";amt.value="";saveSpend(bid);toast("Purchase added");return}
-  if(e.target.id!=="addform")return;e.preventDefault();if(!guard())return;
-  var name=document.getElementById("a-name").value.trim();if(!name)return;
-  var id="u"+Date.now().toString(36);
-  S.custom[id]={list:addList,name:name,area:document.getElementById("a-area").value.trim()||"Other",e:+document.getElementById("a-every").value,m:+document.getElementById("a-min").value||0,
-    sup:document.getElementById("a-sup").value.trim(),s:document.getElementById("a-steps").value.split("\n").map(function(x){return x.trim()}).filter(Boolean)};
-  saveCustom(id);openId=id;sheetMode="task";renderSheet();toast("Task added");
+  var f=e.target.id;if(["buyform","addform","appform","visitform","setform"].indexOf(f)<0)return;
+  e.preventDefault();if(!guard())return;
+  if(f==="buyform"){
+    var a=parseFloat(val("b-amt"));if(!(a>0)){toast("Enter how much it cost.");return}
+    var bid="b"+Date.now().toString(36),dt=val("b-date");
+    S.spend[bid]={what:val("b-what"),amt:Math.round(a*100)/100,at:(dt?new Date(dt+"T12:00:00"):new Date()).toISOString()};
+    document.getElementById("b-what").value="";document.getElementById("b-amt").value="";save("spend",bid);toast("Purchase added");
+  }else if(f==="addform"){
+    var name=val("a-name");if(!name)return;
+    var id="u"+Date.now().toString(36);
+    S.custom[id]={list:cur.extra.list||"clean",name:name,area:val("a-area")||"Other",e:+val("a-every"),m:+val("a-min")||0,sup:val("a-sup"),
+      s:document.getElementById("a-steps").value.split("\n").map(function(x){return x.trim()}).filter(Boolean)};
+    if(cur.extra.app)S.custom[id].app=cur.extra.app;
+    save("custom",id);cur={mode:"task",id:id,extra:{}};renderSheet();toast("Task added");
+  }else if(f==="appform"){
+    var a2=Object.assign({},S.apps[cur.id]);
+    [["name","ap-name"],["kind","ap-kind"],["location","ap-loc"],["brand","ap-brand"],["model","ap-model"],["serial","ap-serial"],["bought","ap-bought"],["warranty","ap-war"],["notes","ap-notes"]].forEach(function(p){var v=val(p[1]);if(v)a2[p[0]]=v;else delete a2[p[0]]});
+    var man=val("ap-man");if(man&&!/^https?:\/\//i.test(man))man="https://"+man;if(man)a2.manual=man;else delete a2.manual;
+    S.apps[cur.id]=a2;save("apps",cur.id);toast("Saved");document.getElementById("sheet").scrollTop=0;
+  }else if(f==="visitform"){
+    var ids=[].map.call(document.querySelectorAll("#visitform input[data-task]:checked"),function(x){return x.dataset.task});
+    if(!ids.length){toast("Check at least one task they did.");return}
+    var vd=val("v-date"),at=vd===isoDay(new Date())?new Date().toISOString():new Date(vd+"T12:00:00").toISOString();
+    if(document.getElementById("v-remember").checked)S.prefs=Object.assign({},S.prefs,{cleanTasks:ids});
+    var cost=parseFloat(val("v-cost"));if(cost>0&&!P("cleanCost",0))S.prefs=Object.assign({},S.prefs,{cleanCost:cost});
+    logVisit(at,cost>0?cost:0,val("v-note"),ids);savePrefs();closeSheet();toast("Visit logged · "+ids.length+" tasks marked done");
+  }else if(f==="setform"){
+    var np=Object.assign({},S.prefs);
+    np.houseName=val("s-name")||"The Zhang-Wolfe House";
+    np.people=val("s-people").split(",").map(function(x){return x.trim()}).filter(Boolean);
+    np.cleanEvery=+val("s-every");var cc=parseFloat(val("s-ccost"));if(cc>=0)np.cleanCost=cc;else delete np.cleanCost;
+    np.cleanNotes=document.getElementById("s-cnotes").value.trim();var rt=parseFloat(val("s-rate"));if(rt>=0)np.rate=rt;
+    S.prefs=np;savePrefs();closeSheet();toast("Saved");
+  }
 });
-document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!document.getElementById("sheet").hidden)closeSheet()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&cur)back()});
 
 lsRead();footer();render();connect();
 </script>

@@ -1,13 +1,13 @@
-# Housekeeping Log
+# The Zhang-Wolfe House
 
-A personal, phone-first tracker for house cleaning and upkeep. The app is a single file: `app/index.html`.
+A household book for one family: cleaning, upkeep, appliances and the cleaners' visits. The app is a single file, `app/index.html`.
 
-- **Today**: the most overdue cleaning tasks, plus an "I have X minutes" picker. Includes a shopping list built from tasks marked "Need supplies".
-- **Cleaning**: every cleaning task, sorted by how overdue it is. Filter by room, search, or add your own.
-- **Week**: an end-of-week wrap-up with tasks done, time spent, money spent on supplies, and what hiring it out would have cost. Browse earlier weeks, log purchases, and set the hourly rate used for savings.
-- **Upkeep**: home maintenance, safety, pool, pond and espresso machine, kept separate from cleaning.
-- **Guide**: the gentle cleaning kit, when a stronger product is worth it, never-mix rules, and notes for cats, kids, hardwood, and silk/wool rugs.
+- **To do**: what's due now, this week or this month, narrowed to the time you have (10 min to 2 hrs). Cleaning and home upkeep are listed separately. Also a shopping list from "Need supplies", plus the tasks not set up yet.
+- **House cleaners**: log each visit and check what they did. Those tasks reset as done "by Cleaners." Keeps a usual checklist, cost and house-rules notes to send them.
+- **Cleaning**: every cleaning task, including the 2.5 baths, wood floors, silk and wool rugs, instruments and plants.
+- **Home**: appliances (brand, model, serial, warranty, manual link, notes) with their own care tasks, plus upkeep for home systems, safety, pool and pond.
+- **Week**: tasks done, time, money, savings vs. hiring out, who did what, and the cleaners' visits.
+- **Guide**: never-mix rules, notes for this house (floors, rugs, instruments, plants with cats), and the gentle and stronger cleaning kits.
+- **Settings** (gear icon): house name, who logs tasks, cleaner schedule, cost and notes, savings rate, backup.
 
-Each task has how-to steps, supplies, a gentle method, a stronger option, warnings, house notes, an adjustable repeat interval, and a history with notes.
-
-When it runs as a claude.ai artifact, the log is saved to your account and syncs across devices. Opened as a plain file, it saves in that browser only.
+As a claude.ai artifact the data is saved to your account and syncs. Opened as a plain file, it saves in that browser only.
