@@ -11,3 +11,11 @@ A household book for one family: cleaning, upkeep, appliances and the cleaners' 
 - **Settings** (gear icon): house name, who logs tasks, cleaner schedule, cost and notes, savings rate, backup.
 
 As a claude.ai artifact the data is saved to your account and syncs. Opened as a plain file, it saves in that browser only.
+
+## The Turning Year (`seasons/`)
+
+A separate, phone-first learning app: a daily spread for the current season, inspired by "A curious mind's guide to fall." Each day brings one long read, one word of the day and three quick ideas, across nature, science, history, culture, folklore, food, language and the sky. A Library tab lets you browse every piece for any season.
+
+- `seasons/index.html`: the app. Seasons turn at the Northern Hemisphere equinoxes and solstices, and the palette and header art change with them.
+- `seasons/content.js`: all the content (about 46 pieces per season). Add to the arrays there to extend it.
+- Reading history and streaks are saved in the browser on that device.

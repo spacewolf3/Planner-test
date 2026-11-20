@@ -1,0 +1,429 @@
+<title>The Turning Year</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Turning Year">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400;1,9..144,500&family=Schibsted+Grotesk:wght@400;500;700&display=swap">
+<style>
+/* Layout: an almanac on one phone column. A painted seasonal plate, the issue title,
+   then today's spread as a ruled list of categories; each row opens in place.
+   Every color is built from three season hues (ground, ink, accent), so the whole
+   page re-tints itself when the season turns. */
+:root{
+  --h1:28; --gs:72%; --h2:16; --h3:12;               /* autumn: parchment, oxblood, rust */
+  --bg:hsl(var(--h1) var(--gs) 93%);
+  --paper:hsl(var(--h1) var(--gs) 96.5%);
+  --chip:hsl(var(--h1) var(--gs) 87%);
+  --ink:hsl(var(--h2) 70% 24%);
+  --muted:hsl(var(--h2) 28% 38%);
+  --accent:hsl(var(--h3) 68% 41%);
+  --rule:hsl(var(--h3) 60% 45% / .5);
+  --f-display:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --f-body:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+:root[data-season="winter"]{--h1:208; --gs:40%; --h2:218; --h3:200}
+:root[data-season="spring"]{--h1:78;  --gs:45%; --h2:150; --h3:338}
+:root[data-season="summer"]{--h1:44;  --gs:88%; --h2:22;  --h3:188}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:hsl(var(--h2) 24% 9%); --paper:hsl(var(--h2) 22% 13%); --chip:hsl(var(--h2) 20% 19%);
+  --ink:hsl(var(--h1) 55% 90%); --muted:hsl(var(--h1) 16% 68%);
+  --accent:hsl(var(--h3) 78% 68%); --rule:hsl(var(--h3) 50% 62% / .35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:hsl(var(--h2) 24% 9%); --paper:hsl(var(--h2) 22% 13%); --chip:hsl(var(--h2) 20% 19%);
+  --ink:hsl(var(--h1) 55% 90%); --muted:hsl(var(--h1) 16% 68%);
+  --accent:hsl(var(--h3) 78% 68%); --rule:hsl(var(--h3) 50% 62% / .35); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  transition:background-color .6s ease}
+.wrap{max-width:600px;margin:0 auto;padding-block:0 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* plate */
+.plate{position:relative;height:150px;margin:12px 0 0;border-radius:2px;overflow:hidden}
+.plate canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.plate .stamp{position:absolute;left:12px;bottom:10px;font:500 11px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.35)}
+
+/* masthead */
+.mast{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px}
+.brand{font:700 12px/1 var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.tabs{display:flex;gap:4px;background:var(--chip);padding:3px;border-radius:999px}
+.tabs button{border:0;background:none;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px hsl(var(--h2) 40% 20% / .12)}
+
+h1{margin:26px 0 0;font:700 clamp(2.4rem,10.5vw,3.5rem)/1 var(--f-display);letter-spacing:-.025em;text-wrap:balance}
+h1 em{display:block;font:italic 400 clamp(2.5rem,11vw,3.7rem)/1.08 var(--f-serif);letter-spacing:-.01em;margin-top:2px}
+
+.almanac{margin-top:18px;display:grid;gap:10px}
+.dayline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dayline .date{font-weight:500;font-size:15px}
+.navbtn{border:1px solid var(--rule);background:transparent;width:34px;height:34px;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;font-size:18px;line-height:1;color:var(--accent)}
+.navbtn:disabled{opacity:.35;cursor:default}
+.todaybtn{border:0;background:var(--chip);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;cursor:pointer}
+.spacer{flex:1}
+.wheel{display:grid;gap:6px}
+.wheel .bar{height:6px;background:var(--chip);border-radius:3px;overflow:hidden}
+.wheel .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.wheel .cap{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+
+.section-h{margin:34px 0 4px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.section-h h2{margin:0;font:italic 500 1.4rem/1.2 var(--f-serif)}
+.section-h .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* the ruled list */
+.list{display:flex;flex-direction:column}
+details.item{border-bottom:1.5px solid var(--rule)}
+details.item summary{list-style:none;cursor:pointer;padding:20px 0 18px;display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:start}
+details.item summary::-webkit-details-marker{display:none}
+.cat{font:700 13px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.ttl{grid-column:1;font:400 clamp(1.3rem,5.4vw,1.55rem)/1.25 var(--f-display);letter-spacing:-.01em;text-wrap:balance;min-width:0}
+.ttl.word{font:italic 500 clamp(1.5rem,6.4vw,1.85rem)/1.15 var(--f-serif)}
+.side{grid-row:1 / span 2;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:2px}
+.kind{font-size:12px;color:var(--muted);white-space:nowrap}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);display:grid;place-items:center;transition:background .2s}
+.dot svg{width:12px;height:12px;opacity:0}
+.is-read .dot{background:var(--accent);border-color:var(--accent)}
+.is-read .dot svg{opacity:1}
+.dot svg path{stroke:var(--paper)}
+details[open] summary .ttl{color:var(--accent)}
+
+.body{padding:0 0 22px;max-width:62ch}
+.body p{margin:0 0 14px;font-size:17px;line-height:1.62}
+.body p:last-child{margin-bottom:0}
+.body p:first-child::first-letter{font:600 2.9em/0.9 var(--f-serif);float:left;margin:5px 8px 0 0;color:var(--accent)}
+.body.short p:first-child::first-letter,.body.wordcard p::first-letter{all:unset}
+.wordcard .pr{font-size:14px;color:var(--muted);margin:-6px 0 12px}
+.wordcard .pr b{font-weight:500;font-style:italic;font-family:var(--f-serif);font-size:15px;color:var(--ink);margin-right:8px}
+.wordcard .def{font-size:18px;line-height:1.5;margin-bottom:12px}
+.wordcard .orig{font-size:15.5px;color:var(--muted);padding-left:14px;border-left:2px solid var(--rule)}
+
+/* library */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.chip{border:1.5px solid var(--rule);background:transparent;border-radius:999px;padding:6px 13px;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:500}
+.group-h{margin:28px 0 0;font:700 12px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+.foot{margin-top:40px;font-size:13px;color:var(--muted);line-height:1.55;max-width:62ch}
+.foot button{border:0;background:none;padding:0;text-decoration:underline;color:var(--muted);cursor:pointer;font-size:13px}
+
+@media (prefers-reduced-motion: reduce){body{transition:none}.dot{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">The Turning Year</div>
+    <nav class="tabs" aria-label="Views">
+      <button id="tab-today" type="button" aria-pressed="true">Today</button>
+      <button id="tab-library" type="button" aria-pressed="false">Library</button>
+    </nav>
+  </header>
+
+  <div class="plate" aria-hidden="true"><canvas id="plate"></canvas><div class="stamp" id="stamp"></div></div>
+
+  <h1 id="title">A curious mind’s <em>guide to autumn</em></h1>
+
+  <section id="view-today">
+    <div class="almanac">
+      <div class="dayline">
+        <button class="navbtn" id="prev" type="button" aria-label="Previous day">‹</button>
+        <span class="date" id="date"></span>
+        <button class="navbtn" id="next" type="button" aria-label="Next day">›</button>
+        <span class="spacer"></span>
+        <button class="todaybtn" id="gotoday" type="button" hidden>Back to today</button>
+      </div>
+      <div class="wheel">
+        <div class="bar"><i id="bar"></i></div>
+        <div class="cap"><span id="dayof"></span><span id="until"></span></div>
+      </div>
+    </div>
+    <div class="section-h"><h2>Today’s spread</h2><span class="meta" id="progress"></span></div>
+    <div class="list" id="spread"></div>
+  </section>
+
+  <section id="view-library" hidden>
+    <div class="filters" id="season-filters" role="group" aria-label="Season"></div>
+    <div class="filters" id="kind-filters" role="group" aria-label="Type"></div>
+    <div class="section-h"><h2 id="lib-h">Everything this season</h2><span class="meta" id="lib-count"></span></div>
+    <div id="library"></div>
+  </section>
+
+  <p class="foot">
+    A new spread arrives every day: one longer read, one word and three quick ideas, all chosen for the season.
+    Seasons follow the Northern Hemisphere calendar, turning at the equinoxes and solstices.
+    <span id="streak"></span>
+    <br><button type="button" id="reset">Clear my reading history</button><span id="reset-confirm" hidden> · Sure? <button type="button" id="reset-yes">Yes, clear it</button></span>
+  </p>
+</div>
+
+<script src="content.js"></script>
+<script>
+(function(){
+const DATA = window.TURNING_YEAR;
+const SEASONS = ["spring","summer","autumn","winter"];
+const STARTS = {spring:[2,20], summer:[5,21], autumn:[8,22], winter:[11,21]};
+const EVENT = {spring:"spring equinox", summer:"summer solstice", autumn:"autumn equinox", winter:"winter solstice"};
+const DAY = 864e5;
+
+/* storage (per-viewer convenience only) */
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+let readSet = new Set(load("ty-read", []));
+let daysOpened = new Set(load("ty-days", []));
+
+/* dates */
+function midnight(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function seasonInfo(date){
+  const y = date.getFullYear(), list = [];
+  for (const yy of [y-1, y, y+1]) for (const s of SEASONS) list.push({s, d:new Date(yy, STARTS[s][0], STARTS[s][1])});
+  list.sort((a,b)=>a.d-b.d);
+  for (let i=0;i<list.length-1;i++){
+    if (date >= list[i].d && date < list[i+1].d){
+      return { key:list[i].s, start:list[i].d, end:list[i+1].d, nextKey:list[i+1].s,
+        dayIndex: Math.round((date - list[i].d)/DAY),
+        length: Math.round((list[i+1].d - list[i].d)/DAY),
+        toNext: Math.round((list[i+1].d - date)/DAY) };
+    }
+  }
+}
+
+/* seeded shuffle so each season's spread is fixed per date but cycles through everything */
+function hash(str){ let h = 2166136261; for (const c of str){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h>>>0; }
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed>>>15, 1|seed); t = t + Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
+function order(n, seed){ const a=[...Array(n).keys()], r=rng(seed); for(let i=n-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function itemsFor(info){
+  const S = DATA[info.key], seed = hash(info.key + info.start.getFullYear());
+  const i = info.dayIndex;
+  const ro = order(S.reads.length, seed+1), wo = order(S.words.length, seed+2), qo = order(S.quick.length, seed+3);
+  const q = k => qo[(i*3 + k) % qo.length];
+  return [
+    {kind:"read", id:info.key+"-r"+ro[i % ro.length], data:S.reads[ro[i % ro.length]]},
+    {kind:"word", id:info.key+"-w"+wo[i % wo.length], data:S.words[wo[i % wo.length]]},
+    {kind:"quick", id:info.key+"-q"+q(0), data:S.quick[q(0)]},
+    {kind:"quick", id:info.key+"-q"+q(1), data:S.quick[q(1)]},
+    {kind:"quick", id:info.key+"-q"+q(2), data:S.quick[q(2)]}
+  ];
+}
+
+/* rendering */
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const CHECK = '<svg viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2 4.7-5" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function minutes(p){ const w = p.join(" ").split(/\s+/).length; return Math.max(1, Math.round(w/200)); }
+
+function itemHTML(it){
+  const d = it.data, read = readSet.has(it.id) ? " is-read" : "";
+  let cat, ttl, kind, body;
+  if (it.kind === "read"){
+    cat = d.c; ttl = `<span class="ttl">${esc(d.t)}</span>`; kind = `Long read · ${minutes(d.p)} min`;
+    body = `<div class="body">${d.p.map(x=>`<p>${esc(x)}</p>`).join("")}</div>`;
+  } else if (it.kind === "word"){
+    cat = "Word of the day"; ttl = `<span class="ttl word">${esc(d.w)}</span>`; kind = "Word";
+    body = `<div class="body wordcard"><div class="pr">${d.pr?`<b>${esc(d.pr)}</b>`:""}${esc(d.pos)}</div><p class="def">${esc(d.d)}</p><p class="orig">${esc(d.o)}</p></div>`;
+  } else {
+    cat = d.c; ttl = `<span class="ttl">${esc(d.t)}</span>`; kind = "Quick idea";
+    body = `<div class="body short"><p>${esc(d.b)}</p></div>`;
+  }
+  return `<details class="item${read}" data-id="${it.id}"><summary><span class="cat">${esc(cat)}</span>${ttl}<span class="side"><span class="kind">${kind}</span><span class="dot">${CHECK}</span></span></summary>${body}</details>`;
+}
+
+function wireList(root){
+  root.querySelectorAll("details.item").forEach(el=>{
+    el.addEventListener("toggle", ()=>{
+      if (!el.open) return;
+      const id = el.dataset.id;
+      if (!readSet.has(id)){ readSet.add(id); save("ty-read", [...readSet]); }
+      document.querySelectorAll(`details.item[data-id="${id}"]`).forEach(x=>x.classList.add("is-read"));
+      daysOpened.add(iso(midnight(new Date()))); save("ty-days", [...daysOpened]);
+      updateCounts();
+    });
+  });
+}
+
+const today = midnight(new Date());
+let viewDate = today;
+let current = null;
+let libSeason = null, libKind = "all";
+
+function setSeason(key){
+  if (document.documentElement.dataset.season !== key){
+    document.documentElement.dataset.season = key;
+    plate.setSeason(key);
+  }
+  document.getElementById("title").innerHTML = `A curious mind’s <em>guide to ${DATA[key].name.toLowerCase()}</em>`;
+}
+
+function renderToday(){
+  current = seasonInfo(viewDate);
+  setSeason(current.key);
+  const fmt = viewDate.toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric"});
+  document.getElementById("date").textContent = fmt;
+  document.getElementById("stamp").textContent = `${DATA[current.key].name} · day ${current.dayIndex+1}`;
+  document.getElementById("bar").style.width = ((current.dayIndex+1)/current.length*100).toFixed(1)+"%";
+  document.getElementById("dayof").textContent = `Day ${current.dayIndex+1} of ${current.length}`;
+  const n = current.toNext;
+  document.getElementById("until").textContent = `${n} ${n===1?"day":"days"} to the ${EVENT[current.nextKey]}`;
+  document.getElementById("gotoday").hidden = +viewDate === +today;
+  document.getElementById("next").disabled = (viewDate - today)/DAY >= 7;
+  const list = document.getElementById("spread");
+  list.innerHTML = itemsFor(current).map(itemHTML).join("");
+  wireList(list);
+  updateCounts();
+}
+
+function updateCounts(){
+  if (current){
+    const ids = itemsFor(current).map(x=>x.id);
+    const done = ids.filter(id=>readSet.has(id)).length;
+    document.getElementById("progress").textContent = done === ids.length ? "All 5 read" : `${done} of ${ids.length} read`;
+  }
+  if (libSeason) renderLibCount();
+  // streak: consecutive days up to today on which something was opened
+  let s = 0, d = new Date(today);
+  const back = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()-1);
+  if (!daysOpened.has(iso(d))) d = back(d);
+  while (daysOpened.has(iso(d))){ s++; d = back(d); }
+  document.getElementById("streak").textContent = s >= 2 ? `You’re on a ${s}-day streak.` : "";
+}
+
+/* library */
+function allItems(key){
+  const S = DATA[key];
+  return [
+    ...S.reads.map((d,i)=>({kind:"read", id:key+"-r"+i, data:d})),
+    ...S.words.map((d,i)=>({kind:"word", id:key+"-w"+i, data:d})),
+    ...S.quick.map((d,i)=>({kind:"quick", id:key+"-q"+i, data:d}))
+  ];
+}
+function renderLibCount(){
+  const all = allItems(libSeason), done = all.filter(x=>readSet.has(x.id)).length;
+  document.getElementById("lib-count").textContent = `${done} of ${all.length} explored`;
+}
+function renderLibrary(){
+  setSeason(libSeason);
+  document.getElementById("stamp").textContent = `${DATA[libSeason].name} · library`;
+  document.getElementById("season-filters").innerHTML = SEASONS.map(s=>
+    `<button class="chip" type="button" data-s="${s}" aria-pressed="${s===libSeason}">${DATA[s].name}</button>`).join("");
+  const kinds = [["all","Everything"],["read","Long reads"],["word","Words"],["quick","Quick ideas"]];
+  document.getElementById("kind-filters").innerHTML = kinds.map(([k,l])=>
+    `<button class="chip" type="button" data-k="${k}" aria-pressed="${k===libKind}">${l}</button>`).join("");
+  document.getElementById("lib-h").textContent = libSeason === seasonInfo(today).key ? "Everything this season" : `Everything in ${DATA[libSeason].name.toLowerCase()}`;
+  const items = allItems(libSeason);
+  const groups = [["read","Long reads"],["word","Words"],["quick","Quick ideas"]].filter(([k])=>libKind==="all"||libKind===k);
+  const lib = document.getElementById("library");
+  lib.innerHTML = groups.map(([k,l])=>{
+    let g = items.filter(x=>x.kind===k);
+    if (k==="word") g = g.slice().sort((a,b)=>a.data.w.localeCompare(b.data.w));
+    return `<div class="group-h">${l} · ${g.length}</div><div class="list">${g.map(itemHTML).join("")}</div>`;
+  }).join("");
+  wireList(lib);
+  renderLibCount();
+}
+document.getElementById("season-filters").addEventListener("click", e=>{
+  const b = e.target.closest("[data-s]"); if (!b) return; libSeason = b.dataset.s; renderLibrary();
+});
+document.getElementById("kind-filters").addEventListener("click", e=>{
+  const b = e.target.closest("[data-k]"); if (!b) return; libKind = b.dataset.k; renderLibrary();
+});
+
+/* tabs and nav */
+function show(view){
+  const lib = view === "library";
+  document.getElementById("view-today").hidden = lib;
+  document.getElementById("view-library").hidden = !lib;
+  document.getElementById("tab-today").setAttribute("aria-pressed", !lib);
+  document.getElementById("tab-library").setAttribute("aria-pressed", lib);
+  if (lib){ libSeason = libSeason || seasonInfo(viewDate).key; renderLibrary(); }
+  else { libSeason = null; renderToday(); }
+  if (location.hash !== "#"+view){ try{ location.hash = view; }catch(e){} }
+}
+document.getElementById("tab-today").onclick = ()=>show("today");
+document.getElementById("tab-library").onclick = ()=>show("library");
+function shiftDay(n){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), viewDate.getDate()+n); renderToday(); }
+document.getElementById("prev").onclick = ()=>shiftDay(-1);
+document.getElementById("next").onclick = ()=>shiftDay(1);
+document.getElementById("gotoday").onclick = ()=>{ viewDate = today; renderToday(); };
+document.getElementById("reset").onclick = ()=>{ document.getElementById("reset-confirm").hidden = false; };
+document.getElementById("reset-yes").onclick = ()=>{
+  readSet = new Set(); daysOpened = new Set(); save("ty-read", []); save("ty-days", []);
+  document.getElementById("reset-confirm").hidden = true;
+  document.querySelectorAll(".is-read").forEach(x=>x.classList.remove("is-read")); updateCounts();
+};
+
+/* the painted plate: leaves, snow, petals or fireflies */
+const plate = (function(){
+  const cv = document.getElementById("plate"), ctx = cv.getContext("2d");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let season = "autumn", parts = [], W = 0, H = 0, raf = 0, t0 = 0, r = rng(7);
+  const SKY = {
+    autumn:[["#7a2a12",0],["#b4451f",.55],["#e0913a",1]],
+    winter:[["#16263f",0],["#2f4f78",.6],["#7d9cc0",1]],
+    spring:[["#f3c6d3",0],["#e9e3c4",.55],["#b7d39a",1]],
+    summer:[["#0e3c55",0],["#c4572c",.62],["#f2b54a",1]]
+  };
+  const INK = {
+    autumn:["#f2b33d","#e46a28","#9c2f14","#f7d58a","#c8411d"],
+    winter:["#ffffff","#e3eefb","#c7dbf2"],
+    spring:["#fff5f8","#f5a9c0","#e57ea0","#ffffff"],
+    summer:["#fff3a8","#ffe066","#d9ff8a"]
+  };
+  function size(){
+    const dpr = Math.min(2, window.devicePixelRatio || 1), b = cv.getBoundingClientRect();
+    W = b.width; H = b.height; cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function spawn(){
+    r = rng(hash(season)); parts = [];
+    const n = season==="winter" ? 70 : season==="summer" ? 46 : 34;
+    for (let i=0;i<n;i++) parts.push({x:r()*W, y:r()*H, s:.6+r()*1.1, a:r()*6.28, v:.25+r()*.6, c:INK[season][Math.floor(r()*INK[season].length)], ph:r()*6.28});
+  }
+  function bg(){
+    const g = ctx.createLinearGradient(0,0,W*.4,H); SKY[season].forEach(([c,o])=>g.addColorStop(o,c));
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    if (season==="summer"){ // low sun and horizon
+      ctx.fillStyle="rgba(255,214,120,.9)"; ctx.beginPath(); ctx.arc(W*.78,H*.86,26,0,6.28); ctx.fill();
+      ctx.fillStyle="rgba(8,30,40,.85)"; ctx.fillRect(0,H*.86,W,H);
+    }
+    if (season==="winter"){ ctx.fillStyle="rgba(255,255,255,.85)"; ctx.beginPath(); ctx.arc(W*.82,H*.3,13,0,6.28); ctx.fill(); }
+  }
+  function leaf(p){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.scale(p.s,p.s); ctx.fillStyle=p.c;
+    ctx.beginPath(); ctx.moveTo(0,-10); ctx.quadraticCurveTo(8,-2,0,10); ctx.quadraticCurveTo(-8,-2,0,-10); ctx.fill();
+    ctx.strokeStyle="rgba(0,0,0,.18)"; ctx.lineWidth=.8; ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(0,12); ctx.stroke(); ctx.restore(); }
+  function flake(p){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a*.3); ctx.strokeStyle=p.c; ctx.lineWidth=1; const L=3.2*p.s;
+    for(let k=0;k<6;k++){ ctx.rotate(Math.PI/3); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,L); ctx.moveTo(0,L*.55); ctx.lineTo(L*.3,L*.8); ctx.moveTo(0,L*.55); ctx.lineTo(-L*.3,L*.8); ctx.stroke(); }
+    ctx.restore(); }
+  function petal(p){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.scale(p.s,p.s*.6); ctx.fillStyle=p.c;
+    ctx.beginPath(); ctx.ellipse(0,0,6,4,0,0,6.28); ctx.fill(); ctx.restore(); }
+  function fly(p,t){ const glow = .35 + .65*Math.max(0, Math.sin(t*.0016*p.v*3 + p.ph));
+    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,9*p.s); g.addColorStop(0,`rgba(255,240,140,${glow})`); g.addColorStop(1,"rgba(255,240,140,0)");
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,9*p.s,0,6.28); ctx.fill();
+    ctx.fillStyle=`rgba(255,250,200,${glow})`; ctx.beginPath(); ctx.arc(p.x,p.y,1.4,0,6.28); ctx.fill(); }
+  function step(dt,t){
+    for (const p of parts){
+      if (season==="summer"){ p.x += Math.cos(p.ph + t*.0004)*.25*p.v; p.y += Math.sin(p.ph*1.3 + t*.0005)*.2*p.v; if (p.y>H*.84) p.y=H*.84; }
+      else {
+        const fall = season==="winter" ? .35 : season==="spring" ? .3 : .45;
+        p.y += fall*p.v*dt/16; p.x += (Math.sin(t*.001*p.v + p.ph)*.5 + (season==="spring"?.35:.12))*dt/16; p.a += .01*p.v*dt/16;
+        if (p.y > H+12){ p.y = -12; p.x = r()*W; } if (p.x > W+12) p.x = -12;
+      }
+    }
+  }
+  function draw(t){ bg(); for (const p of parts){ season==="autumn"?leaf(p):season==="winter"?flake(p):season==="spring"?petal(p):fly(p,t); } }
+  function loop(t){ const dt = Math.min(48, t - (t0||t)); t0 = t; step(dt,t); draw(t); raf = requestAnimationFrame(loop); }
+  function start(){ cancelAnimationFrame(raf); size(); spawn(); if (still) draw(1200); else { t0 = 0; raf = requestAnimationFrame(loop); } }
+  addEventListener("resize", ()=>{ size(); if (still) draw(1200); });
+  return { setSeason(s){ season = s; start(); } };
+})();
+
+/* boot */
+function route(){ show(location.hash === "#library" ? "library" : "today"); }
+addEventListener("hashchange", route);
+route();
+})();
+</script>
