@@ -113,6 +113,37 @@ details[open] summary .ttl{color:var(--accent)}
 .foot{margin-top:40px;font-size:13px;color:var(--muted);line-height:1.55;max-width:62ch}
 .foot button{border:0;background:none;padding:0;text-decoration:underline;color:var(--muted);cursor:pointer;font-size:13px}
 
+/* go deeper with Claude */
+.deeper{margin-top:22px;padding:16px;background:var(--paper);border-radius:10px;display:grid;gap:12px}
+.deeper-h{display:flex;align-items:center;gap:8px;font:700 12px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.deeper-h svg{width:14px;height:14px;fill:var(--accent)}
+.prompts{display:flex;flex-wrap:wrap;gap:8px}
+.pchip{border:1.5px solid var(--rule);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer;text-align:left}
+.pchip:hover{border-color:var(--accent)}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;min-width:0;border:1.5px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;font-size:15px}
+.ask input::placeholder{color:var(--muted)}
+.ask button,.stop{border:0;background:var(--accent);color:var(--paper);border-radius:999px;padding:9px 16px;font-weight:500;cursor:pointer}
+.ask button:disabled,.pchip:disabled{opacity:.45;cursor:default}
+.thread{display:grid;gap:12px}
+.thread:empty{display:none}
+.q{justify-self:end;max-width:88%;background:var(--chip);border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:15px}
+.a{font-size:16px;line-height:1.6;min-width:0;overflow-wrap:anywhere}
+.a p{margin:0 0 10px!important;font-size:16px!important}
+.a p::first-letter{all:unset}
+.a ul,.a ol{margin:0 0 10px;padding-left:20px}
+.a li{margin-bottom:4px}
+.a.thinking{color:var(--muted);font-style:italic}
+.a .err{color:var(--muted);font-size:14px}
+.stop{justify-self:start;background:transparent;color:var(--accent);border:1.5px solid var(--rule);padding:5px 12px;font-size:13px}
+.chatlink{font-size:14px;color:var(--accent);font-weight:500;text-decoration:none;justify-self:start}
+.chatlink:hover{text-decoration:underline}
+.claude-note{font-size:13px;color:var(--muted)}
+body:not(.has-claude) .needs-claude{display:none!important}
+.selask{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom, 0px));z-index:20;
+  border:0;background:var(--ink);color:var(--bg);border-radius:999px;padding:11px 18px;font-weight:500;font-size:15px;
+  box-shadow:0 6px 20px hsl(var(--h2) 40% 10% / .3);max-width:calc(100% - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+
 @media (prefers-reduced-motion: reduce){body{transition:none}.dot{transition:none}}
 </style>
 
@@ -157,11 +188,13 @@ details[open] summary .ttl{color:var(--accent)}
   <p class="foot">
     A new spread arrives every day: one longer read, one word and three quick ideas, all chosen for the season.
     Seasons follow the Northern Hemisphere calendar, turning at the equinoxes and solstices.
+    <span class="needs-claude">Tip: select any word or phrase to ask Claude about it. Questions use your own Claude account.</span>
     <span id="streak"></span>
     <br><button type="button" id="reset">Clear my reading history</button><span id="reset-confirm" hidden> · Sure? <button type="button" id="reset-yes">Yes, clear it</button></span>
   </p>
 </div>
 
+<button class="selask" id="selask" type="button" hidden></button>
 <script src="content.js"></script>
 <script>
 (function(){
@@ -218,7 +251,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&
 const CHECK = '<svg viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2 4.7-5" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function minutes(p){ const w = p.join(" ").split(/\s+/).length; return Math.max(1, Math.round(w/200)); }
 
-function itemHTML(it){
+function itemHTML(it, scope){
   const d = it.data, read = readSet.has(it.id) ? " is-read" : "";
   let cat, ttl, kind, body;
   if (it.kind === "read"){
@@ -231,7 +264,7 @@ function itemHTML(it){
     cat = d.c; ttl = `<span class="ttl">${esc(d.t)}</span>`; kind = "Quick idea";
     body = `<div class="body short"><p>${esc(d.b)}</p></div>`;
   }
-  return `<details class="item${read}" data-id="${it.id}"><summary><span class="cat">${esc(cat)}</span>${ttl}<span class="side"><span class="kind">${kind}</span><span class="dot">${CHECK}</span></span></summary>${body}</details>`;
+  return `<details class="item${read}" data-id="${it.id}"><summary><span class="cat">${esc(cat)}</span>${ttl}<span class="side"><span class="kind">${kind}</span><span class="dot">${CHECK}</span></span></summary>${body}${deeperHTML(it, scope)}</details>`;
 }
 
 function wireList(root){
@@ -246,6 +279,149 @@ function wireList(root){
     });
   });
 }
+
+/* ---- Go deeper with Claude ---- */
+const SPARK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0l1.6 6.4L16 8l-6.4 1.6L8 16l-1.6-6.4L0 8l6.4-1.6z"/></svg>';
+const PROMPTS = {
+  read:  ["Tell me more", "What do experts still debate?", "A surprising related fact", "Recommend further reading"],
+  word:  ["Use it in a few sentences", "Dig into the etymology", "Related words worth knowing"],
+  quick: ["Explain how this works", "Tell me more", "A surprising related fact"]
+};
+let sample = null;
+const threads = new Map(); // panel key -> {turns, ctl, busy}
+const byId = {};
+for (const k of SEASONS){ allItems(k).forEach(it=>byId[it.id]=it); }
+
+function contextFor(it){
+  const d = it.data;
+  if (it.kind==="read") return `A short article titled “${d.t}” (${d.c}):\n\n${d.p.join("\n\n")}`;
+  if (it.kind==="word") return `The word of the day “${d.w}” (${d.pos}${d.pr?", pronounced "+d.pr:""}). Definition: ${d.d} Origin and notes: ${d.o}`;
+  return `A quick idea titled “${d.t}” (${d.c}): ${d.b}`;
+}
+function labelFor(it){ return it.kind==="word" ? it.data.w : it.data.t; }
+const RULES = `You are a knowledgeable, warm guide inside a seasonal learning app called The Turning Year. The reader has just read the piece below and wants to go deeper.
+Rules: be accurate above all. Only state facts you are confident are true; when something is uncertain, debated or folklore, say so plainly. Never invent quotes, statistics, studies or book titles; only recommend books or sources you are certain exist, with their authors.
+Answer in about 120 to 220 words unless asked for more, in plain conversational prose. You may use short bullet lists and **bold**, but no headings. End with nothing extra: no offers of further help.`;
+
+function chatURL(it, question){
+  let ctx = contextFor(it); if (ctx.length > 1400) ctx = ctx.slice(0,1400) + "…";
+  const q = `I'm reading this in my seasonal learning app and want to go deeper. ${question || "Tell me more about it."}\n\n${ctx}`;
+  return "https://claude.ai/new?q=" + encodeURIComponent(q);
+}
+function deeperHTML(it, scope){
+  const key = scope+"-"+it.id;
+  return `<div class="deeper" data-key="${key}" data-id="${it.id}">
+    <div class="deeper-h">${SPARK}Go deeper</div>
+    <div class="prompts needs-claude">${PROMPTS[it.kind].map(p=>`<button class="pchip" type="button" data-q="${esc(p)}">${esc(p)}</button>`).join("")}</div>
+    <form class="ask needs-claude"><input id="ask-${key}" type="text" enterkeyhint="send" placeholder="Ask your own question…" aria-label="Ask Claude about ${esc(labelFor(it))}"><button type="submit">Ask</button></form>
+    <div class="thread" aria-live="polite"></div>
+    <a class="chatlink" href="${chatURL(it)}" target="_blank" rel="noopener">Continue in a Claude chat ↗</a>
+  </div>`;
+}
+
+function md(src){
+  const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/(^|[^*])\*(?!\s)(.+?)\*/g,"$1<em>$2</em>");
+  const out = []; let list = null;
+  for (const raw of src.split("\n")){
+    const line = raw.trim();
+    const m = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)/);
+    if (m){ const tag = /^\d/.test(line) ? "ol" : "ul"; if (!list || list.tag!==tag){ if (list) out.push(`</${list.tag}>`); list={tag}; out.push(`<${tag}>`); } out.push(`<li>${inline(m[1])}</li>`); continue; }
+    if (list){ out.push(`</${list.tag}>`); list = null; }
+    if (line) out.push(`<p>${inline(line.replace(/^#+\s*/,""))}</p>`);
+  }
+  if (list) out.push(`</${list.tag}>`);
+  return out.join("");
+}
+const ERRORS = {
+  rate_limited:"Claude needs a short break. Try again in a minute.",
+  session_expired:"Please sign in to Claude again, then try once more.",
+  refused:"Claude couldn’t answer that one. Try asking it a different way.",
+  empty_completion:"No answer came back. Try a simpler question.",
+  prompt_too_large:"That question was too long. Try a shorter one."
+};
+
+async function ask(panel, question){
+  if (!sample) return;
+  const key = panel.dataset.key, it = byId[panel.dataset.id];
+  let th = threads.get(key);
+  if (!th){ th = {turns:[]}; threads.set(key, th); }
+  if (th.busy) return;
+  const thread = panel.querySelector(".thread");
+  const q = document.createElement("div"); q.className="q"; q.textContent = question; thread.append(q);
+  const a = document.createElement("div"); a.className="a thinking"; a.textContent="Thinking…"; thread.append(a);
+  const stop = document.createElement("button"); stop.type="button"; stop.className="stop"; stop.textContent="Stop"; thread.append(stop);
+  const first = th.turns.length === 0;
+  th.turns.push({role:"user", content: first ? `${RULES}\n\n---\n${contextFor(it)}\n---\n\nThe reader asks: ${question}` : question});
+  th.busy = true; setBusy(panel, true);
+  const ctl = new AbortController(); stop.onclick = ()=>ctl.abort();
+  panel.querySelector(".chatlink").href = chatURL(it, question);
+  try{
+    // keep the opening turn (rules + the piece) and the most recent exchange history
+    const input = th.turns.length > 9 ? [th.turns[0], ...th.turns.slice(-8)] : th.turns.slice();
+    const {text, truncated} = await sample(input, {
+      signal: ctl.signal, cache: first ? true : false,
+      onText: ({text})=>{ a.classList.remove("thinking"); a.innerHTML = md(text); }
+    });
+    a.classList.remove("thinking"); a.innerHTML = md(text) + (truncated ? `<p class="err">(Cut short. Ask for a part of it.)</p>` : "");
+    th.turns.push({role:"assistant", content:text});
+  }catch(e){
+    th.turns.pop(); // drop the unanswered question so the next one stays coherent
+    a.classList.remove("thinking");
+    const keep = e && e.text ? md(e.text) : "";
+    if (e && (e.code==="not_granted" || e.code==="sampling_disabled" || e.code==="not_declared" || e.code==="capability_disabled" || e.code==="capability_removed")){
+      sample = null; document.body.classList.remove("has-claude");
+      a.innerHTML = `<p class="err">Asking Claude here isn’t turned on. Use “Continue in a Claude chat” instead.</p>`;
+    } else if (e && e.code==="cancelled"){
+      a.innerHTML = keep || `<p class="err">Stopped.</p>`;
+    } else {
+      a.innerHTML = keep + `<p class="err">${ERRORS[e && e.code] || "Something interrupted the answer. Try again."}</p>`;
+    }
+  }finally{
+    stop.remove(); th.busy = false; setBusy(panel, false);
+  }
+}
+function setBusy(panel, on){ panel.querySelectorAll(".pchip,.ask button").forEach(b=>b.disabled=on); }
+
+document.addEventListener("click", e=>{
+  const chip = e.target.closest(".pchip"); if (!chip) return;
+  ask(chip.closest(".deeper"), chip.dataset.q);
+});
+document.addEventListener("submit", e=>{
+  const f = e.target.closest(".ask"); if (!f) return;
+  e.preventDefault();
+  const input = f.querySelector("input"), v = input.value.trim(); if (!v) return;
+  input.value = ""; ask(f.closest(".deeper"), v);
+});
+
+/* select a word or phrase -> ask about it */
+const selBtn = document.getElementById("selask");
+let selCtx = null;
+document.addEventListener("selectionchange", ()=>{
+  if (!sample){ selBtn.hidden = true; return; }
+  const sel = getSelection(), txt = sel ? sel.toString().trim().replace(/\s+/g," ") : "";
+  if (!txt || txt.length > 80 || !sel.rangeCount){ selBtn.hidden = true; return; }
+  const node = sel.getRangeAt(0).commonAncestorContainer;
+  const el = node.nodeType===1 ? node : node.parentElement;
+  const item = el && el.closest("details.item");
+  if (!item || el.closest(".deeper") && !el.closest(".a")){ selBtn.hidden = true; return; }
+  selCtx = {item, txt};
+  selBtn.textContent = `Ask Claude about “${txt.length>28 ? txt.slice(0,28)+"…" : txt}”`;
+  selBtn.hidden = false;
+});
+selBtn.addEventListener("pointerdown", e=>e.preventDefault()); // keep the selection
+selBtn.addEventListener("click", ()=>{
+  if (!selCtx) return;
+  const panel = selCtx.item.querySelector(".deeper");
+  const q = `What does “${selCtx.txt}” mean here? Explain it and tell me something interesting about it.`;
+  selBtn.hidden = true; try{ getSelection().removeAllRanges(); }catch(e){}
+  ask(panel, q);
+  panel.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"end"});
+});
+
+(async ()=>{
+  try{ sample = window.claude && await window.claude.use("sample"); }catch(e){ sample = null; }
+  if (sample) document.body.classList.add("has-claude");
+})();
 
 const today = midnight(new Date());
 let viewDate = today;
@@ -273,7 +449,7 @@ function renderToday(){
   document.getElementById("gotoday").hidden = +viewDate === +today;
   document.getElementById("next").disabled = (viewDate - today)/DAY >= 7;
   const list = document.getElementById("spread");
-  list.innerHTML = itemsFor(current).map(itemHTML).join("");
+  list.innerHTML = itemsFor(current).map(x=>itemHTML(x,"t")).join("");
   wireList(list);
   updateCounts();
 }
@@ -321,7 +497,7 @@ function renderLibrary(){
   lib.innerHTML = groups.map(([k,l])=>{
     let g = items.filter(x=>x.kind===k);
     if (k==="word") g = g.slice().sort((a,b)=>a.data.w.localeCompare(b.data.w));
-    return `<div class="group-h">${l} · ${g.length}</div><div class="list">${g.map(itemHTML).join("")}</div>`;
+    return `<div class="group-h">${l} · ${g.length}</div><div class="list">${g.map(x=>itemHTML(x,"l")).join("")}</div>`;
   }).join("");
   wireList(lib);
   renderLibCount();
