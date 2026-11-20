@@ -37,7 +37,8 @@
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+html,body{overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;overflow-wrap:break-word;
   transition:background-color .6s ease}
 .wrap{max-width:600px;margin:0 auto;padding-block:0 56px;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
@@ -79,11 +80,12 @@ h1 em{display:block;font:italic 400 clamp(2.5rem,11vw,3.7rem)/1.08 var(--f-serif
 
 /* the ruled list */
 .list{display:flex;flex-direction:column}
-details.item{border-bottom:1.5px solid var(--rule)}
-details.item summary{list-style:none;cursor:pointer;padding:20px 0 18px;display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:start}
+details.item{border-bottom:1.5px solid var(--rule);min-width:0;max-width:100%}
+.body{min-width:0}
+details.item summary{list-style:none;cursor:pointer;padding:20px 0 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:start}
 details.item summary::-webkit-details-marker{display:none}
 .cat{font:700 13px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
-.ttl{grid-column:1;font:400 clamp(1.3rem,5.4vw,1.55rem)/1.25 var(--f-display);letter-spacing:-.01em;text-wrap:balance;min-width:0}
+.ttl{grid-column:1;overflow-wrap:anywhere;hyphens:auto;font:400 clamp(1.3rem,5.4vw,1.55rem)/1.25 var(--f-display);letter-spacing:-.01em;text-wrap:balance;min-width:0}
 .ttl.word{font:italic 500 clamp(1.5rem,6.4vw,1.85rem)/1.15 var(--f-serif)}
 .side{grid-row:1 / span 2;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:2px}
 .kind{font-size:12px;color:var(--muted);white-space:nowrap}
@@ -114,14 +116,15 @@ details[open] summary .ttl{color:var(--accent)}
 .foot button{border:0;background:none;padding:0;text-decoration:underline;color:var(--muted);cursor:pointer;font-size:13px}
 
 /* go deeper with Claude */
-.deeper{margin-top:22px;padding:16px;background:var(--paper);border-radius:10px;display:grid;gap:12px}
+.deeper{margin-top:22px;padding:16px;background:var(--paper);border-radius:10px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.deeper > *{min-width:0}
 .deeper-h{display:flex;align-items:center;gap:8px;font:700 12px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
 .deeper-h svg{width:14px;height:14px;fill:var(--accent)}
 .prompts{display:flex;flex-wrap:wrap;gap:8px}
-.pchip{border:1.5px solid var(--rule);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer;text-align:left}
+.pchip{border:1.5px solid var(--rule);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer;text-align:left;max-width:100%;overflow-wrap:anywhere}
 .pchip:hover{border-color:var(--accent)}
 .ask{display:flex;gap:8px}
-.ask input{flex:1;min-width:0;border:1.5px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;font-size:15px}
+.ask input{flex:1 1 0;width:0;min-width:0;border:1.5px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;font-size:15px}
 .ask input::placeholder{color:var(--muted)}
 .ask button,.stop{border:0;background:var(--accent);color:var(--paper);border-radius:999px;padding:9px 16px;font-weight:500;cursor:pointer}
 .ask button:disabled,.pchip:disabled{opacity:.45;cursor:default}
