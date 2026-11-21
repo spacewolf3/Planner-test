@@ -142,6 +142,9 @@ details[open] summary .ttl{color:var(--accent)}
 .chatlink{font-size:14px;color:var(--accent);font-weight:500;text-decoration:none;justify-self:start}
 .chatlink:hover{text-decoration:underline}
 .claude-note{font-size:13px;color:var(--muted)}
+.deeper-foot{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.clearthread{border:0;background:none;padding:0;font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer}
+.clearthread[hidden]{display:none}
 body:not(.has-claude) .needs-claude{display:none!important}
 .selask{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom, 0px));z-index:20;
   border:0;background:var(--ink);color:var(--bg);border-radius:999px;padding:11px 18px;font-weight:500;font-size:15px;
@@ -193,6 +196,7 @@ body:not(.has-claude) .needs-claude{display:none!important}
     Seasons follow the Northern Hemisphere calendar, turning at the equinoxes and solstices.
     <span class="needs-claude">Tip: select any word or phrase to ask Claude about it. Questions use your own Claude account.</span>
     <span id="streak"></span>
+    <span id="sync"></span>
     <br><button type="button" id="reset">Clear my reading history</button><span id="reset-confirm" hidden> · Sure? <button type="button" id="reset-yes">Yes, clear it</button></span>
   </p>
 </div>
@@ -275,9 +279,12 @@ function wireList(root){
     el.addEventListener("toggle", ()=>{
       if (!el.open) return;
       const id = el.dataset.id;
-      if (!readSet.has(id)){ readSet.add(id); save("ty-read", [...readSet]); }
+      let changed = false;
+      if (!readSet.has(id)){ readSet.add(id); changed = true; }
       document.querySelectorAll(`details.item[data-id="${id}"]`).forEach(x=>x.classList.add("is-read"));
-      daysOpened.add(iso(midnight(new Date()))); save("ty-days", [...daysOpened]);
+      const day = iso(midnight(new Date()));
+      if (!daysOpened.has(day)){ daysOpened.add(day); changed = true; }
+      if (changed) persistProgress();
       updateCounts();
     });
   });
@@ -291,7 +298,7 @@ const PROMPTS = {
   quick: ["Explain how this works", "Tell me more", "A surprising related fact"]
 };
 let sample = null;
-const threads = new Map(); // panel key -> {turns, ctl, busy}
+const threads = new Map(); // item id -> {turns:[{role, content, shown?}], busy}
 const byId = {};
 for (const k of SEASONS){ allItems(k).forEach(it=>byId[it.id]=it); }
 
@@ -317,9 +324,22 @@ function deeperHTML(it, scope){
     <div class="deeper-h">${SPARK}Go deeper</div>
     <div class="prompts needs-claude">${PROMPTS[it.kind].map(p=>`<button class="pchip" type="button" data-q="${esc(p)}">${esc(p)}</button>`).join("")}</div>
     <form class="ask needs-claude"><input id="ask-${key}" type="text" enterkeyhint="send" placeholder="Ask your own question…" aria-label="Ask Claude about ${esc(labelFor(it))}"><button type="submit">Ask</button></form>
-    <div class="thread" aria-live="polite"></div>
-    <a class="chatlink" href="${chatURL(it)}" target="_blank" rel="noopener">Continue in a Claude chat ↗</a>
+    <div class="thread" aria-live="polite">${threadHTML(it.id)}</div>
+    <div class="deeper-foot">
+      <a class="chatlink" href="${chatURL(it, lastQuestion(it.id))}" target="_blank" rel="noopener">Continue in a Claude chat ↗</a>
+      <button class="clearthread" type="button"${threads.get(it.id)?.turns.length ? "" : " hidden"}>Clear this conversation</button>
+    </div>
   </div>`;
+}
+function threadHTML(id){
+  const th = threads.get(id); if (!th) return "";
+  return th.turns.map(t => t.role==="user"
+    ? `<div class="q">${esc(t.shown || t.content)}</div>`
+    : `<div class="a">${md(t.content)}</div>`).join("");
+}
+function lastQuestion(id){
+  const t = threads.get(id)?.turns.filter(x=>x.role==="user").pop();
+  return t ? (t.shown || t.content) : "";
 }
 
 function md(src){
@@ -345,28 +365,31 @@ const ERRORS = {
 
 async function ask(panel, question){
   if (!sample) return;
-  const key = panel.dataset.key, it = byId[panel.dataset.id];
-  let th = threads.get(key);
-  if (!th){ th = {turns:[]}; threads.set(key, th); }
+  const id = panel.dataset.id, it = byId[id];
+  let th = threads.get(id);
+  if (!th){ th = {turns:[]}; threads.set(id, th); }
   if (th.busy) return;
   const thread = panel.querySelector(".thread");
   const q = document.createElement("div"); q.className="q"; q.textContent = question; thread.append(q);
   const a = document.createElement("div"); a.className="a thinking"; a.textContent="Thinking…"; thread.append(a);
   const stop = document.createElement("button"); stop.type="button"; stop.className="stop"; stop.textContent="Stop"; thread.append(stop);
   const first = th.turns.length === 0;
-  th.turns.push({role:"user", content: first ? `${RULES}\n\n---\n${contextFor(it)}\n---\n\nThe reader asks: ${question}` : question});
+  th.turns.push(first ? {role:"user", shown:question, content:`${RULES}\n\n---\n${contextFor(it)}\n---\n\nThe reader asks: ${question}`} : {role:"user", content:question});
   th.busy = true; setBusy(panel, true);
   const ctl = new AbortController(); stop.onclick = ()=>ctl.abort();
   panel.querySelector(".chatlink").href = chatURL(it, question);
   try{
     // keep the opening turn (rules + the piece) and the most recent exchange history
-    const input = th.turns.length > 9 ? [th.turns[0], ...th.turns.slice(-8)] : th.turns.slice();
+    const all = th.turns.map(t=>({role:t.role, content:t.content}));
+    const input = all.length > 9 ? [all[0], ...all.slice(-8)] : all;
     const {text, truncated} = await sample(input, {
       signal: ctl.signal, cache: first ? true : false,
       onText: ({text})=>{ a.classList.remove("thinking"); a.innerHTML = md(text); }
     });
     a.classList.remove("thinking"); a.innerHTML = md(text) + (truncated ? `<p class="err">(Cut short. Ask for a part of it.)</p>` : "");
     th.turns.push({role:"assistant", content:text});
+    saveThread(id);
+    panel.querySelector(".clearthread").hidden = false;
   }catch(e){
     th.turns.pop(); // drop the unanswered question so the next one stays coherent
     a.classList.remove("thinking");
@@ -424,6 +447,87 @@ selBtn.addEventListener("click", ()=>{
 (async ()=>{
   try{ sample = window.claude && await window.claude.use("sample"); }catch(e){ sample = null; }
   if (sample) document.body.classList.add("has-claude");
+})();
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest(".clearthread"); if (!b) return;
+  const panel = b.closest(".deeper"), id = panel.dataset.id;
+  if (threads.get(id)?.busy) return;
+  threads.delete(id); saveThread(id);
+  document.querySelectorAll(`.deeper[data-id="${id}"]`).forEach(p=>{ p.querySelector(".thread").innerHTML = ""; p.querySelector(".clearthread").hidden = true; });
+});
+
+/* ---- Remembering: your Claude account first, this browser as a backup ---- */
+const store = { db:null, uid:null };
+for (const [id, turns] of Object.entries(load("ty-threads", {}))) if (Array.isArray(turns) && turns.length) threads.set(id, {turns});
+function progressRef(){ return store.db.doc("data/users/" + store.uid + "/progress"); }
+function threadRef(id){ return progressRef().collection("threads").doc(id); }
+function setSync(state){
+  const msg = {
+    account: "Your reading and questions are saved to your Claude account.",
+    local: "Your reading and questions are saved in this browser only. Open this page in Claude while signed in to keep them everywhere.",
+    error: "Couldn’t reach your saved history just now; changes are kept in this browser until it reconnects."
+  }[state] || "";
+  document.getElementById("sync").textContent = msg;
+}
+function saveLocal(){
+  save("ty-read", [...readSet]); save("ty-days", [...daysOpened]);
+  const t = {}; threads.forEach((v,k)=>{ if (v.turns.length) t[k] = v.turns; }); save("ty-threads", t);
+}
+let progTimer = 0, progWriting = false, progAgain = false;
+function persistProgress(){ saveLocal(); clearTimeout(progTimer); progTimer = setTimeout(flushProgress, 600); }
+async function flushProgress(){
+  if (!store.db) return;
+  if (progWriting){ progAgain = true; return; }
+  progWriting = true;
+  try{ await progressRef().set({ read:[...readSet], days:[...daysOpened].sort().slice(-500), updatedAt:Date.now() }); setSync("account"); }
+  catch(e){ setSync("error"); }
+  progWriting = false;
+  if (progAgain){ progAgain = false; flushProgress(); }
+}
+const threadWrites = new Map(); // id -> promise chain, one write at a time per conversation
+function saveThread(id){
+  saveLocal();
+  if (!store.db) return;
+  const prev = threadWrites.get(id) || Promise.resolve();
+  const next = prev.then(async ()=>{
+    const th = threads.get(id);
+    try{
+      if (th && th.turns.length) await threadRef(id).set({ turns: th.turns.slice(-30), updatedAt: Date.now() });
+      else await threadRef(id).delete();
+    }catch(e){ setSync("error"); }
+  });
+  threadWrites.set(id, next);
+}
+function rerender(){
+  const open = [...document.querySelectorAll("details.item[open]")].map(d=>d.dataset.id);
+  if (libSeason) renderLibrary(); else renderToday();
+  open.forEach(id=>document.querySelectorAll(`details.item[data-id="${id}"]`).forEach(d=>d.open = true));
+}
+(async ()=>{
+  let db = null, user = null;
+  try{ [db, user] = await Promise.all([window.claude?.use("db"), window.claude?.use("user")]); }catch(e){}
+  const uid = user ? await user.id().catch(()=>null) : null;
+  if (!db || !uid){ setSync("local"); return; }
+  store.db = db; store.uid = uid;
+  try{
+    const snap = await progressRef().get();
+    const d = snap.exists ? snap.data() : {};
+    const remoteRead = new Set(d.read || []), remoteDays = new Set(d.days || []);
+    const localExtra = [...readSet].some(x=>!remoteRead.has(x)) || [...daysOpened].some(x=>!remoteDays.has(x));
+    remoteRead.forEach(x=>readSet.add(x)); remoteDays.forEach(x=>daysOpened.add(x));
+    const qs = await progressRef().collection("threads").get();
+    const remoteIds = new Set();
+    qs.docs.forEach(doc=>{
+      const turns = doc.data()?.turns;
+      if (Array.isArray(turns) && turns.length && !threads.get(doc.id)?.busy){ threads.set(doc.id, {turns}); remoteIds.add(doc.id); }
+    });
+    saveLocal();
+    if (localExtra) flushProgress();
+    threads.forEach((v,id)=>{ if (!remoteIds.has(id) && v.turns.length) saveThread(id); }); // upload conversations only this browser had
+    setSync("account");
+    rerender();
+  }catch(e){ setSync("error"); }
 })();
 
 const today = midnight(new Date());
@@ -531,7 +635,7 @@ document.getElementById("next").onclick = ()=>shiftDay(1);
 document.getElementById("gotoday").onclick = ()=>{ viewDate = today; renderToday(); };
 document.getElementById("reset").onclick = ()=>{ document.getElementById("reset-confirm").hidden = false; };
 document.getElementById("reset-yes").onclick = ()=>{
-  readSet = new Set(); daysOpened = new Set(); save("ty-read", []); save("ty-days", []);
+  readSet = new Set(); daysOpened = new Set(); persistProgress();
   document.getElementById("reset-confirm").hidden = true;
   document.querySelectorAll(".is-read").forEach(x=>x.classList.remove("is-read")); updateCounts();
 };

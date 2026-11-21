@@ -19,4 +19,4 @@ A separate, phone-first learning app: a daily spread for the current season, ins
 - `seasons/index.html`: the app. Seasons turn at the Northern Hemisphere equinoxes and solstices, and the palette and header art change with them.
 - `seasons/content.js`: all the content (about 46 pieces per season). Add to the arrays there to extend it.
 - **Go deeper**: every piece ends with suggested questions and an ask box. Claude answers in place (on the reader's own Claude account) and you can ask follow-ups. Select any word or phrase to ask about it. "Continue in a Claude chat" opens a new claude.ai chat prefilled with the topic.
-- Reading history and streaks are saved in the browser on that device.
+- What you have read, your streak and your Go deeper conversations are saved privately to your Claude account (each reader sees only their own), with this browser as a backup. Opened outside Claude, they are kept in that browser only.
