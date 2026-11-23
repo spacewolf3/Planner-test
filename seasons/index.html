@@ -1,0 +1,712 @@
+<title>The Turning Year</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Turning Year">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400;1,9..144,500&family=Schibsted+Grotesk:wght@400;500;700&display=swap">
+<style>
+/* Layout: an almanac on one phone column. A painted seasonal plate, the issue title,
+   then today's spread as a ruled list of categories; each row opens in place.
+   Every color is built from three season hues (ground, ink, accent), so the whole
+   page re-tints itself when the season turns. */
+:root{
+  --h1:28; --gs:72%; --h2:16; --h3:12;               /* autumn: parchment, oxblood, rust */
+  --bg:hsl(var(--h1) var(--gs) 93%);
+  --paper:hsl(var(--h1) var(--gs) 96.5%);
+  --chip:hsl(var(--h1) var(--gs) 87%);
+  --ink:hsl(var(--h2) 70% 24%);
+  --muted:hsl(var(--h2) 28% 38%);
+  --accent:hsl(var(--h3) 68% 41%);
+  --rule:hsl(var(--h3) 60% 45% / .5);
+  --f-display:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-serif:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --f-body:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+:root[data-season="winter"]{--h1:208; --gs:40%; --h2:218; --h3:200}
+:root[data-season="spring"]{--h1:78;  --gs:45%; --h2:150; --h3:338}
+:root[data-season="summer"]{--h1:44;  --gs:88%; --h2:22;  --h3:188}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:hsl(var(--h2) 24% 9%); --paper:hsl(var(--h2) 22% 13%); --chip:hsl(var(--h2) 20% 19%);
+  --ink:hsl(var(--h1) 55% 90%); --muted:hsl(var(--h1) 16% 68%);
+  --accent:hsl(var(--h3) 78% 68%); --rule:hsl(var(--h3) 50% 62% / .35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:hsl(var(--h2) 24% 9%); --paper:hsl(var(--h2) 22% 13%); --chip:hsl(var(--h2) 20% 19%);
+  --ink:hsl(var(--h1) 55% 90%); --muted:hsl(var(--h1) 16% 68%);
+  --accent:hsl(var(--h3) 78% 68%); --rule:hsl(var(--h3) 50% 62% / .35); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;overflow-wrap:break-word;
+  transition:background-color .6s ease}
+.wrap{max-width:600px;margin:0 auto;padding-block:0 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* plate */
+.plate{position:relative;height:150px;margin:12px 0 0;border-radius:2px;overflow:hidden}
+.plate canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.plate .stamp{position:absolute;left:12px;bottom:10px;font:500 11px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.92);text-shadow:0 1px 2px rgba(0,0,0,.35)}
+
+/* masthead */
+.mast{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px}
+.brand{font:700 12px/1 var(--f-body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.tabs{display:flex;gap:4px;background:var(--chip);padding:3px;border-radius:999px}
+.tabs button{border:0;background:none;padding:7px 14px;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px hsl(var(--h2) 40% 20% / .12)}
+
+h1{margin:26px 0 0;font:700 clamp(2.4rem,10.5vw,3.5rem)/1 var(--f-display);letter-spacing:-.025em;text-wrap:balance}
+h1 em{display:block;font:italic 400 clamp(2.5rem,11vw,3.7rem)/1.08 var(--f-serif);letter-spacing:-.01em;margin-top:2px}
+
+.almanac{margin-top:18px;display:grid;gap:10px}
+.dayline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dayline .date{font-weight:500;font-size:15px}
+.navbtn{border:1px solid var(--rule);background:transparent;width:34px;height:34px;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;font-size:18px;line-height:1;color:var(--accent)}
+.navbtn:disabled{opacity:.35;cursor:default}
+.todaybtn{border:0;background:var(--chip);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;cursor:pointer}
+.spacer{flex:1}
+.wheel{display:grid;gap:6px}
+.wheel .bar{height:6px;background:var(--chip);border-radius:3px;overflow:hidden}
+.wheel .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.wheel .cap{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+
+.section-h{margin:34px 0 4px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.section-h h2{margin:0;font:italic 500 1.4rem/1.2 var(--f-serif)}
+.section-h .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* the ruled list */
+.list{display:flex;flex-direction:column}
+details.item{border-bottom:1.5px solid var(--rule);min-width:0;max-width:100%}
+.body{min-width:0}
+details.item summary{list-style:none;cursor:pointer;padding:20px 0 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:start}
+details.item summary::-webkit-details-marker{display:none}
+.cat{font:700 13px/1.2 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.ttl{grid-column:1;overflow-wrap:anywhere;hyphens:auto;font:400 clamp(1.3rem,5.4vw,1.55rem)/1.25 var(--f-display);letter-spacing:-.01em;text-wrap:balance;min-width:0}
+.ttl.word{font:italic 500 clamp(1.5rem,6.4vw,1.85rem)/1.15 var(--f-serif)}
+.side{grid-row:1 / span 2;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:2px}
+.kind{font-size:12px;color:var(--muted);white-space:nowrap}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--rule);display:grid;place-items:center;transition:background .2s}
+.dot svg{width:12px;height:12px;opacity:0}
+.is-read .dot{background:var(--accent);border-color:var(--accent)}
+.is-read .dot svg{opacity:1}
+.dot svg path{stroke:var(--paper)}
+details[open] summary .ttl{color:var(--accent)}
+
+.body{padding:0 0 22px;max-width:62ch}
+.body p{margin:0 0 14px;font-size:17px;line-height:1.62}
+.body p:last-child{margin-bottom:0}
+.body p:first-child::first-letter{font:600 2.9em/0.9 var(--f-serif);float:left;margin:5px 8px 0 0;color:var(--accent)}
+.body.short p:first-child::first-letter,.body.wordcard p::first-letter{all:unset}
+.wordcard .pr{font-size:14px;color:var(--muted);margin:-6px 0 12px}
+.wordcard .pr b{font-weight:500;font-style:italic;font-family:var(--f-serif);font-size:15px;color:var(--ink);margin-right:8px}
+.wordcard .def{font-size:18px;line-height:1.5;margin-bottom:12px}
+.wordcard .orig{font-size:15.5px;color:var(--muted);padding-left:14px;border-left:2px solid var(--rule)}
+
+/* library */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.chip{border:1.5px solid var(--rule);background:transparent;border-radius:999px;padding:6px 13px;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:500}
+.group-h{margin:28px 0 0;font:700 12px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+.foot{margin-top:40px;font-size:13px;color:var(--muted);line-height:1.55;max-width:62ch}
+.foot button{border:0;background:none;padding:0;text-decoration:underline;color:var(--muted);cursor:pointer;font-size:13px}
+
+/* go deeper with Claude */
+.deeper{margin-top:22px;padding:16px;background:var(--paper);border-radius:10px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0}
+.deeper > *{min-width:0}
+.deeper-h{display:flex;align-items:center;gap:8px;font:700 12px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.deeper-h svg{width:14px;height:14px;fill:var(--accent)}
+.prompts{display:flex;flex-wrap:wrap;gap:8px}
+.pchip{border:1.5px solid var(--rule);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer;text-align:left;max-width:100%;overflow-wrap:anywhere}
+.pchip:hover{border-color:var(--accent)}
+.ask{display:flex;gap:8px}
+.ask input{flex:1 1 0;width:0;min-width:0;border:1.5px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 14px;font:inherit;font-size:15px}
+.ask input::placeholder{color:var(--muted)}
+.ask button,.stop{border:0;background:var(--accent);color:var(--paper);border-radius:999px;padding:9px 16px;font-weight:500;cursor:pointer}
+.ask button:disabled,.pchip:disabled{opacity:.45;cursor:default}
+.thread{display:grid;gap:12px}
+.thread:empty{display:none}
+.q{justify-self:end;max-width:88%;background:var(--chip);border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:15px}
+.a{font-size:16px;line-height:1.6;min-width:0;overflow-wrap:anywhere}
+.a p{margin:0 0 10px!important;font-size:16px!important}
+.a p::first-letter{all:unset}
+.a ul,.a ol{margin:0 0 10px;padding-left:20px}
+.a li{margin-bottom:4px}
+.a.thinking{color:var(--muted);font-style:italic}
+.a .err{color:var(--muted);font-size:14px}
+.stop{justify-self:start;background:transparent;color:var(--accent);border:1.5px solid var(--rule);padding:5px 12px;font-size:13px}
+.chatlink{font-size:14px;color:var(--accent);font-weight:500;text-decoration:none;justify-self:start}
+.chatlink:hover{text-decoration:underline}
+.claude-note{font-size:13px;color:var(--muted)}
+.deeper-foot{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.clearthread{border:0;background:none;padding:0;font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer}
+.clearthread[hidden]{display:none}
+body:not(.has-claude) .needs-claude{display:none!important}
+.selask{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom, 0px));z-index:20;
+  border:0;background:var(--ink);color:var(--bg);border-radius:999px;padding:11px 18px;font-weight:500;font-size:15px;
+  box-shadow:0 6px 20px hsl(var(--h2) 40% 10% / .3);max-width:calc(100% - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+
+@media (prefers-reduced-motion: reduce){body{transition:none}.dot{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">The Turning Year</div>
+    <nav class="tabs" aria-label="Views">
+      <button id="tab-today" type="button" aria-pressed="true">Today</button>
+      <button id="tab-library" type="button" aria-pressed="false">Library</button>
+    </nav>
+  </header>
+
+  <div class="plate" aria-hidden="true"><canvas id="plate"></canvas><div class="stamp" id="stamp"></div></div>
+
+  <h1 id="title">A curious mind’s <em>guide to autumn</em></h1>
+
+  <section id="view-today">
+    <div class="almanac">
+      <div class="dayline">
+        <button class="navbtn" id="prev" type="button" aria-label="Previous day">‹</button>
+        <span class="date" id="date"></span>
+        <button class="navbtn" id="next" type="button" aria-label="Next day">›</button>
+        <span class="spacer"></span>
+        <button class="todaybtn" id="gotoday" type="button" hidden>Back to today</button>
+      </div>
+      <div class="wheel">
+        <div class="bar"><i id="bar"></i></div>
+        <div class="cap"><span id="dayof"></span><span id="until"></span></div>
+      </div>
+    </div>
+    <div class="section-h"><h2>Today’s spread</h2><span class="meta" id="progress"></span></div>
+    <div class="list" id="spread"></div>
+  </section>
+
+  <section id="view-library" hidden>
+    <div class="filters" id="season-filters" role="group" aria-label="Season"></div>
+    <div class="filters" id="kind-filters" role="group" aria-label="Type"></div>
+    <div class="section-h"><h2 id="lib-h">Everything this season</h2><span class="meta" id="lib-count"></span></div>
+    <div id="library"></div>
+  </section>
+
+  <p class="foot">
+    A new spread arrives every day: one longer read, one word and three quick ideas, all chosen for the season.
+    Seasons follow the Northern Hemisphere calendar, turning at the equinoxes and solstices.
+    <span class="needs-claude">Tip: select any word or phrase to ask Claude about it. Questions use your own Claude account.</span>
+    <span id="streak"></span>
+    <span id="sync"></span>
+    <br><button type="button" id="reset">Clear my reading history</button><span id="reset-confirm" hidden> · Sure? <button type="button" id="reset-yes">Yes, clear it</button></span>
+  </p>
+</div>
+
+<button class="selask" id="selask" type="button" hidden></button>
+<script src="content.js"></script>
+<script>
+(function(){
+const DATA = window.TURNING_YEAR;
+const SEASONS = ["spring","summer","autumn","winter"];
+const STARTS = {spring:[2,20], summer:[5,21], autumn:[8,22], winter:[11,21]};
+const EVENT = {spring:"spring equinox", summer:"summer solstice", autumn:"autumn equinox", winter:"winter solstice"};
+const DAY = 864e5;
+
+/* storage (per-viewer convenience only) */
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+let readSet = new Set(load("ty-read", []));
+let daysOpened = new Set(load("ty-days", []));
+
+/* dates */
+function midnight(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function seasonInfo(date){
+  const y = date.getFullYear(), list = [];
+  for (const yy of [y-1, y, y+1]) for (const s of SEASONS) list.push({s, d:new Date(yy, STARTS[s][0], STARTS[s][1])});
+  list.sort((a,b)=>a.d-b.d);
+  for (let i=0;i<list.length-1;i++){
+    if (date >= list[i].d && date < list[i+1].d){
+      return { key:list[i].s, start:list[i].d, end:list[i+1].d, nextKey:list[i+1].s,
+        dayIndex: Math.round((date - list[i].d)/DAY),
+        length: Math.round((list[i+1].d - list[i].d)/DAY),
+        toNext: Math.round((list[i+1].d - date)/DAY) };
+    }
+  }
+}
+
+/* seeded shuffle so each season's spread is fixed per date but cycles through everything */
+function hash(str){ let h = 2166136261; for (const c of str){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h>>>0; }
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed>>>15, 1|seed); t = t + Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
+function order(n, seed){ const a=[...Array(n).keys()], r=rng(seed); for(let i=n-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function itemsFor(info){
+  const S = DATA[info.key], seed = hash(info.key + info.start.getFullYear());
+  const i = info.dayIndex;
+  const ro = order(S.reads.length, seed+1), wo = order(S.words.length, seed+2), qo = order(S.quick.length, seed+3);
+  const q = k => qo[(i*3 + k) % qo.length];
+  return [
+    {kind:"read", id:info.key+"-r"+ro[i % ro.length], data:S.reads[ro[i % ro.length]]},
+    {kind:"word", id:info.key+"-w"+wo[i % wo.length], data:S.words[wo[i % wo.length]]},
+    {kind:"quick", id:info.key+"-q"+q(0), data:S.quick[q(0)]},
+    {kind:"quick", id:info.key+"-q"+q(1), data:S.quick[q(1)]},
+    {kind:"quick", id:info.key+"-q"+q(2), data:S.quick[q(2)]}
+  ];
+}
+
+/* rendering */
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const CHECK = '<svg viewBox="0 0 12 12"><path d="M2.5 6.3l2.3 2.2 4.7-5" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function minutes(p){ const w = p.join(" ").split(/\s+/).length; return Math.max(1, Math.round(w/200)); }
+
+function itemHTML(it, scope){
+  const d = it.data, read = readSet.has(it.id) ? " is-read" : "";
+  let cat, ttl, kind, body;
+  if (it.kind === "read"){
+    cat = d.c; ttl = `<span class="ttl">${esc(d.t)}</span>`; kind = `Long read · ${minutes(d.p)} min`;
+    body = `<div class="body">${d.p.map(x=>`<p>${esc(x)}</p>`).join("")}</div>`;
+  } else if (it.kind === "word"){
+    cat = "Word of the day"; ttl = `<span class="ttl word">${esc(d.w)}</span>`; kind = "Word";
+    body = `<div class="body wordcard"><div class="pr">${d.pr?`<b>${esc(d.pr)}</b>`:""}${esc(d.pos)}</div><p class="def">${esc(d.d)}</p><p class="orig">${esc(d.o)}</p></div>`;
+  } else {
+    cat = d.c; ttl = `<span class="ttl">${esc(d.t)}</span>`; kind = "Quick idea";
+    body = `<div class="body short"><p>${esc(d.b)}</p></div>`;
+  }
+  return `<details class="item${read}" data-id="${it.id}"><summary><span class="cat">${esc(cat)}</span>${ttl}<span class="side"><span class="kind">${kind}</span><span class="dot">${CHECK}</span></span></summary>${body}${deeperHTML(it, scope)}</details>`;
+}
+
+function wireList(root){
+  root.querySelectorAll("details.item").forEach(el=>{
+    el.addEventListener("toggle", ()=>{
+      if (!el.open) return;
+      const id = el.dataset.id;
+      let changed = false;
+      if (!readSet.has(id)){ readSet.add(id); changed = true; }
+      document.querySelectorAll(`details.item[data-id="${id}"]`).forEach(x=>x.classList.add("is-read"));
+      const day = iso(midnight(new Date()));
+      if (!daysOpened.has(day)){ daysOpened.add(day); changed = true; }
+      if (changed) persistProgress();
+      updateCounts();
+    });
+  });
+}
+
+/* ---- Go deeper with Claude ---- */
+const SPARK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0l1.6 6.4L16 8l-6.4 1.6L8 16l-1.6-6.4L0 8l6.4-1.6z"/></svg>';
+const PROMPTS = {
+  read:  ["Tell me more", "What do experts still debate?", "A surprising related fact", "Recommend further reading"],
+  word:  ["Use it in a few sentences", "Dig into the etymology", "Related words worth knowing"],
+  quick: ["Explain how this works", "Tell me more", "A surprising related fact"]
+};
+let sample = null;
+const threads = new Map(); // item id -> {turns:[{role, content, shown?}], busy}
+const byId = {};
+for (const k of SEASONS){ allItems(k).forEach(it=>byId[it.id]=it); }
+
+function contextFor(it){
+  const d = it.data;
+  if (it.kind==="read") return `A short article titled “${d.t}” (${d.c}):\n\n${d.p.join("\n\n")}`;
+  if (it.kind==="word") return `The word of the day “${d.w}” (${d.pos}${d.pr?", pronounced "+d.pr:""}). Definition: ${d.d} Origin and notes: ${d.o}`;
+  return `A quick idea titled “${d.t}” (${d.c}): ${d.b}`;
+}
+function labelFor(it){ return it.kind==="word" ? it.data.w : it.data.t; }
+const RULES = `You are a knowledgeable, warm guide inside a seasonal learning app called The Turning Year. The reader has just read the piece below and wants to go deeper.
+Rules: be accurate above all. Only state facts you are confident are true; when something is uncertain, debated or folklore, say so plainly. Never invent quotes, statistics, studies or book titles; only recommend books or sources you are certain exist, with their authors.
+Answer in about 120 to 220 words unless asked for more, in plain conversational prose. You may use short bullet lists and **bold**, but no headings. End with nothing extra: no offers of further help.`;
+
+function chatURL(it, question){
+  let ctx = contextFor(it); if (ctx.length > 1400) ctx = ctx.slice(0,1400) + "…";
+  const q = `I'm reading this in my seasonal learning app and want to go deeper. ${question || "Tell me more about it."}\n\n${ctx}`;
+  return "https://claude.ai/new?q=" + encodeURIComponent(q);
+}
+function deeperHTML(it, scope){
+  const key = scope+"-"+it.id;
+  return `<div class="deeper" data-key="${key}" data-id="${it.id}">
+    <div class="deeper-h">${SPARK}Go deeper</div>
+    <div class="prompts needs-claude">${PROMPTS[it.kind].map(p=>`<button class="pchip" type="button" data-q="${esc(p)}">${esc(p)}</button>`).join("")}</div>
+    <form class="ask needs-claude"><input id="ask-${key}" type="text" enterkeyhint="send" placeholder="Ask your own question…" aria-label="Ask Claude about ${esc(labelFor(it))}"><button type="submit">Ask</button></form>
+    <div class="thread" aria-live="polite">${threadHTML(it.id)}</div>
+    <div class="deeper-foot">
+      <a class="chatlink" href="${chatURL(it, lastQuestion(it.id))}" target="_blank" rel="noopener">Continue in a Claude chat ↗</a>
+      <button class="clearthread" type="button"${threads.get(it.id)?.turns.length ? "" : " hidden"}>Clear this conversation</button>
+    </div>
+  </div>`;
+}
+function threadHTML(id){
+  const th = threads.get(id); if (!th) return "";
+  return th.turns.map(t => t.role==="user"
+    ? `<div class="q">${esc(t.shown || t.content)}</div>`
+    : `<div class="a">${md(t.content)}</div>`).join("");
+}
+function lastQuestion(id){
+  const t = threads.get(id)?.turns.filter(x=>x.role==="user").pop();
+  return t ? (t.shown || t.content) : "";
+}
+
+function md(src){
+  const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/(^|[^*])\*(?!\s)(.+?)\*/g,"$1<em>$2</em>");
+  const out = []; let list = null;
+  for (const raw of src.split("\n")){
+    const line = raw.trim();
+    const m = line.match(/^(?:[-*•]|\d+[.)])\s+(.*)/);
+    if (m){ const tag = /^\d/.test(line) ? "ol" : "ul"; if (!list || list.tag!==tag){ if (list) out.push(`</${list.tag}>`); list={tag}; out.push(`<${tag}>`); } out.push(`<li>${inline(m[1])}</li>`); continue; }
+    if (list){ out.push(`</${list.tag}>`); list = null; }
+    if (line) out.push(`<p>${inline(line.replace(/^#+\s*/,""))}</p>`);
+  }
+  if (list) out.push(`</${list.tag}>`);
+  return out.join("");
+}
+const ERRORS = {
+  rate_limited:"Claude needs a short break. Try again in a minute.",
+  session_expired:"Please sign in to Claude again, then try once more.",
+  refused:"Claude couldn’t answer that one. Try asking it a different way.",
+  empty_completion:"No answer came back. Try a simpler question.",
+  prompt_too_large:"That question was too long. Try a shorter one."
+};
+
+async function ask(panel, question){
+  if (!sample) return;
+  const id = panel.dataset.id, it = byId[id];
+  let th = threads.get(id);
+  if (!th){ th = {turns:[]}; threads.set(id, th); }
+  if (th.busy) return;
+  const thread = panel.querySelector(".thread");
+  const q = document.createElement("div"); q.className="q"; q.textContent = question; thread.append(q);
+  const a = document.createElement("div"); a.className="a thinking"; a.textContent="Thinking…"; thread.append(a);
+  const stop = document.createElement("button"); stop.type="button"; stop.className="stop"; stop.textContent="Stop"; thread.append(stop);
+  const first = th.turns.length === 0;
+  th.turns.push(first ? {role:"user", shown:question, content:`${RULES}\n\n---\n${contextFor(it)}\n---\n\nThe reader asks: ${question}`} : {role:"user", content:question});
+  th.busy = true; setBusy(panel, true);
+  const ctl = new AbortController(); stop.onclick = ()=>ctl.abort();
+  panel.querySelector(".chatlink").href = chatURL(it, question);
+  try{
+    // keep the opening turn (rules + the piece) and the most recent exchange history
+    const all = th.turns.map(t=>({role:t.role, content:t.content}));
+    const input = all.length > 9 ? [all[0], ...all.slice(-8)] : all;
+    const {text, truncated} = await sample(input, {
+      signal: ctl.signal, cache: first ? true : false,
+      onText: ({text})=>{ a.classList.remove("thinking"); a.innerHTML = md(text); }
+    });
+    a.classList.remove("thinking"); a.innerHTML = md(text) + (truncated ? `<p class="err">(Cut short. Ask for a part of it.)</p>` : "");
+    th.turns.push({role:"assistant", content:text});
+    saveThread(id);
+    panel.querySelector(".clearthread").hidden = false;
+  }catch(e){
+    th.turns.pop(); // drop the unanswered question so the next one stays coherent
+    a.classList.remove("thinking");
+    const keep = e && e.text ? md(e.text) : "";
+    if (e && (e.code==="not_granted" || e.code==="sampling_disabled" || e.code==="not_declared" || e.code==="capability_disabled" || e.code==="capability_removed")){
+      sample = null; document.body.classList.remove("has-claude");
+      a.innerHTML = `<p class="err">Asking Claude here isn’t turned on. Use “Continue in a Claude chat” instead.</p>`;
+    } else if (e && e.code==="cancelled"){
+      a.innerHTML = keep || `<p class="err">Stopped.</p>`;
+    } else {
+      a.innerHTML = keep + `<p class="err">${ERRORS[e && e.code] || "Something interrupted the answer. Try again."}</p>`;
+    }
+  }finally{
+    stop.remove(); th.busy = false; setBusy(panel, false);
+  }
+}
+function setBusy(panel, on){ panel.querySelectorAll(".pchip,.ask button").forEach(b=>b.disabled=on); }
+
+document.addEventListener("click", e=>{
+  const chip = e.target.closest(".pchip"); if (!chip) return;
+  ask(chip.closest(".deeper"), chip.dataset.q);
+});
+document.addEventListener("submit", e=>{
+  const f = e.target.closest(".ask"); if (!f) return;
+  e.preventDefault();
+  const input = f.querySelector("input"), v = input.value.trim(); if (!v) return;
+  input.value = ""; ask(f.closest(".deeper"), v);
+});
+
+/* select a word or phrase -> ask about it */
+const selBtn = document.getElementById("selask");
+let selCtx = null;
+document.addEventListener("selectionchange", ()=>{
+  if (!sample){ selBtn.hidden = true; return; }
+  const sel = getSelection(), txt = sel ? sel.toString().trim().replace(/\s+/g," ") : "";
+  if (!txt || txt.length > 80 || !sel.rangeCount){ selBtn.hidden = true; return; }
+  const node = sel.getRangeAt(0).commonAncestorContainer;
+  const el = node.nodeType===1 ? node : node.parentElement;
+  const item = el && el.closest("details.item");
+  if (!item || el.closest(".deeper") && !el.closest(".a")){ selBtn.hidden = true; return; }
+  selCtx = {item, txt};
+  selBtn.textContent = `Ask Claude about “${txt.length>28 ? txt.slice(0,28)+"…" : txt}”`;
+  selBtn.hidden = false;
+});
+selBtn.addEventListener("pointerdown", e=>e.preventDefault()); // keep the selection
+selBtn.addEventListener("click", ()=>{
+  if (!selCtx) return;
+  const panel = selCtx.item.querySelector(".deeper");
+  const q = `What does “${selCtx.txt}” mean here? Explain it and tell me something interesting about it.`;
+  selBtn.hidden = true; try{ getSelection().removeAllRanges(); }catch(e){}
+  ask(panel, q);
+  panel.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"end"});
+});
+
+(async ()=>{
+  try{ sample = window.claude && await window.claude.use("sample"); }catch(e){ sample = null; }
+  if (sample) document.body.classList.add("has-claude");
+})();
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest(".clearthread"); if (!b) return;
+  const panel = b.closest(".deeper"), id = panel.dataset.id;
+  if (threads.get(id)?.busy) return;
+  threads.delete(id); saveThread(id);
+  document.querySelectorAll(`.deeper[data-id="${id}"]`).forEach(p=>{ p.querySelector(".thread").innerHTML = ""; p.querySelector(".clearthread").hidden = true; });
+});
+
+/* ---- Remembering: your Claude account first, this browser as a backup ---- */
+const store = { db:null, uid:null };
+for (const [id, turns] of Object.entries(load("ty-threads", {}))) if (Array.isArray(turns) && turns.length) threads.set(id, {turns});
+function progressRef(){ return store.db.doc("data/users/" + store.uid + "/progress"); }
+function threadRef(id){ return progressRef().collection("threads").doc(id); }
+function setSync(state){
+  const msg = {
+    account: "Your reading and questions are saved to your Claude account.",
+    local: "Your reading and questions are saved in this browser only. Open this page in Claude while signed in to keep them everywhere.",
+    error: "Couldn’t reach your saved history just now; changes are kept in this browser until it reconnects."
+  }[state] || "";
+  document.getElementById("sync").textContent = msg;
+}
+function saveLocal(){
+  save("ty-read", [...readSet]); save("ty-days", [...daysOpened]);
+  const t = {}; threads.forEach((v,k)=>{ if (v.turns.length) t[k] = v.turns; }); save("ty-threads", t);
+}
+let progTimer = 0, progWriting = false, progAgain = false;
+function persistProgress(){ saveLocal(); clearTimeout(progTimer); progTimer = setTimeout(flushProgress, 600); }
+async function flushProgress(){
+  if (!store.db) return;
+  if (progWriting){ progAgain = true; return; }
+  progWriting = true;
+  try{ await progressRef().set({ read:[...readSet], days:[...daysOpened].sort().slice(-500), updatedAt:Date.now() }); setSync("account"); }
+  catch(e){ setSync("error"); }
+  progWriting = false;
+  if (progAgain){ progAgain = false; flushProgress(); }
+}
+const threadWrites = new Map(); // id -> promise chain, one write at a time per conversation
+function saveThread(id){
+  saveLocal();
+  if (!store.db) return;
+  const prev = threadWrites.get(id) || Promise.resolve();
+  const next = prev.then(async ()=>{
+    const th = threads.get(id);
+    try{
+      if (th && th.turns.length) await threadRef(id).set({ turns: th.turns.slice(-30), updatedAt: Date.now() });
+      else await threadRef(id).delete();
+    }catch(e){ setSync("error"); }
+  });
+  threadWrites.set(id, next);
+}
+function rerender(){
+  const open = [...document.querySelectorAll("details.item[open]")].map(d=>d.dataset.id);
+  if (libSeason) renderLibrary(); else renderToday();
+  open.forEach(id=>document.querySelectorAll(`details.item[data-id="${id}"]`).forEach(d=>d.open = true));
+}
+(async ()=>{
+  let db = null, user = null;
+  try{ [db, user] = await Promise.all([window.claude?.use("db"), window.claude?.use("user")]); }catch(e){}
+  const uid = user ? await user.id().catch(()=>null) : null;
+  if (!db || !uid){ setSync("local"); return; }
+  store.db = db; store.uid = uid;
+  try{
+    const snap = await progressRef().get();
+    const d = snap.exists ? snap.data() : {};
+    const remoteRead = new Set(d.read || []), remoteDays = new Set(d.days || []);
+    const localExtra = [...readSet].some(x=>!remoteRead.has(x)) || [...daysOpened].some(x=>!remoteDays.has(x));
+    remoteRead.forEach(x=>readSet.add(x)); remoteDays.forEach(x=>daysOpened.add(x));
+    const qs = await progressRef().collection("threads").get();
+    const remoteIds = new Set();
+    qs.docs.forEach(doc=>{
+      const turns = doc.data()?.turns;
+      if (Array.isArray(turns) && turns.length && !threads.get(doc.id)?.busy){ threads.set(doc.id, {turns}); remoteIds.add(doc.id); }
+    });
+    saveLocal();
+    if (localExtra) flushProgress();
+    threads.forEach((v,id)=>{ if (!remoteIds.has(id) && v.turns.length) saveThread(id); }); // upload conversations only this browser had
+    setSync("account");
+    rerender();
+  }catch(e){ setSync("error"); }
+})();
+
+const today = midnight(new Date());
+let viewDate = today;
+let current = null;
+let libSeason = null, libKind = "all";
+
+function setSeason(key){
+  if (document.documentElement.dataset.season !== key){
+    document.documentElement.dataset.season = key;
+    plate.setSeason(key);
+  }
+  document.getElementById("title").innerHTML = `A curious mind’s <em>guide to ${DATA[key].name.toLowerCase()}</em>`;
+}
+
+function renderToday(){
+  current = seasonInfo(viewDate);
+  setSeason(current.key);
+  const fmt = viewDate.toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric"});
+  document.getElementById("date").textContent = fmt;
+  document.getElementById("stamp").textContent = `${DATA[current.key].name} · day ${current.dayIndex+1}`;
+  document.getElementById("bar").style.width = ((current.dayIndex+1)/current.length*100).toFixed(1)+"%";
+  document.getElementById("dayof").textContent = `Day ${current.dayIndex+1} of ${current.length}`;
+  const n = current.toNext;
+  document.getElementById("until").textContent = `${n} ${n===1?"day":"days"} to the ${EVENT[current.nextKey]}`;
+  document.getElementById("gotoday").hidden = +viewDate === +today;
+  document.getElementById("next").disabled = (viewDate - today)/DAY >= 7;
+  const list = document.getElementById("spread");
+  list.innerHTML = itemsFor(current).map(x=>itemHTML(x,"t")).join("");
+  wireList(list);
+  updateCounts();
+}
+
+function updateCounts(){
+  if (current){
+    const ids = itemsFor(current).map(x=>x.id);
+    const done = ids.filter(id=>readSet.has(id)).length;
+    document.getElementById("progress").textContent = done === ids.length ? "All 5 read" : `${done} of ${ids.length} read`;
+  }
+  if (libSeason) renderLibCount();
+  // streak: consecutive days up to today on which something was opened
+  let s = 0, d = new Date(today);
+  const back = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()-1);
+  if (!daysOpened.has(iso(d))) d = back(d);
+  while (daysOpened.has(iso(d))){ s++; d = back(d); }
+  document.getElementById("streak").textContent = s >= 2 ? `You’re on a ${s}-day streak.` : "";
+}
+
+/* library */
+function allItems(key){
+  const S = DATA[key];
+  return [
+    ...S.reads.map((d,i)=>({kind:"read", id:key+"-r"+i, data:d})),
+    ...S.words.map((d,i)=>({kind:"word", id:key+"-w"+i, data:d})),
+    ...S.quick.map((d,i)=>({kind:"quick", id:key+"-q"+i, data:d}))
+  ];
+}
+function renderLibCount(){
+  const all = allItems(libSeason), done = all.filter(x=>readSet.has(x.id)).length;
+  document.getElementById("lib-count").textContent = `${done} of ${all.length} explored`;
+}
+function renderLibrary(){
+  setSeason(libSeason);
+  document.getElementById("stamp").textContent = `${DATA[libSeason].name} · library`;
+  document.getElementById("season-filters").innerHTML = SEASONS.map(s=>
+    `<button class="chip" type="button" data-s="${s}" aria-pressed="${s===libSeason}">${DATA[s].name}</button>`).join("");
+  const kinds = [["all","Everything"],["read","Long reads"],["word","Words"],["quick","Quick ideas"]];
+  document.getElementById("kind-filters").innerHTML = kinds.map(([k,l])=>
+    `<button class="chip" type="button" data-k="${k}" aria-pressed="${k===libKind}">${l}</button>`).join("");
+  document.getElementById("lib-h").textContent = libSeason === seasonInfo(today).key ? "Everything this season" : `Everything in ${DATA[libSeason].name.toLowerCase()}`;
+  const items = allItems(libSeason);
+  const groups = [["read","Long reads"],["word","Words"],["quick","Quick ideas"]].filter(([k])=>libKind==="all"||libKind===k);
+  const lib = document.getElementById("library");
+  lib.innerHTML = groups.map(([k,l])=>{
+    let g = items.filter(x=>x.kind===k);
+    if (k==="word") g = g.slice().sort((a,b)=>a.data.w.localeCompare(b.data.w));
+    return `<div class="group-h">${l} · ${g.length}</div><div class="list">${g.map(x=>itemHTML(x,"l")).join("")}</div>`;
+  }).join("");
+  wireList(lib);
+  renderLibCount();
+}
+document.getElementById("season-filters").addEventListener("click", e=>{
+  const b = e.target.closest("[data-s]"); if (!b) return; libSeason = b.dataset.s; renderLibrary();
+});
+document.getElementById("kind-filters").addEventListener("click", e=>{
+  const b = e.target.closest("[data-k]"); if (!b) return; libKind = b.dataset.k; renderLibrary();
+});
+
+/* tabs and nav */
+function show(view){
+  const lib = view === "library";
+  document.getElementById("view-today").hidden = lib;
+  document.getElementById("view-library").hidden = !lib;
+  document.getElementById("tab-today").setAttribute("aria-pressed", !lib);
+  document.getElementById("tab-library").setAttribute("aria-pressed", lib);
+  if (lib){ libSeason = libSeason || seasonInfo(viewDate).key; renderLibrary(); }
+  else { libSeason = null; renderToday(); }
+  if (location.hash !== "#"+view){ try{ location.hash = view; }catch(e){} }
+}
+document.getElementById("tab-today").onclick = ()=>show("today");
+document.getElementById("tab-library").onclick = ()=>show("library");
+function shiftDay(n){ viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), viewDate.getDate()+n); renderToday(); }
+document.getElementById("prev").onclick = ()=>shiftDay(-1);
+document.getElementById("next").onclick = ()=>shiftDay(1);
+document.getElementById("gotoday").onclick = ()=>{ viewDate = today; renderToday(); };
+document.getElementById("reset").onclick = ()=>{ document.getElementById("reset-confirm").hidden = false; };
+document.getElementById("reset-yes").onclick = ()=>{
+  readSet = new Set(); daysOpened = new Set(); persistProgress();
+  document.getElementById("reset-confirm").hidden = true;
+  document.querySelectorAll(".is-read").forEach(x=>x.classList.remove("is-read")); updateCounts();
+};
+
+/* the painted plate: leaves, snow, petals or fireflies */
+const plate = (function(){
+  const cv = document.getElementById("plate"), ctx = cv.getContext("2d");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let season = "autumn", parts = [], W = 0, H = 0, raf = 0, t0 = 0, r = rng(7);
+  const SKY = {
+    autumn:[["#7a2a12",0],["#b4451f",.55],["#e0913a",1]],
+    winter:[["#16263f",0],["#2f4f78",.6],["#7d9cc0",1]],
+    spring:[["#f3c6d3",0],["#e9e3c4",.55],["#b7d39a",1]],
+    summer:[["#0e3c55",0],["#c4572c",.62],["#f2b54a",1]]
+  };
+  const INK = {
+    autumn:["#f2b33d","#e46a28","#9c2f14","#f7d58a","#c8411d"],
+    winter:["#ffffff","#e3eefb","#c7dbf2"],
+    spring:["#fff5f8","#f5a9c0","#e57ea0","#ffffff"],
+    summer:["#fff3a8","#ffe066","#d9ff8a"]
+  };
+  function size(){
+    const dpr = Math.min(2, window.devicePixelRatio || 1), b = cv.getBoundingClientRect();
+    W = b.width; H = b.height; cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function spawn(){
+    r = rng(hash(season)); parts = [];
+    const n = season==="winter" ? 70 : season==="summer" ? 46 : 34;
+    for (let i=0;i<n;i++) parts.push({x:r()*W, y:r()*H, s:.6+r()*1.1, a:r()*6.28, v:.25+r()*.6, c:INK[season][Math.floor(r()*INK[season].length)], ph:r()*6.28});
+  }
+  function bg(){
+    const g = ctx.createLinearGradient(0,0,W*.4,H); SKY[season].forEach(([c,o])=>g.addColorStop(o,c));
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    if (season==="summer"){ // low sun and horizon
+      ctx.fillStyle="rgba(255,214,120,.9)"; ctx.beginPath(); ctx.arc(W*.78,H*.86,26,0,6.28); ctx.fill();
+      ctx.fillStyle="rgba(8,30,40,.85)"; ctx.fillRect(0,H*.86,W,H);
+    }
+    if (season==="winter"){ ctx.fillStyle="rgba(255,255,255,.85)"; ctx.beginPath(); ctx.arc(W*.82,H*.3,13,0,6.28); ctx.fill(); }
+  }
+  function leaf(p){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.scale(p.s,p.s); ctx.fillStyle=p.c;
+    ctx.beginPath(); ctx.moveTo(0,-10); ctx.quadraticCurveTo(8,-2,0,10); ctx.quadraticCurveTo(-8,-2,0,-10); ctx.fill();
+    ctx.strokeStyle="rgba(0,0,0,.18)"; ctx.lineWidth=.8; ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(0,12); ctx.stroke(); ctx.restore(); }
+  function flake(p){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a*.3); ctx.strokeStyle=p.c; ctx.lineWidth=1; const L=3.2*p.s;
+    for(let k=0;k<6;k++){ ctx.rotate(Math.PI/3); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,L); ctx.moveTo(0,L*.55); ctx.lineTo(L*.3,L*.8); ctx.moveTo(0,L*.55); ctx.lineTo(-L*.3,L*.8); ctx.stroke(); }
+    ctx.restore(); }
+  function petal(p){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.scale(p.s,p.s*.6); ctx.fillStyle=p.c;
+    ctx.beginPath(); ctx.ellipse(0,0,6,4,0,0,6.28); ctx.fill(); ctx.restore(); }
+  function fly(p,t){ const glow = .35 + .65*Math.max(0, Math.sin(t*.0016*p.v*3 + p.ph));
+    const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,9*p.s); g.addColorStop(0,`rgba(255,240,140,${glow})`); g.addColorStop(1,"rgba(255,240,140,0)");
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,9*p.s,0,6.28); ctx.fill();
+    ctx.fillStyle=`rgba(255,250,200,${glow})`; ctx.beginPath(); ctx.arc(p.x,p.y,1.4,0,6.28); ctx.fill(); }
+  function step(dt,t){
+    for (const p of parts){
+      if (season==="summer"){ p.x += Math.cos(p.ph + t*.0004)*.25*p.v; p.y += Math.sin(p.ph*1.3 + t*.0005)*.2*p.v; if (p.y>H*.84) p.y=H*.84; }
+      else {
+        const fall = season==="winter" ? .35 : season==="spring" ? .3 : .45;
+        p.y += fall*p.v*dt/16; p.x += (Math.sin(t*.001*p.v + p.ph)*.5 + (season==="spring"?.35:.12))*dt/16; p.a += .01*p.v*dt/16;
+        if (p.y > H+12){ p.y = -12; p.x = r()*W; } if (p.x > W+12) p.x = -12;
+      }
+    }
+  }
+  function draw(t){ bg(); for (const p of parts){ season==="autumn"?leaf(p):season==="winter"?flake(p):season==="spring"?petal(p):fly(p,t); } }
+  function loop(t){ const dt = Math.min(48, t - (t0||t)); t0 = t; step(dt,t); draw(t); raf = requestAnimationFrame(loop); }
+  function start(){ cancelAnimationFrame(raf); size(); spawn(); if (still) draw(1200); else { t0 = 0; raf = requestAnimationFrame(loop); } }
+  addEventListener("resize", ()=>{ size(); if (still) draw(1200); });
+  return { setSeason(s){ season = s; start(); } };
+})();
+
+/* boot */
+function route(){ show(location.hash === "#library" ? "library" : "today"); }
+addEventListener("hashchange", route);
+route();
+})();
+</script>

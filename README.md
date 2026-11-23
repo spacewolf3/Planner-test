@@ -1,11 +1,13 @@
 # Home
 
-Small web apps our household uses day to day. Each app is a single HTML file that runs as a [claude.ai](https://claude.ai) artifact; there is nothing to install or build.
+Small web apps our household uses day to day. Each app is a self-contained web page that runs as a [claude.ai](https://claude.ai) artifact; there is nothing to install or build.
 
 | App | Folder | What it does |
 | --- | --- | --- |
 | **Family Planner** | [`planner/`](planner/) | Who has the kids, school and no-school days, calendar, weather, meals, groceries and to-dos, shared between both parents. |
 | **House Book** | [`house-book/`](house-book/) | Cleaning and upkeep schedule, appliances, and the house cleaners' visits. |
+| **Yard & Irrigation Plan** | [`yard/`](yard/) | Map of the yard and sprinkler system, zone schedules, parts, seasonal care and repairs. |
+| **The Turning Year** | [`seasons/`](seasons/) | A daily seasonal reading: one long piece, a word of the day and three quick ideas. |
 
 ## How this repository is organized
 
