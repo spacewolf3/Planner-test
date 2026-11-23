@@ -199,6 +199,8 @@ table.pattern select { width: 100%; padding: 5px 4px; font-size: .82rem; }
 .sheet { background: var(--surface); color: var(--fg); border-radius: 14px; width: min(520px, 100%); max-width: 100%; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 18px; box-shadow: var(--shadow); display: grid; gap: 12px; min-width: 0; }
 .sheet > *, .sheet form > *, .sheet .field, .sheet .fieldrow > * { min-width: 0; max-width: 100%; }
 .sheet > .actions, .sheet form > .actions { max-width: none; }
+.addrow input[type="date"] { width: auto; flex: 0 1 170px; display: inline-block; }
+@media (max-width: 560px) { .addrow input[type="date"], .addrow select { flex: 1 1 140px; } .addrow .btn.primary { flex: 1 1 100%; } }
 .sheet .actions { position: sticky; bottom: -18px; z-index: 1; background: var(--surface); margin: 4px -18px -18px; padding: 12px 18px; border-top: 1px solid var(--line); }
 html.modal-open, html.modal-open body { overflow: hidden; }
 .sheet:focus { outline: none; }
@@ -269,6 +271,23 @@ fieldset.scope input { margin-top: 4px; accent-color: var(--accent); width: 18px
 .wxfacts dt { color: var(--muted); }
 .wxfacts dd { margin: 0; }
 .wxtip { margin: 8px 0 0; font-size: .85rem; font-weight: 600; color: var(--o6); }
+.textlink { justify-self: start; border: 0; background: none; padding: 0; color: var(--muted); font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.tedit { border: 0; background: transparent; padding: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; min-width: 0; }
+.checklist .tedit { display: block; }
+.checklist .tedit .tt { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
+.checklist .tedit:hover .tt { text-decoration-color: var(--line); }
+.checklist li.done .tedit { text-decoration: line-through; color: var(--muted); }
+.tnote { display: block; font-size: .8rem; color: var(--muted); }
+button.due { border: 0; background: transparent; padding: 4px 2px; font: inherit; font-size: .8rem; cursor: pointer; }
+button.due.nodue { color: var(--muted); opacity: .8; }
+.wtasks { list-style: none; margin: 0; padding: 4px 8px 6px; display: grid; gap: 3px; border-top: 1px dashed var(--line); }
+.wtasks li { display: flex; gap: 6px; align-items: flex-start; font-size: .82rem; }
+.wtasks input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+.wtasks .tedit { overflow-wrap: anywhere; }
+.wtasks li.done .tedit { text-decoration: line-through; color: var(--muted); }
+.late { color: var(--gap); font-weight: 600; }
+.wadds { display: flex; gap: 4px; margin: 4px 6px 8px; }
+.wadds .wadd { flex: 1; margin: 0; }
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -772,8 +791,11 @@ function renderWeek() {
           return `<button class="seg ${gap ? 'gap' : o.v === 'na' ? 'na' : ''}" style="--c:${ownerColor(o.v)}" data-act="care" data-kid="${esc(k.id)}" data-block="${b.key}" data-ds="${ds}" aria-label="${esc(b.label)}: ${esc(ownerLabel(gap ? '' : o.v))}"><span class="sl">${esc(b.label)}</span><span class="so">${esc(gap ? 'Nobody' : o.v === 'na' ? '—' : ownerLabel(o.v))}</span></button>`; }).join('')
       }</div></div>`).join('')}</div>` : ''}
       <div class="wev">${its.map(i => evItem(i, true)).join('')}</div>
+      ${(() => { const due = tasksDue(ds); const late = ds === t ? S.tasks.filter(x => !x.done && x.due && x.due < t) : [];
+        const all = [...late, ...due]; if (!all.length) return '';
+        return `<ul class="wtasks" aria-label="Tasks due">${all.map(x => { const p = person(x.owner); return `<li class="${x.done ? 'done' : ''}"><input type="checkbox" id="wt-${esc(ds)}-${esc(x.id)}" data-act="tdone" data-id="${esc(x.id)}" ${x.done ? 'checked' : ''} aria-label="Done: ${esc(x.title)}"><button type="button" class="tedit" data-act="tedit" data-id="${esc(x.id)}">${esc(x.title)}${x.due < ds ? ' <span class="late small">overdue</span>' : ''}${p ? ` <span class="small muted">· ${esc(p.name)}</span>` : ''}</button></li>`; }).join('')}</ul>`; })()}
       ${dinner ? `<button class="wdinner" data-act="meal" data-ds="${ds}" data-slot="dinner"><span class="sl">Dinner</span> ${esc(dinner.name)}</button>` : ''}
-      <button class="wadd" data-act="newev" data-ds="${ds}">+ Add</button>
+      <div class="wadds"><button class="wadd" data-act="newev" data-ds="${ds}">+ Event</button><button class="wadd" data-act="newtask" data-ds="${ds}">+ Task</button></div>
     </section>`;
   }).join('')}</div>`;
 }
@@ -781,8 +803,8 @@ function renderWeek() {
 function taskLi(x) {
   const p = person(x.owner); const late = x.due && x.due < todayStr() && !x.done;
   return `<li class="${x.done ? 'done' : ''}"><input type="checkbox" id="tk-${esc(x.id)}" data-act="tdone" data-id="${esc(x.id)}" ${x.done ? 'checked' : ''} aria-label="Done: ${esc(x.title)}">
-    <span class="grow">${esc(x.title)}${p ? ` <span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>` : ''}</span>
-    ${x.due ? `<span class="due tnum${late ? ' late' : ''}">${late ? 'Overdue · ' : ''}${esc(x.due === todayStr() ? 'Today' : shortDate(x.due))}</span>` : ''}
+    <button type="button" class="grow tedit" data-act="tedit" data-id="${esc(x.id)}" aria-label="Edit ${esc(x.title)}"><span class="tt">${esc(x.title)}</span>${p ? ` <span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>` : ''}${x.notes ? `<span class="tnote">${esc(x.notes)}</span>` : ''}</button>
+    <button type="button" class="due tnum${late ? ' late' : ''}${x.due ? '' : ' nodue'}" data-act="tedit" data-id="${esc(x.id)}" aria-label="Change due date">${x.due ? `${late ? 'Overdue · ' : ''}${esc(x.due === todayStr() ? 'Today' : x.due === addDays(todayStr(), 1) ? 'Tomorrow' : shortDate(x.due))}` : '+ Date'}</button>
     <button class="xbtn" data-act="tdel" data-id="${esc(x.id)}" aria-label="Delete ${esc(x.title)}">×</button></li>`;
 }
 function renderTasks() {
@@ -1316,6 +1338,45 @@ function careSheet(kidId, block, ds) {
   });
 }
 
+function taskSheet(x, due) {
+  const isNew = !x;
+  const t = x ? JSON.parse(JSON.stringify(x)) : { id: uid(), title: '', due: due || '', owner: '', notes: '', done: false };
+  const ppl = settings().people;
+  openSheet(`
+    <h3>${isNew ? 'New task' : 'Edit task'}</h3>
+    <form id="taskform" class="opts" style="gap:12px">
+      <label class="field"><span>Task</span><span class="withmic"><input type="text" id="tf-title" value="${esc(t.title)}" placeholder="Sign permission slip, book dentist…" required>${micBtn('tf-title')}</span></label>
+      <div class="fieldrow">
+        <label class="field"><span>Due</span><input type="date" id="tf-due" value="${esc(t.due || '')}"></label>
+        <label class="field"><span>Who's doing it</span><select id="tf-owner"><option value="">Anyone</option>${ppl.map(p => `<option value="${esc(p.id)}" ${t.owner === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>
+      </div>
+      ${t.due ? '<button type="button" class="textlink" data-x="nodate">Remove the due date</button>' : ''}
+      <label class="field"><span>Notes</span><span class="withmic"><textarea id="tf-notes" rows="3" placeholder="Phone number, part number, where it is…">${esc(t.notes || '')}</textarea>${micBtn('tf-notes')}</span></label>
+      ${!isNew ? `<label class="toggles"><span><input type="checkbox" id="tf-done" ${t.done ? 'checked' : ''}> Done</span></label>` : ''}
+      <div class="actions">
+        ${!isNew ? '<button type="button" class="btn danger left" data-x="del">Delete</button>' : ''}
+        <button type="button" class="btn" data-act="close">Cancel</button>
+        <button type="submit" class="btn primary">${isNew ? 'Add task' : 'Save'}</button>
+      </div>
+    </form>`, sh => {
+    sh.addEventListener('click', async e => {
+      const b = e.target.closest('[data-x]'); if (!b) return;
+      if (b.dataset.x === 'nodate') { sh.querySelector('#tf-due').value = ''; b.remove(); }
+      if (b.dataset.x === 'del') { if (b.dataset.sure) { closeSheet(); await write(() => S.db.doc('tasks/' + t.id).delete(), 'Task deleted'); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to delete'; } }
+    });
+    sh.querySelector('#taskform').addEventListener('submit', async e => {
+      e.preventDefault();
+      const q = s => sh.querySelector(s);
+      const title = q('#tf-title').value.trim(); if (!title) return;
+      const done = q('#tf-done') ? q('#tf-done').checked : false;
+      const next = { title, due: q('#tf-due').value, owner: q('#tf-owner').value, notes: q('#tf-notes').value.trim(), done, doneAt: done ? (t.doneAt || Date.now()) : 0, createdAt: t.createdAt || Date.now() };
+      closeSheet();
+      await write(() => S.db.doc('tasks/' + t.id).set(next), isNew ? 'Task added' : 'Task saved');
+    });
+  });
+}
+const tasksDue = ds => S.tasks.filter(x => x.due === ds).sort((a, b) => (a.done - b.done) || (a.createdAt || 0) - (b.createdAt || 0));
+
 function eventSheet(ev, ds) {
   const isNew = !ev;
   const e = ev ? JSON.parse(JSON.stringify(ev)) : { id: uid(), title: '', date: ds || todayStr(), allDay: false, time: '', endTime: '', kids: [], owner: '', notes: '', repeat: null };
@@ -1531,6 +1592,8 @@ document.addEventListener('click', async e => {
   if (a === 'bkcancel') { S.restore = null; schedule(); return; }
   if (a === 'gclear') { const done = S.groceries.filter(g => g.done); for (const g of done) await write(() => S.db.doc('groceries/' + g.id).delete()); toast(`Cleared ${done.length} item${done.length === 1 ? '' : 's'}`); return; }
   if (a === 'gdel') { await write(() => S.db.doc('groceries/' + t.dataset.id).delete()); return; }
+  if (a === 'tedit') { const x = S.tasks.find(y => y.id === t.dataset.id); if (x && guard()) taskSheet(x); return; }
+  if (a === 'newtask') { if (guard()) taskSheet(null, t.dataset.ds); return; }
   if (a === 'tdel') { await write(() => S.db.doc('tasks/' + t.dataset.id).delete()); return; }
   if (a === 'color') {
     const st = JSON.parse(JSON.stringify(settings())); const it = st[t.dataset.kind].find(x => x.id === t.dataset.id); if (!it) return;
