@@ -224,6 +224,12 @@ table.pattern select { width: 100%; padding: 5px 4px; font-size: .82rem; }
 .gnote { font-size: .82rem; color: var(--muted); }
 .gerr { font-size: .85rem; padding: 8px 10px; border-radius: 8px; background: var(--sunk); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
+.gapweek { display: grid; gap: 6px; padding: 8px 0; border-top: 1px solid var(--line); }
+.gapweek:first-of-type { border-top: 0; padding-top: 0; }
+.gapweek-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.gapday { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px; align-items: start; font-size: .9rem; }
+.gapbtns { display: flex; flex-wrap: wrap; gap: 4px; }
+.gapday .gapitem { width: auto; padding: 3px 9px; font-size: .82rem; }
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -291,7 +297,7 @@ const MEAL_SLOTS = [
   { key: 'lunchbox', label: 'Lunchbox' },
   { key: 'dinner', label: 'Dinner' },
 ];
-const NO_SCHOOL_RE = /\b(no school|school (is )?closed|school holiday|no classes|teacher (work|in-?service) day|winter break|spring break|thanksgiving break)\b/i;
+const NO_SCHOOL_RE = /\b(no[\s-]+school|school (is )?closed|school holiday|no classes|teacher (work|in-?service) day)\b/i;
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DOW_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -311,7 +317,7 @@ const S = {
   db: null, user: null, mcp: null, perms: null,
   dbReady: false, dbMissing: false, canWrite: true,
   settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {}, meals: {},
-  mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
+  nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
   g: {},            // calendarId -> { events, err, at }
   gCals: null,      // list from list_calendars
   gState: 'idle',   // idle | off | ask | on | unavailable
@@ -382,9 +388,11 @@ function blocksFor(k, ds) {
 // Google all-day events like "No school!" on a day still counted as a school day.
 function calNoSchool(ds) {
   if (!isSchool(ds) || dayMark(ds) !== null) return null;
-  const hit = googleOn(ds).find(i => i.allDay && NO_SCHOOL_RE.test(i.title));
+  const hit = googleOn(ds).find(i => NO_SCHOOL_RE.test(i.title));
   return hit ? hit.title : null;
 }
+// Gaps from today (or the week's start, if later) to the end of that Monday–Sunday week.
+function weekGaps(ws) { const t = todayStr(); const from = ws > t ? ws : t; const end = addDays(ws, 7); if (from >= end) return []; return gapsFrom(from, Math.round((parseYmd(end) - parseYmd(from)) / 864e5)); }
 function gapsFrom(start, days) {
   const out = [];
   for (let i = 0; i < days; i++) {
@@ -464,7 +472,7 @@ function careRows(ds) {
   const typeRow = `<div class="daytype"><div class="seg-ctl" role="group" aria-label="School day or not">
       <button type="button" data-act="daytype" data-ds="${ds}" data-v="1" aria-pressed="${school}">School day</button>
       <button type="button" data-act="daytype" data-ds="${ds}" data-v="0" aria-pressed="${!school}">No school</button></div>
-      ${hint ? `<span class="hint">Your calendar says “${esc(hint)}”</span>` : ''}</div>`;
+      ${hint ? `<span class="hint">Your calendar says “${esc(hint)}”</span>` : S.care[ds] && S.care[ds].schoolNote && !school ? `<span class="small muted">From your calendar: ${esc(S.care[ds].schoolNote)}</span>` : ''}</div>`;
   return typeRow + kids.map(k => `<div class="kidrow"><div class="kidname"><span class="dot" style="--c:${colorVar(k.color)}"></span><span>${esc(k.name)}</span></div><div class="blocks">${
     blocksFor(k, ds).map(b => { const o = ownerOf(k.id, b.key, ds); const gap = !o.v || (o.v !== 'na' && !person(o.v));
       const cls = gap ? 'gap' : o.v === 'na' ? 'na' : '';
@@ -487,7 +495,7 @@ function noSchoolBanner(start, days) {
 
 function renderToday() {
   const t = todayStr(), tm = addDays(t, 1);
-  const gaps = gapsFrom(t, 14);
+  const thisWk = mondayOf(t);
   const items = itemsOn(t).map(i => ({ ...i, ds: t }));
   const tItems = itemsOn(tm).map(i => ({ ...i, ds: tm }));
   const dueTasks = S.tasks.filter(x => !x.done && x.due && x.due <= tm).sort((a, b) => a.due.localeCompare(b.due));
@@ -515,12 +523,14 @@ function renderToday() {
     </div>
     <div class="stack">
       <section class="panel" aria-labelledby="h-gaps">
-        <div class="panel-head"><h2 id="h-gaps">Care gaps, next 2 weeks</h2>${gaps.length ? `<span class="chip" style="--c:var(--gap)">${gaps.length} open</span>` : ''}</div>
-        ${!settings().kids.length ? '<p class="empty">No kids added yet.</p>' : gaps.length ? `
-          ${!hasPattern ? `<p class="small muted" style="margin:0 0 8px">Set who usually covers each day in <a href="#family">Setup</a> and most of these fill in on their own.</p>` : ''}
-          <div class="gaplist">${gaps.slice(0, 8).map(g => `<button class="gapitem" data-act="care" data-kid="${esc(g.kid.id)}" data-block="${g.block.key}" data-ds="${g.ds}"><span><b>${esc(DOW[dowOf(g.ds)])} ${esc(shortDate(g.ds))}</b> · ${esc(g.block.label)}${settings().kids.length > 1 ? ` · ${esc(g.kid.name)}` : ''}</span><span class="small">Assign</span></button>`).join('')}</div>
-          ${gaps.length > 8 ? `<p class="small muted" style="margin:8px 0 0">${gaps.length - 8} more in the <a href="#week">Week</a> view.</p>` : ''}`
-          : '<p class="allgood">Every care block has someone on it.</p>'}
+        <div class="panel-head"><h2 id="h-gaps">Care gaps</h2></div>
+        ${!settings().kids.length ? '<p class="empty">No kids added yet.</p>' : [[thisWk, 'This week'], [addDays(thisWk, 7), 'Next week']].map(([ws, label]) => {
+          const g = weekGaps(ws);
+          const byDay = {}; g.forEach(x => { (byDay[x.ds] = byDay[x.ds] || []).push(x); });
+          return `<div class="gapweek"><div class="gapweek-h"><h3 class="eyebrow">${label} · ${esc(shortDate(ws))}–${esc(shortDate(addDays(ws, 6)))}</h3>${g.length ? `<span class="chip" style="--c:var(--gap)">${g.length} open</span>` : '<span class="allgood small">All covered</span>'}</div>
+          ${g.length ? `<div class="gaplist">${Object.entries(byDay).map(([ds, xs]) => `<div class="gapday"><b>${esc(DOW[dowOf(ds)])} ${esc(shortDate(ds))}</b><span class="gapbtns">${xs.map(x => `<button class="gapitem" data-act="care" data-kid="${esc(x.kid.id)}" data-block="${x.block.key}" data-ds="${ds}">${settings().kids.length > 1 ? `${esc(x.kid.name)} · ` : ''}${esc(x.block.label)}</button>`).join('')}</span></div>`).join('')}</div>` : ''}</div>`;
+        }).join('')}
+        ${!hasPattern && settings().kids.length ? `<p class="small muted" style="margin:8px 0 0">Set who usually covers each day in <a href="#family">Setup</a> and most gaps fill in on their own.</p>` : ''}
       </section>
       <section class="panel" aria-labelledby="h-tasks">
         <div class="panel-head"><h2 id="h-tasks">Due today and tomorrow</h2><a href="#tasks" class="small">All tasks</a></div>
@@ -539,7 +549,7 @@ function renderWeek() {
   const ws = S.weekStart, we = addDays(ws, 6), t = todayStr();
   const people = settings().people;
   const days = [...Array(7)].map((_, i) => addDays(ws, i));
-  const gapCount = gapsFrom(ws, 7).length;
+  const gapCount = weekGaps(ws).length;
   return `
   <div class="weekbar">
     <h2>${esc(shortDate(ws))} – ${esc(shortDate(we))}</h2>
@@ -553,7 +563,7 @@ function renderWeek() {
   ${people.length ? `<div class="legend">${people.map(p => `<span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>`).join('')}<span class="chip" style="--c:var(--gap)">Nobody yet</span></div>` : ''}
   <div class="week">${days.map(ds => {
     const its = itemsOn(ds).map(i => ({ ...i, ds }));
-    const gn = gapsFrom(ds, 1).length;
+    const gn = ds >= t ? gapsFrom(ds, 1).length : 0;
     const school = isSchool(ds), hint = calNoSchool(ds);
     const dinner = settings().mealSlots.includes('dinner') ? mealAt(ds, 'dinner') : null;
     return `<section class="wday${ds === t ? ' is-today' : ''}" aria-label="${esc(longDate(ds))}">
@@ -760,7 +770,7 @@ function render() {
   for (const [id, val] of Object.entries(keep)) { const el = document.getElementById(id); if (el && el.tagName !== 'SELECT' && document.activeElement !== el && el.dataset.act !== 'rename' && el.dataset.act !== 'srename') { if (!el.value) el.value = val; } }
   if (focusId) { const el = document.getElementById(focusId); if (el) { el.value = keep[focusId] ?? el.value; el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch {} } }
   document.querySelectorAll('#tabs a').forEach(a => { a.toggleAttribute('aria-current', a.dataset.v === v); if (a.dataset.v === v) a.setAttribute('aria-current', 'page'); });
-  const gapsN = S.settings ? gapsFrom(todayStr(), 7).length : 0;
+  const gapsN = S.settings ? weekGaps(mondayOf(todayStr())).length : 0;
   const wk = document.querySelector('#tabs a[data-v="week"]'); wk.innerHTML = `Week${gapsN ? `<span class="badge" aria-label="${gapsN} care gaps">${gapsN}</span>` : ''}`;
 }
 let rq = 0; function schedule() { cancelAnimationFrame(rq); rq = requestAnimationFrame(render); }
@@ -793,9 +803,52 @@ function setCareDay(ds, kidId, block, val) {
   return write(() => S.db.doc('care/' + ds).set(cur));
 }
 
+// Days your Google Calendar marks as no school are switched automatically,
+// unless someone already chose school day / no school for that date.
+const nsWatches = new Map();
+function syncNoSchoolWatches() {
+  if (!S.mcp || S.gState !== 'on') { for (const u of nsWatches.values()) u(); nsWatches.clear(); return; }
+  const start = todayStr(), end = addDays(start, 400);
+  const want = new Set(S.selCals.map(c => c + '|' + start));
+  for (const [k, u] of nsWatches) if (!want.has(k)) { u(); nsWatches.delete(k); }
+  for (const cal of S.selCals) {
+    const k = cal + '|' + start; if (nsWatches.has(k)) continue;
+    nsWatches.set(k, S.mcp.watchTool(GC, 'list_events', { calendarId: cal, startTime: start + 'T00:00:00', endTime: end + 'T00:00:00', fullText: 'school', orderBy: 'startTime', pageSize: 250 }, ev => {
+      if (ev.type !== 'data') return;
+      const p = ev.result && ev.result.payload;
+      S.nsEvents[cal] = p && Array.isArray(p.events) ? p.events : [];
+      applyNoSchool();
+    }, { refetchInterval: 6 * 3600 * 1000, cache: { staleTime: 10 * 60 * 1000 } }));
+  }
+}
+function noSchoolDays() {
+  const out = new Map(); const t = todayStr();
+  for (const evs of Object.values(S.nsEvents)) for (const ev of evs) {
+    if (!ev || ev.status === 'cancelled' || !NO_SCHOOL_RE.test(ev.summary || '')) continue;
+    if (ev.start && ev.start.date) { const endD = (ev.end && ev.end.date) || addDays(ev.start.date, 1); for (let d = ev.start.date; d < endD; d = addDays(d, 1)) if (d >= t) out.set(d, ev.summary); }
+    else if (ev.start && ev.start.dateTime) { const d = ymd(new Date(ev.start.dateTime)); if (d >= t) out.set(d, ev.summary); }
+  }
+  return out;
+}
+let nsBusy = false;
+async function applyNoSchool() {
+  if (nsBusy || !S.careReady || !S.db || !S.canWrite) return;
+  nsBusy = true;
+  try {
+    const todo = [...noSchoolDays()].filter(([ds]) => dayMark(ds) === null && settings().schoolDays.includes(dowOf(ds))).sort();
+    let n = 0;
+    for (const [ds, title] of todo) {
+      const cur = S.care[ds] ? JSON.parse(JSON.stringify(S.care[ds])) : { date: ds, v: {} };
+      cur.date = ds; cur.v = cur.v || {}; cur.school = false; cur.schoolNote = String(title).slice(0, 120);
+      S.care[ds] = cur;
+      try { await S.db.doc('care/' + ds).set(cur); n++; } catch { break; }
+    }
+    if (n) { schedule(); toast(`Marked ${n} no-school day${n === 1 ? '' : 's'} from your calendar`); }
+  } finally { nsBusy = false; }
+}
 function setDayType(ds, school) {
   const cur = S.care[ds] ? JSON.parse(JSON.stringify(S.care[ds])) : { date: ds, v: {} };
-  cur.date = ds; cur.v = cur.v || {}; cur.school = school;
+  cur.date = ds; cur.v = cur.v || {}; cur.school = school; delete cur.schoolNote;
   S.care[ds] = cur; schedule();
   return write(() => S.db.doc('care/' + ds).set(cur));
 }
@@ -1201,7 +1254,7 @@ async function loadCalendars() {
     const r = await S.mcp.callTool(GC, 'list_calendars', {}, { cache: { staleTime: 5 * 60 * 1000 } });
     const p = r && r.payload; S.gCals = p && Array.isArray(p.calendars) ? p.calendars : [];
     S.gState = 'on'; S.gErr = null;
-    schedule(); syncWatches();
+    schedule(); syncWatches(); syncNoSchoolWatches();
   } catch (err) {
     const info = gErrorFor(err);
     if (err && (err.code === 'not_in_manifest' || err.code === 'not_granted')) S.gState = 'off';
@@ -1253,7 +1306,7 @@ document.addEventListener('click', async e => {
   if (a === 'newev') { if (guard()) eventSheet(null, t.dataset.ds); return; }
   if (a === 'ev') { const ev = S.events.find(x => x.id === t.dataset.id); if (ev && guard()) eventSheet(ev, t.dataset.ds); return; }
   if (a === 'gev') { gEventSheet(t.dataset.id, t.dataset.cal); return; }
-  if (a === 'wk') { const d = Number(t.dataset.d); S.weekStart = d ? addDays(S.weekStart, d) : mondayOf(todayStr()); syncWatches(); schedule(); return; }
+  if (a === 'wk') { const d = Number(t.dataset.d); S.weekStart = d ? addDays(S.weekStart, d) : mondayOf(todayStr()); syncWatches(); syncNoSchoolWatches(); schedule(); return; }
   if (a === 'gconnect') { connectGoogle(); return; }
   if (a === 'gperm') { try { await S.perms.manage(); location.reload(); } catch { toast("Open this page's Permissions menu to turn Google Calendar back on."); } return; }
   if (a === 'daytype') { if (guard()) await setDayType(t.dataset.ds, t.dataset.v === '1'); return; }
@@ -1302,7 +1355,7 @@ document.addEventListener('change', async e => {
   if (a === 'cal') {
     const sel = S.selCals.filter(c => c !== t.dataset.id);
     if (t.checked) sel.push(t.dataset.id);
-    S.selCals = sel; saveLocal('fp.cals', sel); syncWatches(); schedule(); return;
+    S.selCals = sel; saveLocal('fp.cals', sel); syncWatches(); syncNoSchoolWatches(); schedule(); return;
   }
 });
 document.addEventListener('submit', async e => {
@@ -1352,7 +1405,7 @@ S.mealWeek = defaultMealWeek();
 route();
 // a new day while the page stays open
 let lastDay = todayStr();
-setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekStart = mondayOf(lastDay); syncWatches(); schedule(); } }, 60000);
+setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekStart = mondayOf(lastDay); syncWatches(); syncNoSchoolWatches(); schedule(); } }, 60000);
 
 (async () => {
   const c = window.claude;
@@ -1365,7 +1418,7 @@ setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekSt
     const err = e => { if (e && e.code === 'revoked') { S.dbMissing = true; schedule(); } };
     db.doc('family/settings').onSnapshot(s => { S.settings = s.exists ? { ...s.data() } : {}; schedule(); }, err);
     db.doc('family/patterns').onSnapshot(s => { const d = s.exists ? s.data() : null; S.patterns = (d && d.p) || {}; schedule(); }, err);
-    db.collection('care').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.care = m; schedule(); }, err);
+    db.collection('care').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.care = m; if (!S.careReady) { S.careReady = true; applyNoSchool(); } schedule(); }, err);
     db.collection('events').onSnapshot(s => { S.events = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('groceries').onSnapshot(s => { S.groceries = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('tasks').onSnapshot(s => { S.tasks = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
