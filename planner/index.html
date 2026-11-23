@@ -314,6 +314,18 @@ button.due.nodue { color: var(--muted); opacity: .8; }
 .qtype.task { background: color-mix(in srgb, var(--o4) 22%, var(--surface)); }
 .qtype.noschool { background: var(--sunk); }
 .rep { font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.sheet a { color: var(--accent); font-weight: 600; }
+.sheet h4 { margin: 0; }
+.ideas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.idea { width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 12px; display: grid; gap: 2px; }
+.idea:hover { background: var(--sunk); }
+.idea .it { font-weight: 700; overflow-wrap: anywhere; }
+.needs { display: inline-block; margin-left: 4px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--o4); }
+.recipe-ing { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 2px; }
+.recipe-steps { margin: 4px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.planit { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.planit .btn { justify-self: start; }
+input[type="url"] { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; min-width: 0; width: 100%; }
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -401,7 +413,7 @@ const S = {
   db: null, user: null, mcp: null, perms: null,
   dbReady: false, dbMissing: false, canWrite: true,
   settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {}, meals: {},
-  me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
+  recipes: [], ra: null, me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
   g: {},            // calendarId -> { events, err, at }
   gCals: null,      // list from list_calendars
   gState: 'idle',   // idle | off | ask | on | unavailable
@@ -901,6 +913,7 @@ function renderGroceries() {
           return `<button class="mealcell${m ? '' : ' empty'}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${slots.length > 1 ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')}</div></div>`).join('')}</div>
       ${planned ? `<div class="actions" style="margin-top:10px"><button class="btn" data-act="mtolist">Add this week's ingredients to the list</button></div>` : ''}
     </section>
+    ${renderIdeas()}
     <section class="panel" aria-labelledby="h-mp">
       <div class="panel-head"><h2 id="h-mp">Plan meals with Claude</h2></div>
       ${renderPlanBox()}
@@ -1110,11 +1123,9 @@ function noSchoolDays() {
   return out;
 }
 let nsBusy = false;
-// Two-way sync of no-school days with Google Calendar.
-// - A "No school" event in Google marks the day (schoolSrc 'calendar'); if that event goes away, the mark goes too.
-// - Marking a day "No school" here adds an all-day "No school" event to your Google Calendar (gEv);
-//   switching it back to a school day deletes that event, and deleting it in Google switches the day back.
-// Only the person whose calendar holds the event changes it; marks set by hand otherwise stay as they are.
+// No-school days come from Google Calendar (read only): a "No school" event marks the day (schoolSrc 'calendar'),
+// and if that event goes away the mark goes too. Days someone set by hand are left alone.
+// Only the person whose device made a calendar mark (or the owner, for older marks) removes it.
 const nsComplete = () => S.selCals.length > 0 && S.selCals.every(c => Array.isArray(S.nsEvents[c]));
 const isAutoMark = d => d && d.school === false && (d.schoolSrc === 'calendar' || (!d.schoolSrc && d.schoolNote));
 const mineToManage = d => d.schoolBy ? d.schoolBy === S.me : S.isOwner;
@@ -1132,12 +1143,10 @@ async function applyNoSchool() {
       try { await S.db.doc('care/' + ds).set(cur); added++; } catch { break; }
     }
     if (nsComplete()) {
-      const primaryIds = S.selCals.includes('primary') ? new Set((S.nsEvents.primary || []).filter(e => e && e.status !== 'cancelled').map(e => e.id)) : null;
       for (const d of Object.values(S.care)) {
         if (!d || !d.date || d.date < t) continue;
         const cur = JSON.parse(JSON.stringify(d)); let changed = false;
         if (isAutoMark(d) && mineToManage(d) && !cal.has(d.date)) { delete cur.school; delete cur.schoolSrc; delete cur.schoolNote; delete cur.schoolBy; changed = true; }
-        if (d.gEv && d.gEv.by === S.me && primaryIds && !primaryIds.has(d.gEv.id)) { delete cur.gEv; if (cur.school === false) { delete cur.school; delete cur.schoolSrc; } changed = true; }
         if (!changed) continue;
         S.care[d.date] = cur;
         try { await S.db.doc('care/' + d.date).set(cur); removed++; } catch { break; }
@@ -1146,37 +1155,13 @@ async function applyNoSchool() {
     if (added || removed) { schedule(); toast([added && `Marked ${added} no-school day${added === 1 ? '' : 's'}`, removed && `${removed} day${removed === 1 ? '' : 's'} back to school`].filter(Boolean).join(' · ') + ' from your calendar'); }
   } finally { nsBusy = false; }
 }
-async function addNoSchoolToGoogle(ds) {
-  const input = { summary: 'No school', allDay: true, startTime: ds + 'T00:00:00', endTime: addDays(ds, 1) + 'T00:00:00', description: 'Added by Family Planner.', availability: 'AVAILABILITY_FREE', notificationLevel: 'NONE', calendarId: 'primary' };
-  const r = await S.mcp.callTool(GC, 'create_event', input);
-  let id = r && r.payload && (r.payload.id || (r.payload.event && r.payload.event.id));
-  if (!id) { // find the event we just made
-    const l = await S.mcp.callTool(GC, 'list_events', { calendarId: 'primary', startTime: ds + 'T00:00:00', endTime: addDays(ds, 1) + 'T00:00:00', fullText: 'Family Planner' }, { cache: false });
-    const ev = ((l && l.payload && l.payload.events) || []).find(e => e && e.summary === 'No school' && e.start && e.start.date === ds);
-    id = ev && ev.id;
-  }
-  return id || null;
-}
+// Marking a day here never changes anyone's Google Calendar.
 async function setDayType(ds, school) {
   const cur = S.care[ds] ? JSON.parse(JSON.stringify(S.care[ds])) : { date: ds, v: {} };
   cur.date = ds; cur.v = cur.v || {}; cur.school = school; cur.schoolSrc = 'manual'; delete cur.schoolNote; delete cur.schoolBy;
   S.care[ds] = cur; schedule();
   const ok = await write(() => S.db.doc('care/' + ds).set(cur));
-  if (!ok || !S.mcp || S.gState !== 'on' || !S.me || ds < todayStr()) return ok;
-  try {
-    if (!school && !cur.gEv && !noSchoolDays().has(ds)) {
-      const id = await addNoSchoolToGoogle(ds);
-      if (id) { const now = JSON.parse(JSON.stringify(S.care[ds] || cur)); now.gEv = { id, cal: 'primary', by: S.me }; S.care[ds] = now; await S.db.doc('care/' + ds).set(now); }
-    } else if (school && cur.gEv && cur.gEv.by === S.me) {
-      await S.mcp.callTool(GC, 'delete_event', { calendarId: cur.gEv.cal || 'primary', eventId: cur.gEv.id, notificationLevel: 'NONE' });
-      const now = JSON.parse(JSON.stringify(S.care[ds] || cur)); delete now.gEv; S.care[ds] = now; await S.db.doc('care/' + ds).set(now);
-    } else if (school && noSchoolDays().has(ds)) {
-      toast(`Marked as a school day. Your Google Calendar still says “${noSchoolDays().get(ds)}”; change it there if it's wrong.`);
-    }
-    S.mcp.invalidate(GC, 'list_events').catch(() => {});
-  } catch (e) {
-    toast(e && e.code === 'server_unavailable' ? "Google Calendar didn't answer; check it before trying again." : "Saved here, but Google Calendar wasn't updated: " + ((e && e.message) || 'unknown error'));
-  }
+  if (ok && school && noSchoolDays().has(ds)) toast(`Marked as a school day. Your Google Calendar still says “${noSchoolDays().get(ds)}”.`);
   return ok;
 }
 
@@ -1215,12 +1200,183 @@ function parseIngLines(text) {
     return m ? { qty: m[1].trim(), item: m[2].trim() } : { qty: '', item: l };
   });
 }
+// ---------- meal ideas (saved recipes) ----------
+const safeUrl = u => /^https?:\/\/\S+$/i.test(String(u || '').trim()) ? String(u).trim() : '';
+const srcName = u => { try { const h = new URL(u).hostname.replace(/^www\./, ''); return /instagram\./.test(h) ? 'Instagram' : /tiktok\./.test(h) ? 'TikTok' : /youtu/.test(h) ? 'YouTube' : /pinterest\./.test(h) ? 'Pinterest' : h; } catch { return ''; } };
+const recipe = id => S.recipes.find(r => r.id === id);
+const ingLines = list => (list || []).map(x => (x.qty ? x.qty + ' ' : '') + x.item).join('\n');
+function slugTitle(u) {
+  try { const segs = new URL(u).pathname.split('/').filter(Boolean).filter(s => !/^(p|reel|reels|recipe|recipes|\d+)$/i.test(s) && /[a-z]/i.test(s) && s.length > 3);
+    const s = segs.pop(); return s && /-/.test(s) ? s.replace(/[-_]+/g, ' ').replace(/\.\w+$/, '').replace(/^\w/, c => c.toUpperCase()) : ''; } catch { return ''; }
+}
+function renderIdeas() {
+  const list = [...S.recipes].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return `<section class="panel" aria-labelledby="h-ideas">
+    <div class="panel-head"><h2 id="h-ideas">Meal ideas</h2><button class="btn primary" data-act="ridea-new">+ Add idea</button></div>
+    ${list.length ? `<ul class="ideas">${list.map(r => `<li><button type="button" class="idea" data-act="ridea" data-id="${esc(r.id)}">
+        <span class="it">${esc(r.title || 'Untitled recipe')}</span>
+        <span class="small muted">${[r.source, (r.ingredients || []).length ? `${r.ingredients.length} ingredients` : '', r.time].filter(Boolean).map(esc).join(' · ')}${!(r.ingredients || []).length ? ' <span class="needs">Needs details</span>' : ''}</span>
+      </button></li>`).join('')}</ul>`
+      : '<p class="empty">Save recipes you want to try, from Instagram, a website or anywhere. Paste the link plus the caption or a screenshot, and Claude pulls out the ingredients and steps.</p>'}
+  </section>`;
+}
+function ideaFormHtml(r, opts) {
+  const A = S.ra || {};
+  return `<label class="field"><span>Link</span><input type="url" id="ra-url" value="${esc(r.url || '')}" placeholder="https://www.instagram.com/reel/…" inputmode="url" autocomplete="off"></label>
+    ${opts.read ? `<label class="field"><span>Caption or recipe text</span><span class="withmic"><textarea id="ra-text" rows="5" placeholder="Paste the caption or the recipe from the page. In Instagram, tap the caption to open it, then press and hold to copy.">${esc(A.text || '')}</textarea>${micBtn('ra-text')}</span></label>
+    <div class="qafiles"><label class="btn" for="ra-file">Add screenshots</label><input type="file" id="ra-file" multiple accept="image/*" hidden>
+      ${(A.files || []).map((f, i) => `<span class="chip">${esc(f.name)} <button type="button" class="xbtn" data-x="rmfile" data-i="${i}" aria-label="Remove ${esc(f.name)}">×</button></span>`).join('')}</div>` : ''}
+    ${opts.fields ? `<label class="field"><span>Name</span><input type="text" id="ra-title" value="${esc(r.title || '')}" placeholder="Crispy gnocchi with greens" required></label>
+    <div class="fieldrow"><label class="field"><span>Time</span><input type="text" id="ra-time" value="${esc(r.time || '')}" placeholder="30 min"></label><label class="field"><span>Serves</span><input type="text" id="ra-serves" value="${esc(r.servings || '')}" placeholder="4"></label></div>
+    <label class="field"><span>Ingredients, one per line</span><textarea id="ra-ing" rows="7">${esc(ingLines(r.ingredients))}</textarea></label>
+    <label class="field"><span>Steps, one per line</span><textarea id="ra-steps" rows="7">${esc((r.steps || []).join('\n'))}</textarea></label>
+    <label class="field"><span>Notes</span><input type="text" id="ra-notes" value="${esc(r.notes || '')}" placeholder="Kids liked it, double the sauce…"></label>` : ''}`;
+}
+// Add a new idea: link + caption/screenshots -> Claude -> review -> save.
+function ideaAddSheet() {
+  S.ra = { status: 'idle', text: '', files: [], draft: null };
+  const html = () => {
+    const A = S.ra, d = A.draft;
+    return `<h3>${d ? 'Check the recipe' : 'Add a meal idea'}</h3>
+      ${!d ? '<p class="small muted" style="margin:0">Paste the link, then the caption or recipe text, or add screenshots. The planner can\'t open links itself, so Claude reads what you paste.</p>' : (d.complete === false ? '<p class="gnote" style="margin:0">This looks incomplete. Fill in what\'s missing, or save it and add the rest later.</p>' : '')}
+      <form id="raform" class="opts" style="gap:10px">
+        ${ideaFormHtml(d || { url: A.url || '' }, { read: !d, fields: !!d })}
+        ${A.status === 'loading' ? '<p class="gnote" aria-live="polite">Reading the recipe…</p>' : A.status === 'error' ? `<div class="gerr" role="alert">${esc(A.err)}</div>` : ''}
+        <div class="actions">
+          <button type="button" class="btn" data-act="close">Cancel</button>
+          ${d ? '<button type="button" class="btn" data-x="back">Back</button><button type="submit" class="btn primary">Save idea</button>'
+              : `<button type="submit" class="btn primary" ${A.status === 'loading' ? 'disabled' : ''}>${A.status === 'loading' ? 'Reading…' : 'Read recipe'}</button>`}
+        </div>
+      </form>`;
+  };
+  openSheet(html(), sh => {
+    if (S.sample && S.sample.limits) S.sample.limits().then(l => { if (l && l.images) S.ra.imgLimit = l.images; }).catch(() => {});
+    const keep = () => { const u = sh.querySelector('#ra-url'), t = sh.querySelector('#ra-text'); if (u) S.ra.url = u.value; if (t) S.ra.text = t.value; };
+    const redraw = () => { keep(); sh.innerHTML = html(); };
+    sh.addEventListener('change', e => {
+      if (e.target.id !== 'ra-file') return;
+      for (const f of e.target.files || []) {
+        if (!S.ra.imgLimit) { toast("Screenshots can't be read in this view. Paste the text instead."); break; }
+        if (S.ra.files.length >= (S.ra.imgLimit.maxCount || 5)) { toast("That's the most screenshots at once."); break; }
+        S.ra.files.push({ name: f.name, img: f });
+      }
+      redraw();
+    });
+    sh.addEventListener('click', e => {
+      const b = e.target.closest('[data-x]'); if (!b) return;
+      if (b.dataset.x === 'rmfile') { S.ra.files.splice(Number(b.dataset.i), 1); redraw(); }
+      if (b.dataset.x === 'back') { S.ra.draft = null; S.ra.status = 'idle'; sh.innerHTML = html(); }
+    });
+    sh.addEventListener('submit', async e => {
+      e.preventDefault(); if (e.target.id !== 'raform') return;
+      if (S.ra.draft) { const r = readIdeaForm(sh, S.ra.draft); if (!r) return; closeSheet(); await saveIdea(uid(), r, 'Saved to meal ideas'); return; }
+      keep();
+      const url = safeUrl(S.ra.url), text = (S.ra.text || '').trim();
+      if (S.ra.url && !url) { toast('That link should start with https://'); return; }
+      if (!text && !S.ra.files.length) {
+        if (!url) { toast('Paste a link, the recipe text, or a screenshot.'); return; }
+        S.ra.draft = { url, source: srcName(url), title: slugTitle(url), ingredients: [], steps: [], complete: false }; S.ra.status = 'idle'; sh.innerHTML = html(); return;
+      }
+      if (!S.sample) { S.ra.draft = { url, source: srcName(url), title: slugTitle(url), ingredients: parseIngLines(text), steps: [], complete: false }; sh.innerHTML = html(); return; }
+      S.ra.status = 'loading'; redraw();
+      await readRecipe(url, text, S.ra.files.map(f => f.img));
+      if (document.getElementById('raform')) sh.innerHTML = html();
+    });
+  });
+}
+async function readRecipe(url, text, imgs) {
+  const prompt = `Pull the recipe out of a saved social post or web page. Use only what is in the text${imgs.length ? ' and images' : ''} below. Don't invent ingredients, amounts or steps; leave out anything that isn't there.
+${url ? `Link (for reference only, you can't open it): ${url}\n` : ''}
+<post>
+${text.slice(0, 30000)}
+</post>
+
+Reply with only JSON in this shape:
+{"title":"Short recipe name","servings":"4","time":"30 min","ingredients":[{"item":"chicken thighs","qty":"1.5 lb"}],"steps":["Heat the oven to 425°F.","…"],"notes":"","complete":true}
+Set "complete" to false when the ingredients or steps are missing or cut off.`;
+  try {
+    const r = await S.sample.json(prompt, imgs.length ? { images: imgs } : {});
+    const arr = v => Array.isArray(v) ? v : [];
+    S.ra.draft = { url, source: srcName(url), title: String((r && r.title) || slugTitle(url) || ''), servings: String((r && r.servings) || ''), time: String((r && r.time) || ''),
+      ingredients: arr(r && r.ingredients).filter(x => x && x.item).map(x => ({ item: String(x.item), qty: String(x.qty || '') })),
+      steps: arr(r && r.steps).map(String).filter(Boolean), notes: String((r && r.notes) || ''), complete: !(r && r.complete === false) };
+    S.ra.status = 'idle';
+  } catch (e) {
+    const c = e && e.code;
+    S.ra.status = 'error';
+    S.ra.err = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(c) ? 'Claude is turned off for this page. Type the recipe in instead.'
+      : (c === 'images_unavailable' || c === 'image_rejected') ? "That screenshot couldn't be read. Try another, or paste the text."
+      : c === 'rate_limited' ? "You've hit your Claude usage limit for now. Try again later."
+      : c === 'invalid_json' ? "Claude's answer came back in the wrong format. Press Read recipe to try again."
+      : "Couldn't reach Claude just now. Press Read recipe to try again.";
+  }
+}
+function readIdeaForm(sh, base) {
+  const q = s => sh.querySelector(s);
+  const title = q('#ra-title').value.trim(); if (!title) { toast('Give it a name'); return null; }
+  const url = safeUrl(q('#ra-url').value);
+  return { title, url, source: url ? srcName(url) : (base.source || ''), time: q('#ra-time').value.trim(), servings: q('#ra-serves').value.trim(),
+    ingredients: parseIngLines(q('#ra-ing').value), steps: q('#ra-steps').value.split('\n').map(s => s.trim()).filter(Boolean),
+    notes: q('#ra-notes').value.trim(), complete: true, createdAt: base.createdAt || Date.now() };
+}
+const saveIdea = (id, r, msg) => write(() => S.db.doc('recipes/' + id).set(r), msg);
+function ideaEditSheet(r) {
+  openSheet(`<h3>Edit meal idea</h3><form id="reform" class="opts" style="gap:10px">${ideaFormHtml(r, { fields: true })}
+    <div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary">Save</button></div></form>`, sh => {
+    sh.querySelector('#reform').addEventListener('submit', async e => { e.preventDefault(); const n = readIdeaForm(sh, r); if (!n) return; closeSheet(); await saveIdea(r.id, n, 'Saved'); });
+  });
+}
+// View an idea: ingredients and steps, link, plan it, add to the grocery list.
+function ideaSheet(id) {
+  const r = recipe(id); if (!r) return;
+  const st = settings(); const slots = MEAL_SLOTS.filter(s => st.mealSlots.includes(s.key));
+  const link = safeUrl(r.url);
+  let firstFree = todayStr(); for (let i = 0; i < 14; i++) { const d = addDays(todayStr(), i); if (!mealAt(d, 'dinner')) { firstFree = d; break; } }
+  openSheet(`
+    <h3>${esc(r.title)}</h3>
+    <p class="small muted" style="margin:0">${[r.time, r.servings && `Serves ${r.servings}`].filter(Boolean).map(esc).join(' · ')}${link ? `${r.time || r.servings ? ' · ' : ''}<a href="${esc(link)}" target="_blank" rel="noopener">Open on ${esc(r.source || 'the web')}</a>` : ''}</p>
+    ${(r.ingredients || []).length ? `<div><h4 class="eyebrow">Ingredients</h4><ul class="recipe-ing">${r.ingredients.map(x => `<li>${x.qty ? `<span class="tnum">${esc(x.qty)}</span> ` : ''}${esc(x.item)}</li>`).join('')}</ul></div>` : '<p class="gnote" style="margin:0">No ingredients yet. Tap Edit to add them.</p>'}
+    ${(r.steps || []).length ? `<div><h4 class="eyebrow">Steps</h4><ol class="recipe-steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>` : ''}
+    ${r.notes ? `<p style="margin:0">${esc(r.notes)}</p>` : ''}
+    <form id="planit" class="planit">
+      <h4 class="eyebrow">Plan it</h4>
+      <div class="fieldrow"><label class="field"><span>Day</span><input type="date" id="pi-date" value="${firstFree}" required></label>
+        ${slots.length > 1 ? `<label class="field"><span>Meal</span><select id="pi-slot">${slots.map(s => `<option value="${s.key}" ${s.key === 'dinner' ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select></label>` : `<input type="hidden" id="pi-slot" value="${slots[0] ? slots[0].key : 'dinner'}">`}</div>
+      ${(r.ingredients || []).length ? '<label class="toggles small"><span><input type="checkbox" id="pi-list" checked> Add the ingredients to the grocery list</span></label>' : ''}
+      <button type="submit" class="btn primary">Add to meal plan</button>
+    </form>
+    <div class="actions">
+      <button type="button" class="btn danger left" data-x="del">Delete</button>
+      ${(r.ingredients || []).length ? '<button type="button" class="btn" data-x="list">Add to grocery list</button>' : ''}
+      <button type="button" class="btn" data-x="edit">Edit</button>
+      <button type="button" class="btn" data-act="close">Close</button>
+    </div>`, sh => {
+    sh.addEventListener('click', async e => {
+      const b = e.target.closest('[data-x]'); if (!b) return;
+      if (b.dataset.x === 'edit') ideaEditSheet(r);
+      if (b.dataset.x === 'list') { closeSheet(); const n = await addIngredients(r.ingredients.map(x => ({ ...x, meal: r.title }))); toast(n ? `Added ${n} item${n === 1 ? '' : 's'} to the grocery list` : 'Everything is already on the list'); }
+      if (b.dataset.x === 'del') { if (b.dataset.sure) { closeSheet(); await write(() => S.db.doc('recipes/' + r.id).delete(), 'Meal idea deleted'); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to delete'; } }
+    });
+    sh.querySelector('#planit').addEventListener('submit', async e => {
+      e.preventDefault();
+      const ds = sh.querySelector('#pi-date').value, slot = sh.querySelector('#pi-slot').value; if (!ds) return;
+      const toList = sh.querySelector('#pi-list') && sh.querySelector('#pi-list').checked;
+      closeSheet();
+      if (!(await saveMeal(ds, slot, { name: r.title, ingredients: r.ingredients || [], notes: link, source: 'idea', recipeId: r.id }))) return;
+      const n = toList ? await addIngredients((r.ingredients || []).map(x => ({ ...x, meal: r.title }))) : 0;
+      toast(`${r.title} planned for ${DOW[dowOf(ds)]} ${shortDate(ds)}${toList ? ` · ${n} grocery item${n === 1 ? '' : 's'} added` : ''}`);
+    });
+  });
+}
+
 function mealSheet(ds, slot) {
   const m = mealAt(ds, slot) || { name: '', ingredients: [], notes: '' };
   const label = (MEAL_SLOTS.find(s => s.key === slot) || {}).label || slot;
   openSheet(`
     <h3>${esc(label)} · ${esc(longDate(ds))}</h3>
     <form id="mealform" class="opts" style="gap:12px">
+      ${S.recipes.length ? `<label class="field"><span>From your meal ideas</span><select id="mf-idea"><option value="">Choose one…</option>${[...S.recipes].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(r => `<option value="${esc(r.id)}" ${m.recipeId === r.id ? 'selected' : ''}>${esc(r.title)}</option>`).join('')}</select></label>` : ''}
+      ${m.recipeId && recipe(m.recipeId) ? '<button type="button" class="textlink" data-x="recipe">View the recipe and steps</button>' : ''}
       <label class="field"><span>Meal</span><span class="withmic"><input type="text" id="mf-name" value="${esc(m.name)}" placeholder="Sheet-pan chicken fajitas" required>${micBtn('mf-name')}</span></label>
       <label class="field"><span>Ingredients to buy, one per line</span><span class="withmic"><textarea id="mf-ing" rows="6" placeholder="1.5 lb chicken thighs&#10;3 bell peppers&#10;tortillas">${esc((m.ingredients || []).map(x => (x.qty ? x.qty + ' ' : '') + x.item).join('\n'))}</textarea>${micBtn('mf-ing')}</span></label>
       <label class="field"><span>Notes</span><span class="withmic"><input type="text" id="mf-notes" value="${esc(m.notes || '')}" placeholder="Recipe link, who's cooking…">${micBtn('mf-notes')}</span></label>
@@ -1233,16 +1389,27 @@ function mealSheet(ds, slot) {
     </form>`, sh => {
     sh.addEventListener('click', async e => {
       const x = e.target.closest('[data-x]'); if (!x) return;
+      if (x.dataset.x === 'recipe') { ideaSheet(m.recipeId); return; }
       if (x.dataset.x === 'clear') { closeSheet(); await saveMeal(ds, slot, null) && toast('Meal removed'); }
       if (x.dataset.x === 'list') { closeSheet(); const n = await addIngredients((m.ingredients || []).map(i => ({ ...i, meal: m.name }))); toast(n ? `Added ${n} item${n === 1 ? '' : 's'} to the grocery list` : 'Everything is already on the list'); }
+    });
+    let recipeId = m.recipeId || '';
+    const pick = sh.querySelector('#mf-idea');
+    if (pick) pick.addEventListener('change', () => {
+      const r = recipe(pick.value); if (!r) return;
+      recipeId = r.id;
+      sh.querySelector('#mf-name').value = r.title;
+      sh.querySelector('#mf-ing').value = ingLines(r.ingredients);
+      if (safeUrl(r.url) && !sh.querySelector('#mf-notes').value) sh.querySelector('#mf-notes').value = r.url;
     });
     sh.querySelector('#mealform').addEventListener('submit', async e => {
       e.preventDefault();
       const name = sh.querySelector('#mf-name').value.trim(); if (!name) return;
+      const rid = recipeId && recipe(recipeId) && recipe(recipeId).title === name ? recipeId : '';
       const old = new Map((m.ingredients || []).map(x => [normItem(x.item), x.store]));
       const ingredients = parseIngLines(sh.querySelector('#mf-ing').value).map(x => ({ ...x, store: old.get(normItem(x.item)) || '' }));
       closeSheet();
-      await saveMeal(ds, slot, { name, ingredients, notes: sh.querySelector('#mf-notes').value.trim(), source: m.source || 'manual' }) && toast('Meal saved');
+      await saveMeal(ds, slot, { name, ingredients, notes: sh.querySelector('#mf-notes').value.trim(), source: m.source || 'manual', recipeId: rid }) && toast('Meal saved');
     });
   });
 }
@@ -1273,7 +1440,10 @@ ${want.map(w => `${w.date} ${w.weekday} ${w.slot}`).join('\n')}
 
 Guidance: keep evenings with plans quick (30 minutes or less, or slow cooker or leftovers). Vary the meals across the week. Reuse ingredients across meals where it makes sense. "lunchbox" means a packed school lunch for a kid.
 
-Stores they shop at: ${st.stores.join(', ') || 'a grocery store'}. Put each ingredient's best store, or "" if any store.
+${S.recipes.length ? `Saved meal ideas they want to try. Use some of these when they fit the request, with the name copied exactly:
+${S.recipes.slice(0, 40).map(r => `- ${r.title}${r.time ? ` (${r.time})` : ''}`).join('\n')}
+
+` : ''}Stores they shop at: ${st.stores.join(', ') || 'a grocery store'}. Put each ingredient's best store, or "" if any store.
 
 Reply with only JSON in this shape:
 {"meals":[{"date":"YYYY-MM-DD","slot":"dinner","name":"Sheet-pan chicken fajitas","note":"20 minutes; good for the busy Tuesday","ingredients":[{"item":"chicken thighs","qty":"1.5 lb","store":""}]}]}
@@ -1287,6 +1457,8 @@ List only ingredients to buy: skip salt, pepper, oil, water and common spices.`;
     const valid = new Set(want.map(w => w.date + '|' + w.slot));
     const meals = (res && Array.isArray(res.meals) ? res.meals : []).filter(m => m && valid.has(m.date + '|' + m.slot) && m.name)
       .map(m => ({ date: m.date, slot: m.slot, name: String(m.name), note: String(m.note || ''), ingredients: (Array.isArray(m.ingredients) ? m.ingredients : []).filter(x => x && x.item).map(x => ({ item: String(x.item), qty: String(x.qty || ''), store: String(x.store || '') })) }))
+      .map(m => { const r = S.recipes.find(x => (x.title || '').trim().toLowerCase() === m.name.trim().toLowerCase());
+        return r ? { ...m, recipeId: r.id, ingredients: (r.ingredients || []).length ? r.ingredients : m.ingredients, note: m.note || 'From your meal ideas' } : m; })
       .sort((a, b) => (a.date + a.slot).localeCompare(b.date + b.slot));
     if (!meals.length) { S.plan = { status: 'error', ask, onlyEmpty, err: "Claude's answer didn't include any meals for this week. Try again, or describe what you want a little differently." }; }
     else S.plan = { status: 'ready', ask, onlyEmpty, meals, picked: meals.map(() => true) };
@@ -1306,7 +1478,7 @@ async function usePlan(toList) {
   const P = S.plan; if (!P || P.status !== 'ready') return;
   const chosen = P.meals.filter((_, i) => P.picked[i]);
   if (!chosen.length) { toast('Tick at least one meal'); return; }
-  for (const m of chosen) { const ok = await saveMeal(m.date, m.slot, { name: m.name, ingredients: m.ingredients, notes: m.note, source: 'claude' }); if (!ok) return; }
+  for (const m of chosen) { const ok = await saveMeal(m.date, m.slot, { name: m.name, ingredients: m.ingredients, notes: m.note, source: 'claude', recipeId: m.recipeId || '' }); if (!ok) return; }
   let n = 0;
   if (toList) n = await addIngredients(chosen.flatMap(m => m.ingredients.map(x => ({ ...x, meal: m.name }))));
   S.plan = { status: 'idle', ask: P.ask, onlyEmpty: P.onlyEmpty };
@@ -1315,7 +1487,7 @@ async function usePlan(toList) {
 }
 
 // ---------- backups ----------
-const BACKUP_COLLECTIONS = ['care', 'events', 'groceries', 'tasks', 'gmeta', 'meals'];
+const BACKUP_COLLECTIONS = ['care', 'events', 'groceries', 'tasks', 'gmeta', 'meals', 'recipes'];
 async function collectBackup() {
   const out = { app: 'family-planner', version: 2, exportedAt: new Date().toISOString(), family: {} };
   for (const id of ['settings', 'patterns']) { const s = await S.db.doc('family/' + id).get(); if (s.exists) out.family[id] = s.data(); }
@@ -1453,7 +1625,6 @@ function qaHtml() {
       <span class="grow"><span class="qtype ${it.type}">${it.type === 'event' ? 'Event' : it.type === 'task' ? 'Task' : 'No school'}</span> <b>${esc(it.title)}</b><br>
       <span class="small muted">${esc(qaWhen(it))}${it.kids && it.kids.length ? ' · ' + esc(it.kids.map(id => (kid(id) || {}).name).filter(Boolean).join(', ')) : ''}${it.owner && person(it.owner) ? ' · ' + esc(person(it.owner).name) : ''}</span>
       ${it.notes ? `<br><span class="small muted">${esc(it.notes)}</span>` : ''}</span></li>`).join('')}</ul>
-    ${S.gState === 'on' && Q.items.some(i => i.type === 'event') ? '<label class="toggles small"><span><input type="checkbox" id="qa-gcal"> Also add the events to Google Calendar</span></label>' : ''}
     <p class="gnote" style="margin:0">You can change anything after it's added.</p>` : '<p class="empty">Nothing with a date turned up. Try adding more detail.</p>';
   return `<h3>Quick add</h3>
     <p class="small muted" style="margin:0">Type or say what's coming up, paste a school email, or add a photo or screenshot. Claude finds the events, to-dos and no-school days.</p>
@@ -1504,7 +1675,7 @@ function qaSheet() {
       const b = e.target.closest('[data-x]'); if (!b) return;
       if (b.dataset.x === 'rmfile') { S.qa.files.splice(Number(b.dataset.i), 1); redraw(); }
       if (b.dataset.x === 'again') { S.qa.status = 'idle'; S.qa.items = null; redraw(); }
-      if (b.dataset.x === 'add') { const g = sh.querySelector('#qa-gcal'); await qaAdd(!!(g && g.checked)); }
+      if (b.dataset.x === 'add') await qaAdd();
     });
     sh.addEventListener('submit', async e => {
       e.preventDefault(); if (e.target.id !== 'qaform') return;
@@ -1562,7 +1733,7 @@ Reply with only JSON in this shape:
       : "Couldn't reach Claude just now. Press Find dates to try again.";
   }
 }
-async function qaAdd(toGoogle) {
+async function qaAdd() {
   const picks = (S.qa.items || []).filter(i => i.pick); if (!picks.length) { toast('Tick at least one item'); return; }
   if (!guard()) return;
   closeSheet();
@@ -1571,7 +1742,7 @@ async function qaAdd(toGoogle) {
     if (it.type === 'event') {
       const id = uid();
       const ev = { title: it.title, date: it.date, allDay: it.allDay, time: it.allDay ? '' : it.time, endTime: it.allDay ? '' : it.endTime, kids: it.kids, owner: it.owner, notes: it.notes, repeat: null, skip: [], gcal: null, createdAt: Date.now() };
-      if (await write(() => S.db.doc('events/' + id).set(ev))) { n++; if (toGoogle) await pushToGoogle(id, ev); }
+      if (await write(() => S.db.doc('events/' + id).set(ev))) n++;
     } else if (it.type === 'task') {
       if (await write(() => S.db.doc('tasks/' + uid()).set({ title: it.title, due: it.due, owner: it.owner, notes: it.notes, repeat: '', done: false, createdAt: Date.now() }))) n++;
     } else if (it.type === 'noschool') {
@@ -1664,7 +1835,6 @@ function eventSheet(ev, ds) {
   const e = ev ? JSON.parse(JSON.stringify(ev)) : { id: uid(), title: '', date: ds || todayStr(), allDay: false, time: '', endTime: '', kids: [], owner: '', notes: '', repeat: null };
   const ppl = settings().people, kids = settings().kids;
   const rep = e.repeat && e.repeat.days ? e.repeat.days : [];
-  const gOk = S.gState === 'on';
   openSheet(`
     <h3>${isNew ? 'New event' : 'Edit event'}</h3>
     <form id="evform" class="opts" style="gap:12px">
@@ -1680,7 +1850,6 @@ function eventSheet(ev, ds) {
       <div class="field"><span>Repeats weekly on</span><div class="daypick">${[1,2,3,4,5,6,0].map(d => `<label><input type="checkbox" name="ef-rep" value="${d}" ${rep.includes(d) ? 'checked' : ''}><span>${DOW[d]}</span></label>`).join('')}</div></div>
       <label class="field"><span>Repeat until (optional)</span><input type="date" id="ef-until" value="${esc((e.repeat && e.repeat.until) || '')}"></label>
       <label class="field"><span>Notes</span><span class="withmic"><textarea id="ef-notes">${esc(e.notes || '')}</textarea>${micBtn('ef-notes')}</span></label>
-      ${isNew && gOk ? `<label class="toggles"><span><input type="checkbox" id="ef-gcal"> Also add to Google Calendar</span></label>` : ''}
       ${!isNew && e.gcal ? `<p class="gnote" style="margin:0">Also on Google Calendar. Edits here don't change the Google copy.</p>` : ''}
       <div class="actions">
         ${!isNew ? `<button type="button" class="btn danger left" data-x="del">Delete</button>` : ''}
@@ -1709,10 +1878,8 @@ function eventSheet(ev, ds) {
         skip: e.skip || [], gcal: e.gcal || null, createdAt: e.createdAt || Date.now(),
       };
       if (!next.title || !next.date) return;
-      const toG = q('#ef-gcal') && q('#ef-gcal').checked;
       closeSheet();
       const ok = await write(() => S.db.doc('events/' + e.id).set(next), isNew ? 'Event added' : 'Saved');
-      if (ok && toG) pushToGoogle(e.id, next);
     });
   });
 }
@@ -1816,34 +1983,6 @@ async function connectGoogle() {
   S.gErr = null;
   await loadCalendars();
 }
-async function pushToGoogle(id, e) {
-  if (!S.mcp) return;
-  const cal = S.selCals.find(c => c !== 'primary' && (S.gCals || []).some(x => x.id === c && /family/i.test(x.summary || ''))) || 'primary';
-  const input = { summary: e.title, calendarId: cal };
-  if (e.allDay) { input.allDay = true; input.startTime = e.date + 'T00:00:00'; input.endTime = addDays(e.date, 1) + 'T00:00:00'; }
-  else {
-    const st = e.time || '09:00';
-    let en = e.endTime; if (!en || en <= st) { const [h, m] = st.split(':').map(Number); en = `${pad(Math.min(23, h + 1))}:${pad(m)}`; }
-    input.startTime = `${e.date}T${st}:00`; input.endTime = `${e.date}T${en}:00`;
-  }
-  const notes = [e.notes, e.owner && person(e.owner) ? `${person(e.owner).name} is on it.` : ''].filter(Boolean).join('\n');
-  if (notes) input.description = notes;
-  if (e.repeat && e.repeat.days && e.repeat.days.length) {
-    const BY = ['SU','MO','TU','WE','TH','FR','SA'];
-    let rule = 'RRULE:FREQ=WEEKLY;BYDAY=' + e.repeat.days.map(d => BY[d]).join(',');
-    if (e.repeat.until) rule += ';UNTIL=' + e.repeat.until.replace(/-/g, '') + 'T235959Z';
-    input.recurrenceData = [rule];
-  }
-  try {
-    const r = await S.mcp.callTool(GC, 'create_event', input);
-    const p = r && r.payload; const gid = p && (p.id || (p.event && p.event.id)) || null;
-    await write(() => S.db.doc('events/' + id).update({ gcal: { calendarId: cal, id: gid } }));
-    toast(`Added to Google Calendar (${calName(cal)})`);
-    S.mcp.invalidate(GC, 'list_events').catch(() => {});
-  } catch (err) {
-    toast(err && err.code === 'server_unavailable' ? "Google Calendar didn't answer. Check Google before trying again so it isn't added twice." : gErrorFor(err).msg);
-  }
-}
 
 // ---------- events wiring ----------
 document.addEventListener('click', async e => {
@@ -1858,6 +1997,8 @@ document.addEventListener('click', async e => {
   if (a === 'newev') { if (guard()) eventSheet(null, t.dataset.ds); return; }
   if (a === 'ev') { const ev = S.events.find(x => x.id === t.dataset.id); if (ev && guard()) eventSheet(ev, t.dataset.ds); return; }
   if (a === 'gev') { gEventSheet(t.dataset.id, t.dataset.cal); return; }
+  if (a === 'ridea-new') { if (guard()) ideaAddSheet(); return; }
+  if (a === 'ridea') { ideaSheet(t.dataset.id); return; }
   if (a === 'quickadd') { if (guard()) qaSheet(); return; }
   if (a === 'wkday') { S.wkDay = t.dataset.ds; schedule(); return; }
   if (a === 'wk') { const d = Number(t.dataset.d); S.weekStart = d ? addDays(S.weekStart, d) : mondayOf(todayStr()); S.wkDay = d && S.wkDay ? addDays(S.wkDay, d) : todayStr(); syncWatches(); syncNoSchoolWatches(); schedule(); return; }
@@ -1993,6 +2134,7 @@ setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekSt
     db.collection('meals').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.meals = m; schedule(); }, err);
     setTimeout(() => maybeAutoBackup(false), 4000);
     db.doc('family/grocerymemo').onSnapshot(s => { const d = s.exists ? s.data() : null; S.memo = (d && d.items) || {}; schedule(); }, err);
+    db.collection('recipes').onSnapshot(s => { S.recipes = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('gmeta').onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.gmeta = m; schedule(); }, err);
   }
   if (!mcp) { S.gState = 'unavailable'; schedule(); return; }
