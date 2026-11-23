@@ -372,7 +372,7 @@ function settings() {
     careBlocks: s.careBlocks || (s.blocks ? [...s.blocks, 'daytime'] : DEFAULT_SETTINGS.careBlocks),
     schoolDays: s.schoolDays || DEFAULT_SETTINGS.schoolDays,
     mealSlots: s.mealSlots || DEFAULT_SETTINGS.mealSlots,
-    weather: s.weather || { name: 'Lafayette, CA', key: '337110' },
+    weather: s.weather || { name: 'Moraga, CA', key: '337164' },
   };
 }
 const person = id => settings().people.find(p => p.id === id);
@@ -414,7 +414,7 @@ function setWeekly(kidId, block, from, v) {
   return write(() => S.db.doc('family/patterns').set({ p: S.patterns, r: next }));
 }
 // ---------- weather (AccuWeather connector) ----------
-const AW = 'AccuWeather';
+const AW = 'AccuWeather®'; // must match the connector's name in claude.ai exactly
 // AccuWeather icon numbers -> a small symbol
 function wxIcon(n) {
   n = Number(n);
