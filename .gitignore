@@ -1,0 +1,13 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Local backups and exports (they contain family data)
+*backup*.json
+
+# Tooling
+node_modules/
+*.log

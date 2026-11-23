@@ -1,25 +1,24 @@
-# The Zhang-Wolfe House
+# Home
 
-A household book for one family: cleaning, upkeep, appliances and the cleaners' visits. The app is a single file, `app/index.html`.
+Small web apps our household uses day to day. Each app is a single HTML file that runs as a [claude.ai](https://claude.ai) artifact; there is nothing to install or build.
 
-- **To do**: what's due now, this week or this month, narrowed to the time you have (10 min to 2 hrs). Cleaning and home upkeep are listed separately. Also a shopping list from "Need supplies", plus the tasks not set up yet.
-- **House cleaners**: log each visit and check what they did. Those tasks reset as done "by Cleaners." Keeps a usual checklist, cost and house-rules notes to send them.
-- **Cleaning**: every cleaning task, including the 2.5 baths, wood floors, silk and wool rugs, instruments and plants.
-- **Home**: appliances (brand, model, serial, warranty, manual link, notes) with their own care tasks, plus upkeep for home systems, safety, pool and pond.
-- **Week**: tasks done, time, money, savings vs. hiring out, who did what, and the cleaners' visits.
-- **Guide**: never-mix rules, notes for this house (floors, rugs, instruments, plants with cats), and the gentle and stronger cleaning kits.
-- **Settings** (gear icon): house name, who logs tasks, cleaner schedule, cost and notes, savings rate, backup.
+| App | Folder | What it does |
+| --- | --- | --- |
+| **Family Planner** | [`planner/`](planner/) | Who has the kids, school and no-school days, calendar, weather, meals, groceries and to-dos, shared between both parents. |
+| **House Book** | [`house-book/`](house-book/) | Cleaning and upkeep schedule, appliances, and the house cleaners' visits. |
 
-As a claude.ai artifact the data is saved to your account and syncs. Opened as a plain file, it saves in that browser only.
+## How this repository is organized
 
-## Family Planner (`planner/index.html`)
+- **`main`** is the current version of everything. Each app lives in its own folder with its own README.
+- New work happens on a separate branch, then comes into `main` through a pull request once it's reviewed. Branches are deleted after they're merged.
+- `docs/` holds notes that cover more than one app.
 
-Phase 1 of the Family Planner spec: a shared planner both parents use from their phones.
+## Data and privacy
 
-- **Today**: whether it's a school day, who has the kids for each care block, today's and tomorrow's calendar, care gaps for the next two weeks, tasks due, tonight's dinner.
-- **Week**: seven days with a care strip (gaps in red) and events. Tap a block to assign it for that day or every week.
-- **Meals & groceries**: a weekly meal plan, meal ideas from Claude that fill the plan and the grocery list, and one shared grocery list grouped by store.
-- **Tasks**: family to-dos with an owner and due date.
-- **Setup**: kids, who can cover care, usual school days, care blocks (school days: drop-off, pickup, after school; no-school days: daytime; every day: evening, overnight), the usual weekly schedule, meals to plan, calendars, stores, and backups (Google Drive, download, restore).
+The code is here; the data is not. Each app stores its data with the artifact on claude.ai, under the owner's account. Nothing personal (names, schedules, calendar entries) is committed to this repository. Keep it that way: don't paste real family details into code, READMEs or commit messages.
 
-Google Calendar events show alongside planner events (read through each viewer's own claude.ai Google Calendar connector). New planner events can also be added to Google Calendar. Google Tasks are not included: the connector only reaches calendar events.
+## Updating an app
+
+1. Ask Claude Code to make the change on a new branch.
+2. Claude republishes the artifact at the same link, so the live app updates and its data stays as it was.
+3. Review the pull request on GitHub and merge it into `main`.
