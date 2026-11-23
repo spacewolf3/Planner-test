@@ -11,3 +11,12 @@ A household book for one family: cleaning, upkeep, appliances and the cleaners' 
 - **Settings** (gear icon): house name, who logs tasks, cleaner schedule, cost and notes, savings rate, backup.
 
 As a claude.ai artifact the data is saved to your account and syncs. Opened as a plain file, it saves in that browser only.
+
+## Yard & irrigation plan
+
+A second app, `app/yard.html`, maps the yard and sprinkler system.
+
+- **Map**: trace over a base image (satellite screenshot, plot plan or sketch). Draw mainline, laterals, drip, valve wire and sleeves. Place heads, valves, backflow, controller, shut-offs, trees and plants, and outline lawns, beds and hardscape. Points snap to heads, valves and other pipes. Measure something you know the length of to set the scale, and pipe lengths and areas come out in feet. Heads show their spray coverage from radius and arc. You can highlight one zone at a time and attach a photo to anything, such as the inside of a valve box.
+- **Zones**: station number, run time, days and start time, with heads, GPM, pipe length and gallons per week for each zone. A parts list (head models, nozzles, pipe by size and material) and a plant list.
+- **Care**: seasonal irrigation and landscape upkeep, such as start-up, blowout, backflow test, filters and battery, with due status.
+- **Log**: repairs, installs and adjustments with parts and cost, plus completed care tasks.
