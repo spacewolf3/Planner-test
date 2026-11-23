@@ -9,7 +9,7 @@ A shared planner for both parents: who has the kids, what's on the calendar, wha
 | **Today** | School day or not, who has each child for each part of the day, today's and tomorrow's events, the weather, care gaps for this week and next, tasks due, and tonight's dinner. |
 | **Week** | Seven days with the weather, a care strip per child (gaps in red), events and dinner. Tap a block to assign it for one day or every week from that day on. |
 | **Meals & groceries** | A weekly meal plan, meal ideas from Claude that can fill the plan and the grocery list, and one shared grocery list grouped by store. |
-| **Tasks** | Family to-dos with a person and a due date. |
+| **Tasks** | Family to-dos with a person, a due date and notes. Tap a task to edit it. Tasks also appear in the Week view on their due day (overdue ones on today). |
 | **Setup** | Kids, who can cover care, usual school days, care blocks, the usual weekly schedule, meals to plan, calendars, stores, weather location and backups. |
 
 ## How care is organized
