@@ -16,10 +16,10 @@ As a claude.ai artifact the data is saved to your account and syncs. Opened as a
 
 Phase 1 of the Family Planner spec: a shared planner both parents use from their phones.
 
-- **Today**: who has the kids for each care block, today's and tomorrow's calendar, care gaps for the next two weeks, tasks due, grocery count.
+- **Today**: whether it's a school day, who has the kids for each care block, today's and tomorrow's calendar, care gaps for the next two weeks, tasks due, tonight's dinner.
 - **Week**: seven days with a care strip (gaps in red) and events. Tap a block to assign it for that day or every week.
-- **Groceries**: one shared list grouped by store, with check-offs.
+- **Meals & groceries**: a weekly meal plan, meal ideas from Claude that fill the plan and the grocery list, and one shared grocery list grouped by store.
 - **Tasks**: family to-dos with an owner and due date.
-- **Setup**: kids, who can cover care, which care blocks to track, the usual weekly schedule, Google Calendar calendars, stores.
+- **Setup**: kids, who can cover care, usual school days, care blocks (school days: drop-off, pickup, after school; no-school days: daytime; every day: evening, overnight), the usual weekly schedule, meals to plan, calendars, stores, and backups (Google Drive, download, restore).
 
 Google Calendar events show alongside planner events (read through each viewer's own claude.ai Google Calendar connector). New planner events can also be added to Google Calendar. Google Tasks are not included: the connector only reaches calendar events.

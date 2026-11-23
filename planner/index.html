@@ -223,6 +223,35 @@ table.pattern select { width: 100%; padding: 5px 4px; font-size: .82rem; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 30; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
 .gnote { font-size: .82rem; color: var(--muted); }
 .gerr { font-size: .85rem; padding: 8px 10px; border-radius: 8px; background: var(--sunk); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* school day + meals */
+.daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
+.hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
+.wtype { padding: 6px 8px 0; }
+.pill { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 1px 10px; font-size: .74rem; font-weight: 600; color: var(--muted); }
+.pill.on { background: var(--accent-soft); border-color: transparent; color: var(--fg); }
+.pill.warn { border-color: var(--gap); color: var(--gap); }
+.wdinner { margin: 0 6px 4px; border: 0; border-top: 1px solid var(--line); background: transparent; text-align: left; padding: 6px 2px 2px; font-size: .82rem; font-weight: 600; }
+.wdinner .sl, .mealcell .sl { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.linkish { border: 0; background: none; padding: 0; font-weight: 700; color: var(--fg); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; text-align: left; }
+.mealgrid { display: grid; gap: 6px; }
+.mealday { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; align-items: start; padding: 6px 0; border-top: 1px solid var(--line); }
+.mealday:first-child { border-top: 0; }
+.mealday.is-today .md-h b { color: var(--accent); }
+.md-h { display: grid; font-size: .9rem; padding-top: 6px; }
+.md-h .busy { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
+.md-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
+.mealcell { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; text-align: left; min-width: 0; }
+.mealcell .mn { font-weight: 600; overflow-wrap: anywhere; }
+.mealcell.empty { border-style: dashed; background: transparent; }
+.mealcell.empty .mn { color: var(--muted); font-weight: 500; }
+.mealcell:hover { background: var(--sunk); }
+@media (max-width: 480px) { .mealday { grid-template-columns: 1fr; gap: 4px; } .md-h { padding-top: 0; } }
+.kidhead { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin: 14px 0 4px; }
+table.pattern caption { text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; padding: 10px 0 4px; }
+.blockgroups { display: grid; gap: 10px; }
+.proposal .checklist li { align-items: flex-start; }
+.proposal .checklist input { margin-top: 3px; }
 @media (prefers-reduced-motion: no-preference) { .sheet { animation: rise .16s ease-out; } @keyframes rise { from { transform: translateY(12px); opacity: .6; } } }
 </style>
 
@@ -232,7 +261,7 @@ table.pattern select { width: 100%; padding: 5px 4px; font-size: .82rem; }
     <nav class="tabs" id="tabs" aria-label="Sections">
       <a href="#today" data-v="today">Today</a>
       <a href="#week" data-v="week">Week</a>
-      <a href="#groceries" data-v="groceries">Groceries</a>
+      <a href="#groceries" data-v="groceries">Meals &amp; groceries</a>
       <a href="#tasks" data-v="tasks">Tasks</a>
       <a href="#family" data-v="family">Setup</a>
     </nav>
@@ -247,21 +276,32 @@ table.pattern select { width: 100%; padding: 5px 4px; font-size: .82rem; }
 'use strict';
 const GC = 'Google Calendar';
 const COLORS = ['o1','o2','o3','o4','o5','o6','o7','o8'];
+// type: school = only on school days, off = only on no-school days, all = every day
 const BLOCKS = [
-  { key: 'dropoff', label: 'Drop-off' },
-  { key: 'pickup', label: 'Pickup' },
-  { key: 'after', label: 'After school' },
-  { key: 'evening', label: 'Evening' },
-  { key: 'overnight', label: 'Overnight' },
+  { key: 'dropoff', label: 'Drop-off', type: 'school' },
+  { key: 'pickup', label: 'Pickup', type: 'school' },
+  { key: 'after', label: 'After school', type: 'school' },
+  { key: 'daytime', label: 'Daytime', type: 'off' },
+  { key: 'evening', label: 'Evening', type: 'all' },
+  { key: 'overnight', label: 'Overnight', type: 'all' },
 ];
+const MEAL_SLOTS = [
+  { key: 'breakfast', label: 'Breakfast' },
+  { key: 'lunch', label: 'Lunch' },
+  { key: 'lunchbox', label: 'Lunchbox' },
+  { key: 'dinner', label: 'Dinner' },
+];
+const NO_SCHOOL_RE = /\b(no school|school (is )?closed|school holiday|no classes|teacher (work|in-?service) day|winter break|spring break|thanksgiving break)\b/i;
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DOW_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DEFAULT_SETTINGS = {
   kids: [],
   people: [],
-  blocks: ['dropoff','pickup','after'],
+  careBlocks: ['dropoff','pickup','daytime','evening'],
+  schoolDays: [1,2,3,4,5],
   stores: ['Grocery store','Costco'],
+  mealSlots: ['dinner'],
 };
 
 // ---------- state ----------
@@ -270,7 +310,8 @@ const S = {
   weekStart: null,
   db: null, user: null, mcp: null, perms: null,
   dbReady: false, dbMissing: false, canWrite: true,
-  settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {},
+  settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {}, meals: {},
+  mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
   g: {},            // calendarId -> { events, err, at }
   gCals: null,      // list from list_calendars
   gState: 'idle',   // idle | off | ask | on | unavailable
@@ -294,11 +335,21 @@ const shortDate = s => { const d = parseYmd(s); return `${MON[d.getMonth()]} ${d
 const longDate = s => { const d = parseYmd(s); return `${DOW_LONG[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}`; };
 const fmtTime = hm => { if (!hm) return ''; let [h,m] = hm.split(':').map(Number); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12; return m ? `${h}:${pad(m)}${ap}` : `${h}${ap}`; };
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
-const settings = () => S.settings || DEFAULT_SETTINGS;
+// Older saves used `blocks` (school-day blocks only); read them as careBlocks plus Daytime.
+function settings() {
+  const s = S.settings || {};
+  return {
+    kids: s.kids || [], people: s.people || [],
+    stores: s.stores || DEFAULT_SETTINGS.stores,
+    careBlocks: s.careBlocks || (s.blocks ? [...s.blocks, 'daytime'] : DEFAULT_SETTINGS.careBlocks),
+    schoolDays: s.schoolDays || DEFAULT_SETTINGS.schoolDays,
+    mealSlots: s.mealSlots || DEFAULT_SETTINGS.mealSlots,
+  };
+}
 const person = id => settings().people.find(p => p.id === id);
 const kid = id => settings().kids.find(k => k.id === id);
 const colorVar = c => `var(--${COLORS.includes(c) ? c : 'o8'})`;
-const activeBlocks = () => BLOCKS.filter(b => settings().blocks.includes(b.key));
+const blockDef = key => BLOCKS.find(b => b.key === key);
 
 function toast(msg) {
   const r = document.getElementById('toast-root');
@@ -320,11 +371,25 @@ function ownerLabel(v) {
   const p = person(v); return p ? p.name : 'Nobody yet';
 }
 function ownerColor(v) { const p = person(v); return p ? colorVar(p.color) : 'var(--o8)'; }
+// A day is a school day if marked so; otherwise it follows the usual school weekdays.
+function dayMark(ds) { const d = S.care[ds]; return d && typeof d.school === 'boolean' ? d.school : null; }
+function isSchool(ds) { const m = dayMark(ds); return m !== null ? m : settings().schoolDays.includes(dowOf(ds)); }
+function blocksFor(k, ds) {
+  const school = k.school !== false && isSchool(ds);
+  const on = settings().careBlocks;
+  return BLOCKS.filter(b => on.includes(b.key) && (b.type === 'all' || b.type === (school ? 'school' : 'off')));
+}
+// Google all-day events like "No school!" on a day still counted as a school day.
+function calNoSchool(ds) {
+  if (!isSchool(ds) || dayMark(ds) !== null) return null;
+  const hit = googleOn(ds).find(i => i.allDay && NO_SCHOOL_RE.test(i.title));
+  return hit ? hit.title : null;
+}
 function gapsFrom(start, days) {
   const out = [];
   for (let i = 0; i < days; i++) {
     const ds = addDays(start, i);
-    for (const k of settings().kids) for (const b of activeBlocks()) {
+    for (const k of settings().kids) for (const b of blocksFor(k, ds)) {
       const o = ownerOf(k.id, b.key, ds);
       if (!o.v || (o.v !== 'na' && !person(o.v))) out.push({ ds, kid: k, block: b });
     }
@@ -394,9 +459,14 @@ function evItem(it, compact) {
 }
 function careRows(ds) {
   const kids = settings().kids;
-  if (!kids.length) return `<p class="empty">Add your kids in <a href="#family">Family setup</a> to track who has them.</p>`;
-  return kids.map(k => `<div class="kidrow"><div class="kidname"><span class="dot" style="--c:${colorVar(k.color)}"></span><span>${esc(k.name)}</span></div><div class="blocks">${
-    activeBlocks().map(b => { const o = ownerOf(k.id, b.key, ds); const gap = !o.v || (o.v !== 'na' && !person(o.v));
+  if (!kids.length) return `<p class="empty">Add your kids in <a href="#family">Setup</a> to track who has them.</p>`;
+  const school = isSchool(ds), hint = calNoSchool(ds);
+  const typeRow = `<div class="daytype"><div class="seg-ctl" role="group" aria-label="School day or not">
+      <button type="button" data-act="daytype" data-ds="${ds}" data-v="1" aria-pressed="${school}">School day</button>
+      <button type="button" data-act="daytype" data-ds="${ds}" data-v="0" aria-pressed="${!school}">No school</button></div>
+      ${hint ? `<span class="hint">Your calendar says “${esc(hint)}”</span>` : ''}</div>`;
+  return typeRow + kids.map(k => `<div class="kidrow"><div class="kidname"><span class="dot" style="--c:${colorVar(k.color)}"></span><span>${esc(k.name)}</span></div><div class="blocks">${
+    blocksFor(k, ds).map(b => { const o = ownerOf(k.id, b.key, ds); const gap = !o.v || (o.v !== 'na' && !person(o.v));
       const cls = gap ? 'gap' : o.v === 'na' ? 'na' : '';
       return `<button class="block ${cls}" style="--c:${ownerColor(o.v)}" data-act="care" data-kid="${esc(k.id)}" data-block="${b.key}" data-ds="${ds}"><span class="bl">${esc(b.label)}${o.src === 'day' ? ' · changed' : ''}</span><span class="bo">${esc(ownerLabel(gap ? '' : o.v))}</span></button>`; }).join('')
   }</div></div>`).join('');
@@ -406,6 +476,13 @@ function gBlock() {
   if (S.gState === 'off' || S.gState === 'ask') return `<div class="gerr"><span>See your Google Calendar events here too.</span><button class="btn primary" data-act="gconnect">Connect Google Calendar</button></div>`;
   if (S.gErr) return `<div class="gerr"><span>${esc(S.gErr.msg)}</span>${S.gErr.btn || ''}</div>`;
   return '';
+}
+// One banner for every day in a range that the calendar says has no school.
+function noSchoolBanner(start, days) {
+  const hits = [...Array(days)].map((_, i) => addDays(start, i)).filter(ds => calNoSchool(ds));
+  if (!hits.length) return '';
+  const span = hits.length === 1 ? longDate(hits[0]) : `${shortDate(hits[0])} – ${shortDate(hits[hits.length - 1])}`;
+  return `<div class="banner"><span>Your calendar says “${esc(calNoSchool(hits[0]))}” on ${esc(span)}.</span><button class="btn primary" data-act="marknoschool" data-days="${hits.join(',')}">Mark ${hits.length === 1 ? 'it' : `all ${hits.length} days`} as no school</button></div>`;
 }
 
 function renderToday() {
@@ -419,6 +496,7 @@ function renderToday() {
   return `
   <div class="dayhead"><h2>${esc(longDate(t))}</h2><span class="muted">Here's what's happening today.</span></div>
   ${gBlock()}
+  ${noSchoolBanner(t, 14)}
   <div class="today-grid">
     <div class="stack">
       <section class="panel" aria-labelledby="h-care">
@@ -439,7 +517,7 @@ function renderToday() {
       <section class="panel" aria-labelledby="h-gaps">
         <div class="panel-head"><h2 id="h-gaps">Care gaps, next 2 weeks</h2>${gaps.length ? `<span class="chip" style="--c:var(--gap)">${gaps.length} open</span>` : ''}</div>
         ${!settings().kids.length ? '<p class="empty">No kids added yet.</p>' : gaps.length ? `
-          ${!hasPattern ? `<p class="small muted" style="margin:0 0 8px">Set who usually covers each day in <a href="#family">Family setup</a> and most of these fill in on their own.</p>` : ''}
+          ${!hasPattern ? `<p class="small muted" style="margin:0 0 8px">Set who usually covers each day in <a href="#family">Setup</a> and most of these fill in on their own.</p>` : ''}
           <div class="gaplist">${gaps.slice(0, 8).map(g => `<button class="gapitem" data-act="care" data-kid="${esc(g.kid.id)}" data-block="${g.block.key}" data-ds="${g.ds}"><span><b>${esc(DOW[dowOf(g.ds)])} ${esc(shortDate(g.ds))}</b> · ${esc(g.block.label)}${settings().kids.length > 1 ? ` · ${esc(g.kid.name)}` : ''}</span><span class="small">Assign</span></button>`).join('')}</div>
           ${gaps.length > 8 ? `<p class="small muted" style="margin:8px 0 0">${gaps.length - 8} more in the <a href="#week">Week</a> view.</p>` : ''}`
           : '<p class="allgood">Every care block has someone on it.</p>'}
@@ -449,8 +527,9 @@ function renderToday() {
         ${dueTasks.length ? `<ul class="checklist">${dueTasks.map(taskLi).join('')}</ul>` : '<p class="empty">Nothing due.</p>'}
       </section>
       <section class="panel" aria-labelledby="h-groc">
-        <div class="panel-head"><h2 id="h-groc">Groceries</h2><a href="#groceries" class="small">Open list</a></div>
-        <p class="empty" style="padding:0">${openG ? `${openG} item${openG === 1 ? '' : 's'} on the list.` : 'The list is empty.'}</p>
+        <div class="panel-head"><h2 id="h-groc">Food</h2><a href="#groceries" class="small">Meals &amp; groceries</a></div>
+        ${settings().mealSlots.includes('dinner') ? `<p style="margin:0 0 6px"><span class="eyebrow">Dinner tonight</span><br>${mealAt(t, 'dinner') ? `<button class="linkish" data-act="meal" data-ds="${t}" data-slot="dinner">${esc(mealAt(t, 'dinner').name)}</button>` : '<span class="muted">Not planned yet</span>'}</p>` : ''}
+        <p class="empty" style="padding:0">${openG ? `${openG} item${openG === 1 ? '' : 's'} on the grocery list.` : 'The grocery list is empty.'}</p>
       </section>
     </div>
   </div>`;
@@ -470,17 +549,22 @@ function renderWeek() {
     <button class="iconbtn" data-act="wk" data-d="7" aria-label="Next week">›</button>
   </div>
   ${gBlock()}
+  ${noSchoolBanner(ws, 7)}
   ${people.length ? `<div class="legend">${people.map(p => `<span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>`).join('')}<span class="chip" style="--c:var(--gap)">Nobody yet</span></div>` : ''}
   <div class="week">${days.map(ds => {
     const its = itemsOn(ds).map(i => ({ ...i, ds }));
     const gn = gapsFrom(ds, 1).length;
+    const school = isSchool(ds), hint = calNoSchool(ds);
+    const dinner = settings().mealSlots.includes('dinner') ? mealAt(ds, 'dinner') : null;
     return `<section class="wday${ds === t ? ' is-today' : ''}" aria-label="${esc(longDate(ds))}">
       <div class="wday-h"><span><span class="dn">${DOW[dowOf(ds)]}</span> <span class="dd">${esc(shortDate(ds))}</span></span>${gn ? `<span class="gapn">${gn} gap${gn === 1 ? '' : 's'}</span>` : ''}</div>
-      ${settings().kids.length && activeBlocks().length ? `<div class="wcare">${settings().kids.map(k => `<div class="wkid">${settings().kids.length > 1 ? `<span class="kn"><span class="dot" style="--c:${colorVar(k.color)}"></span>${esc(k.name)}</span>` : ''}<div class="strip">${
-        activeBlocks().map(b => { const o = ownerOf(k.id, b.key, ds); const gap = !o.v || (o.v !== 'na' && !person(o.v));
+      ${settings().kids.length ? `<div class="wtype"><button class="pill${school ? ' on' : ''}${hint ? ' warn' : ''}" data-act="daytype" data-ds="${ds}" data-v="${school ? 0 : 1}" aria-label="${school ? 'School day' : 'No school'}. Tap to switch.">${school ? 'School day' : 'No school'}${hint ? ' ?' : ''}</button></div>` : ''}
+      ${settings().kids.length ? `<div class="wcare">${settings().kids.map(k => `<div class="wkid">${settings().kids.length > 1 ? `<span class="kn"><span class="dot" style="--c:${colorVar(k.color)}"></span>${esc(k.name)}</span>` : ''}<div class="strip">${
+        blocksFor(k, ds).map(b => { const o = ownerOf(k.id, b.key, ds); const gap = !o.v || (o.v !== 'na' && !person(o.v));
           return `<button class="seg ${gap ? 'gap' : o.v === 'na' ? 'na' : ''}" style="--c:${ownerColor(o.v)}" data-act="care" data-kid="${esc(k.id)}" data-block="${b.key}" data-ds="${ds}" aria-label="${esc(b.label)}: ${esc(ownerLabel(gap ? '' : o.v))}"><span class="sl">${esc(b.label)}</span><span class="so">${esc(gap ? 'Nobody' : o.v === 'na' ? '—' : ownerLabel(o.v))}</span></button>`; }).join('')
       }</div></div>`).join('')}</div>` : ''}
       <div class="wev">${its.map(i => evItem(i, true)).join('')}</div>
+      ${dinner ? `<button class="wdinner" data-act="meal" data-ds="${ds}" data-slot="dinner"><span class="sl">Dinner</span> ${esc(dinner.name)}</button>` : ''}
       <button class="wadd" data-act="newev" data-ds="${ds}">+ Add</button>
     </section>`;
   }).join('')}</div>`;
@@ -510,14 +594,59 @@ function renderTasks() {
   </section>`;
 }
 
+function mealAt(ds, slot) { const d = S.meals[ds]; return d && d.slots && d.slots[slot] && d.slots[slot].name ? d.slots[slot] : null; }
+const normItem = s => String(s || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+function renderPlanBox() {
+  const P = S.plan || { status: 'idle' };
+  if (S.sample === null) return `<p class="gnote">Meal ideas from Claude aren't available in this view. Open the planner on claude.ai to use them.</p>`;
+  if (P.status === 'off') return `<p class="gnote">${esc(P.err)}</p>`;
+  const form = `<form id="mpform" class="opts" style="gap:8px">
+      <label class="field"><span>What kind of week?</span><textarea id="mp-ask" placeholder="Quick weeknight dinners, one vegetarian night, kid-friendly, use the slow cooker on Wednesday, tacos on Tuesday…">${esc(P.ask || '')}</textarea></label>
+      <div class="toggles small"><label><input type="checkbox" id="mp-empty" ${P.onlyEmpty === false ? '' : 'checked'}> Only fill days that aren't planned</label></div>
+      <div class="actions"><button class="btn primary" type="submit" ${P.status === 'loading' ? 'disabled' : ''}>${P.status === 'loading' ? 'Thinking…' : 'Suggest meals'}</button></div>
+    </form>`;
+  if (P.status === 'loading') return form + `<p class="gnote" aria-live="polite">Claude is planning ${esc(P.slotsCount || '')} meal${P.slotsCount === 1 ? '' : 's'}${P.streamed ? ' · writing…' : '…'}</p>`;
+  if (P.status === 'error') return form + `<div class="gerr" role="alert">${esc(P.err)}</div>`;
+  if (P.status === 'ready') return form + `
+    <div class="proposal">
+      <h3 class="eyebrow group-h">Suggestions</h3>
+      <ul class="checklist">${P.meals.map((m, i) => `<li><input type="checkbox" id="mp-pick-${i}" data-act="mppick" data-i="${i}" ${P.picked[i] ? 'checked' : ''} aria-label="Use ${esc(m.name)}">
+        <span class="grow"><span class="small muted">${esc(DOW[dowOf(m.date)])} ${esc(shortDate(m.date))} · ${esc((MEAL_SLOTS.find(s => s.key === m.slot) || {}).label || m.slot)}</span><br><b>${esc(m.name)}</b>${m.note ? `<br><span class="small muted">${esc(m.note)}</span>` : ''}
+        <br><span class="small muted">${esc(m.ingredients.map(x => x.item).join(', '))}</span></span></li>`).join('')}</ul>
+      <div class="toggles small" style="margin-top:8px"><label><input type="checkbox" id="mp-tolist" checked> Add their ingredients to the grocery list</label></div>
+      <div class="actions" style="margin-top:8px"><button class="btn left" data-act="mpdiscard">Discard</button><button class="btn primary" data-act="mpuse">Use ${P.picked.filter(Boolean).length} meal${P.picked.filter(Boolean).length === 1 ? '' : 's'}</button></div>
+    </div>`;
+  return form;
+}
+
 function renderGroceries() {
-  const stores = settings().stores.length ? settings().stores : ['Grocery store'];
+  const st = settings();
+  const stores = st.stores.length ? st.stores : ['Grocery store'];
   const items = S.groceries;
   const groups = {};
   for (const s of stores) groups[s] = [];
   for (const it of items) { const s = stores.includes(it.store) ? it.store : stores[0]; groups[s].push(it); }
   const anyDone = items.some(i => i.done);
-  return `<section class="panel" aria-labelledby="h-g">
+  const ws = S.mealWeek, days = [...Array(7)].map((_, i) => addDays(ws, i)), t = todayStr();
+  const slots = MEAL_SLOTS.filter(s => st.mealSlots.includes(s.key));
+  const planned = days.reduce((n, ds) => n + slots.filter(s => mealAt(ds, s.key)).length, 0);
+  return `<div class="two">
+  <div class="stack">
+    <section class="panel" aria-labelledby="h-m">
+      <div class="panel-head"><h2 id="h-m">Meal plan · ${esc(shortDate(ws))} – ${esc(shortDate(addDays(ws, 6)))}</h2>
+        <span class="weekbar"><button class="iconbtn" data-act="mwk" data-d="-7" aria-label="Previous week">‹</button><button class="btn" data-act="mwk" data-d="0">This week</button><button class="iconbtn" data-act="mwk" data-d="7" aria-label="Next week">›</button></span></div>
+      <div class="mealgrid">${days.map(ds => `<div class="mealday${ds === t ? ' is-today' : ''}"><div class="md-h"><b>${DOW[dowOf(ds)]}</b> <span class="muted">${esc(shortDate(ds))}</span>${busyNote(ds) ? `<span class="busy">${esc(busyNote(ds))}</span>` : ''}</div>
+        <div class="md-slots">${slots.map(s => { const m = mealAt(ds, s.key);
+          return `<button class="mealcell${m ? '' : ' empty'}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${slots.length > 1 ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')}</div></div>`).join('')}</div>
+      ${planned ? `<div class="actions" style="margin-top:10px"><button class="btn" data-act="mtolist">Add this week's ingredients to the list</button></div>` : ''}
+    </section>
+    <section class="panel" aria-labelledby="h-mp">
+      <div class="panel-head"><h2 id="h-mp">Plan meals with Claude</h2></div>
+      ${renderPlanBox()}
+    </section>
+  </div>
+  <section class="panel" aria-labelledby="h-g">
     <div class="panel-head"><h2 id="h-g">Grocery list</h2>${anyDone ? '<button class="btn" data-act="gclear">Clear checked</button>' : ''}</div>
     <form class="addrow" id="gform">
       <input type="text" id="g-name" placeholder="Milk, eggs, birthday candles…" aria-label="Item" required>
@@ -526,9 +655,15 @@ function renderGroceries() {
     </form>
     ${!items.length ? '<p class="empty" style="margin-top:10px">The list is empty. Anything either of you adds shows up on both phones.</p>' :
       Object.entries(groups).filter(([, l]) => l.length).map(([s, l]) => `<h3 class="eyebrow group-h">${esc(s)}</h3><ul class="checklist">${
-        l.sort((a, b) => (a.done - b.done) || (a.createdAt || 0) - (b.createdAt || 0)).map(i => `<li class="${i.done ? 'done' : ''}"><input type="checkbox" id="gi-${esc(i.id)}" data-act="gdone" data-id="${esc(i.id)}" ${i.done ? 'checked' : ''} aria-label="Got ${esc(i.name)}"><span class="grow">${esc(i.name)}</span><button class="xbtn" data-act="gdel" data-id="${esc(i.id)}" aria-label="Remove ${esc(i.name)}">×</button></li>`).join('')
+        l.sort((a, b) => (a.done - b.done) || (a.createdAt || 0) - (b.createdAt || 0)).map(i => `<li class="${i.done ? 'done' : ''}"><input type="checkbox" id="gi-${esc(i.id)}" data-act="gdone" data-id="${esc(i.id)}" ${i.done ? 'checked' : ''} aria-label="Got ${esc(i.name)}"><span class="grow">${esc(i.name)}${i.qty ? ` <span class="small muted">${esc(i.qty)}</span>` : ''}${i.meal ? `<br><span class="small muted">for ${esc(i.meal)}</span>` : ''}</span><button class="xbtn" data-act="gdel" data-id="${esc(i.id)}" aria-label="Remove ${esc(i.name)}">×</button></li>`).join('')
       }</ul>`).join('')}
-  </section>`;
+  </section>
+  </div>`;
+}
+// Evening events (3pm or later) hint that dinner should be quick.
+function busyNote(ds) {
+  const late = itemsOn(ds).filter(i => !i.allDay && i.start >= '15:00');
+  return late.length ? `${late[0].title} ${fmtTime(late[0].start)}` : '';
 }
 
 function swatches(kind, id, cur) {
@@ -543,7 +678,7 @@ function renderFamily() {
   <div class="two">
     <section class="panel" aria-labelledby="h-kids">
       <div class="panel-head"><h2 id="h-kids">Kids</h2></div>
-      ${st.kids.map(k => `<div class="rowedit"><input type="text" id="kn-${esc(k.id)}" value="${esc(k.name)}" data-act="rename" data-kind="kids" data-id="${esc(k.id)}" aria-label="Name">${swatches('kids', k.id, k.color)}<button class="xbtn" data-act="rm" data-kind="kids" data-id="${esc(k.id)}" aria-label="Remove ${esc(k.name)}">×</button></div>`).join('') || '<p class="empty">No kids yet.</p>'}
+      ${st.kids.map(k => `<div class="rowedit"><input type="text" id="kn-${esc(k.id)}" value="${esc(k.name)}" data-act="rename" data-kind="kids" data-id="${esc(k.id)}" aria-label="Name">${swatches('kids', k.id, k.color)}<label class="small"><input type="checkbox" id="ks-${esc(k.id)}" data-act="kidschool" data-id="${esc(k.id)}" ${k.school !== false ? 'checked' : ''}> In school</label><button class="xbtn" data-act="rm" data-kind="kids" data-id="${esc(k.id)}" aria-label="Remove ${esc(k.name)}">×</button></div>`).join('') || '<p class="empty">No kids yet.</p>'}
       <form class="addrow" data-add="kids" style="margin-top:8px"><input type="text" id="add-kids" placeholder="Child's name" aria-label="Child's name" required><button class="btn" type="submit">Add child</button></form>
     </section>
     <section class="panel" aria-labelledby="h-ppl">
@@ -554,18 +689,31 @@ function renderFamily() {
     </section>
   </div>
   <section class="panel" aria-labelledby="h-blocks">
-    <div class="panel-head"><h2 id="h-blocks">Care blocks to track</h2></div>
-    <div class="toggles">${BLOCKS.map(b => `<label><input type="checkbox" id="bk-${b.key}" data-act="blk" data-key="${b.key}" ${st.blocks.includes(b.key) ? 'checked' : ''}> ${esc(b.label)}</label>`).join('')}</div>
+    <div class="panel-head"><h2 id="h-blocks">School days and care blocks</h2></div>
+    <div class="field"><span>Usual school days</span><div class="daypick">${order.map(d => `<label><input type="checkbox" id="sd-${d}" data-act="schoolday" data-d="${d}" ${st.schoolDays.includes(d) ? 'checked' : ''}><span>${DOW[d]}</span></label>`).join('')}</div></div>
+    <p class="small muted" style="margin:8px 0">Any single day can be switched between school day and no school from Today or Week.</p>
+    <div class="blockgroups">
+      ${[['school', 'On school days'], ['off', 'On no-school days'], ['all', 'Every day']].map(([type, title]) => `<div class="field"><span>${title}</span><div class="toggles">${BLOCKS.filter(b => b.type === type).map(b => `<label><input type="checkbox" id="bk-${b.key}" data-act="blk" data-key="${b.key}" ${st.careBlocks.includes(b.key) ? 'checked' : ''}> ${esc(b.label)}</label>`).join('')}</div></div>`).join('')}
+    </div>
   </section>
   <section class="panel" aria-labelledby="h-pat">
     <div class="panel-head"><h2 id="h-pat">Usual weekly schedule</h2></div>
-    <p class="small muted" style="margin:0 0 8px">Who normally covers each block. These fill every week automatically; change single days from Today or Week.</p>
-    ${!st.kids.length ? '<p class="empty">Add a child first.</p>' : !activeBlocks().length ? '<p class="empty">Turn on at least one care block above.</p>' : st.kids.map(k => `
-      ${st.kids.length > 1 ? `<h3 class="eyebrow group-h">${esc(k.name)}</h3>` : ''}
-      <div class="pattern-wrap"><table class="pattern"><thead><tr><th></th>${order.map(d => `<th>${DOW[d]}</th>`).join('')}</tr></thead><tbody>
-      ${activeBlocks().map(b => `<tr><th scope="row">${esc(b.label)}</th>${order.map(d => { const v = (S.patterns[k.id] && S.patterns[k.id][b.key] && S.patterns[k.id][b.key][d]) || '';
+    <p class="small muted" style="margin:0 0 8px">Who normally covers each block. These fill every week automatically; change single days from Today or Week. No-school days use their weekday column, so a Wednesday holiday uses Wednesday's daytime pick.</p>
+    ${!st.kids.length ? '<p class="empty">Add a child first.</p>' : st.kids.map(k => {
+      const groups = [
+        ['School days', BLOCKS.filter(b => b.type === 'school' && k.school !== false), order.filter(d => st.schoolDays.includes(d))],
+        ['No-school days', BLOCKS.filter(b => b.type === 'off'), order],
+        ['Every day', BLOCKS.filter(b => b.type === 'all'), order],
+      ].map(([t, bl, cols]) => [t, bl.filter(b => st.careBlocks.includes(b.key)), cols]).filter(([, bl, cols]) => bl.length && cols.length);
+      return `${st.kids.length > 1 ? `<h3 class="kidhead"><span class="dot" style="--c:${colorVar(k.color)}"></span>${esc(k.name)}</h3>` : ''}
+      ${groups.length ? groups.map(([t, bl, cols]) => `<div class="pattern-wrap"><table class="pattern"><caption>${t}</caption><thead><tr><th></th>${cols.map(d => `<th>${DOW[d]}</th>`).join('')}</tr></thead><tbody>
+      ${bl.map(b => `<tr><th scope="row">${esc(b.label)}</th>${cols.map(d => { const v = (S.patterns[k.id] && S.patterns[k.id][b.key] && S.patterns[k.id][b.key][d]) || '';
         return `<td><select id="pt-${esc(k.id)}-${b.key}-${d}" data-act="pat" data-kid="${esc(k.id)}" data-block="${b.key}" data-d="${d}" aria-label="${esc(b.label)} ${DOW_LONG[d]}">${ownerOpts(v)}</select></td>`; }).join('')}</tr>`).join('')}
-      </tbody></table></div>`).join('')}
+      </tbody></table></div>`).join('') : '<p class="empty">Turn on at least one care block above.</p>'}`; }).join('')}
+  </section>
+  <section class="panel" aria-labelledby="h-meals">
+    <div class="panel-head"><h2 id="h-meals">Meals to plan</h2></div>
+    <div class="toggles">${MEAL_SLOTS.map(s => `<label><input type="checkbox" id="ms-${s.key}" data-act="mslot" data-key="${s.key}" ${st.mealSlots.includes(s.key) ? 'checked' : ''}> ${esc(s.label)}</label>`).join('')}</div>
   </section>
   <div class="two">
     <section class="panel" aria-labelledby="h-gc">
@@ -582,6 +730,18 @@ function renderFamily() {
       <form class="addrow" data-add="stores" style="margin-top:8px"><input type="text" id="add-stores" placeholder="Store name" aria-label="Store name" required><button class="btn" type="submit">Add store</button></form>
     </section>
   </div>
+  <section class="panel" aria-labelledby="h-bk">
+    <div class="panel-head"><h2 id="h-bk">Backups</h2></div>
+    <p class="small muted" style="margin:0 0 10px">Your planner is saved on claude.ai. A backup is an extra copy of everything (kids, schedules, events, meals, groceries and tasks) that you keep yourself.</p>
+    <div class="actions" style="justify-content:flex-start">
+      ${S.mcp ? '<button class="btn primary" data-act="bkdrive">Back up to Google Drive</button>' : ''}
+      ${S.downloads ? '<button class="btn" data-act="bkdl">Download a backup</button>' : ''}
+      <label class="btn" for="bk-file">Restore from a backup…</label><input type="file" id="bk-file" accept=".json,application/json" hidden>
+    </div>
+    ${S.mcp ? `<div class="toggles small" style="margin-top:10px"><label><input type="checkbox" id="bk-auto" data-act="bkauto" ${loadLocal('fp.autoDrive', false) ? 'checked' : ''}> Back up to Google Drive automatically, once a day, when this device opens the planner</label></div>` : ''}
+    <p class="gnote" style="margin:8px 0 0" id="bk-status">${esc(backupStatus())}</p>
+    ${S.restore ? `<div class="banner warn" style="margin-top:10px"><span>Restore the backup from ${esc(S.restore.when)}? This replaces everything in the planner for both of you.</span><button class="btn danger" data-act="bkrestore">Replace with backup</button><button class="btn" data-act="bkcancel">Cancel</button></div>` : ''}
+  </section>
   <section class="panel"><h2 style="margin-bottom:6px">Sharing</h2><p class="small muted" style="margin:0">To let another parent edit, share this page with them and give them edit access. Everything here except the Google Calendar events is shared; each person connects their own Google account.</p></section>`;
 }
 
@@ -633,6 +793,216 @@ function setCareDay(ds, kidId, block, val) {
   return write(() => S.db.doc('care/' + ds).set(cur));
 }
 
+function setDayType(ds, school) {
+  const cur = S.care[ds] ? JSON.parse(JSON.stringify(S.care[ds])) : { date: ds, v: {} };
+  cur.date = ds; cur.v = cur.v || {}; cur.school = school;
+  S.care[ds] = cur; schedule();
+  return write(() => S.db.doc('care/' + ds).set(cur));
+}
+
+// ---------- meals ----------
+function saveMeal(ds, slot, meal) {
+  const cur = S.meals[ds] ? JSON.parse(JSON.stringify(S.meals[ds])) : { date: ds, slots: {} };
+  cur.date = ds; cur.slots = cur.slots || {};
+  if (meal) cur.slots[slot] = meal; else delete cur.slots[slot];
+  S.meals[ds] = cur; schedule();
+  return write(() => S.db.doc('meals/' + ds).set(cur));
+}
+// Adds ingredients not already on the open list; returns how many were added.
+async function addIngredients(list) {
+  if (!guard()) return 0;
+  const open = new Set(S.groceries.filter(g => !g.done).map(g => normItem(g.name)));
+  const stores = settings().stores;
+  let n = 0;
+  for (const x of list) {
+    const key = normItem(x.item); if (!key || open.has(key)) continue;
+    open.add(key);
+    const store = stores.includes(x.store) ? x.store : (stores[0] || '');
+    const ok = await write(() => S.db.collection('groceries').doc(uid()).set({ name: String(x.item).trim(), qty: x.qty || '', store, meal: x.meal || '', done: false, createdAt: Date.now() }));
+    if (!ok) break; n++;
+  }
+  return n;
+}
+function weekIngredients(ws) {
+  const out = []; const slots = settings().mealSlots;
+  for (let i = 0; i < 7; i++) for (const s of slots) { const m = mealAt(addDays(ws, i), s); if (m) for (const x of (m.ingredients || [])) out.push({ ...x, meal: m.name }); }
+  return out;
+}
+// "2 lb chicken thighs" lines <-> {item, qty}
+function parseIngLines(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^((?:\d[\d./\s-]*|a |an |one |two |three |half )(?:\s*(?:lb|lbs|oz|g|kg|cups?|tbsp|tsp|cans?|jars?|bags?|boxes?|packs?|packages?|bunch(?:es)?|heads?|cloves?|dozen|pints?|quarts?|gallons?|bottles?|loaf|loaves|ml|l)\b\.?)?)\s+(.+)$/i);
+    return m ? { qty: m[1].trim(), item: m[2].trim() } : { qty: '', item: l };
+  });
+}
+function mealSheet(ds, slot) {
+  const m = mealAt(ds, slot) || { name: '', ingredients: [], notes: '' };
+  const label = (MEAL_SLOTS.find(s => s.key === slot) || {}).label || slot;
+  openSheet(`
+    <h3>${esc(label)} · ${esc(longDate(ds))}</h3>
+    <form id="mealform" class="opts" style="gap:12px">
+      <label class="field"><span>Meal</span><input type="text" id="mf-name" value="${esc(m.name)}" placeholder="Sheet-pan chicken fajitas" required></label>
+      <label class="field"><span>Ingredients to buy, one per line</span><textarea id="mf-ing" rows="6" placeholder="1.5 lb chicken thighs&#10;3 bell peppers&#10;tortillas">${esc((m.ingredients || []).map(x => (x.qty ? x.qty + ' ' : '') + x.item).join('\n'))}</textarea></label>
+      <label class="field"><span>Notes</span><input type="text" id="mf-notes" value="${esc(m.notes || '')}" placeholder="Recipe link, who's cooking…"></label>
+      <div class="actions">
+        ${mealAt(ds, slot) ? '<button type="button" class="btn danger left" data-x="clear">Remove</button>' : ''}
+        ${mealAt(ds, slot) && (m.ingredients || []).length ? '<button type="button" class="btn" data-x="list">Add to grocery list</button>' : ''}
+        <button type="button" class="btn" data-act="close">Cancel</button>
+        <button type="submit" class="btn primary">Save</button>
+      </div>
+    </form>`, sh => {
+    sh.addEventListener('click', async e => {
+      const x = e.target.closest('[data-x]'); if (!x) return;
+      if (x.dataset.x === 'clear') { closeSheet(); await saveMeal(ds, slot, null) && toast('Meal removed'); }
+      if (x.dataset.x === 'list') { closeSheet(); const n = await addIngredients((m.ingredients || []).map(i => ({ ...i, meal: m.name }))); toast(n ? `Added ${n} item${n === 1 ? '' : 's'} to the grocery list` : 'Everything is already on the list'); }
+    });
+    sh.querySelector('#mealform').addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = sh.querySelector('#mf-name').value.trim(); if (!name) return;
+      const old = new Map((m.ingredients || []).map(x => [normItem(x.item), x.store]));
+      const ingredients = parseIngLines(sh.querySelector('#mf-ing').value).map(x => ({ ...x, store: old.get(normItem(x.item)) || '' }));
+      closeSheet();
+      await saveMeal(ds, slot, { name, ingredients, notes: sh.querySelector('#mf-notes').value.trim(), source: m.source || 'manual' }) && toast('Meal saved');
+    });
+  });
+}
+
+let planCtl = null;
+async function planMeals(ask, onlyEmpty) {
+  const st = settings(), ws = S.mealWeek;
+  const slots = MEAL_SLOTS.filter(s => st.mealSlots.includes(s.key));
+  const want = [];
+  for (let i = 0; i < 7; i++) { const ds = addDays(ws, i); for (const s of slots) if (!onlyEmpty || !mealAt(ds, s.key)) want.push({ date: ds, weekday: DOW_LONG[dowOf(ds)], slot: s.key }); }
+  if (!want.length) { S.plan = { status: 'error', ask, onlyEmpty, err: 'Every meal this week is already planned. Untick "Only fill days that aren\'t planned" to replace them.' }; schedule(); return; }
+  const context = [...Array(7)].map((_, i) => {
+    const ds = addDays(ws, i);
+    const evening = itemsOn(ds).filter(x => !x.allDay && x.start >= '15:00').map(x => `${x.title} at ${fmtTime(x.start)}`);
+    const planned = slots.map(s => mealAt(ds, s.key) ? `${s.label}: ${mealAt(ds, s.key).name}` : '').filter(Boolean);
+    return `- ${DOW_LONG[dowOf(ds)]} ${ds}: ${isSchool(ds) ? 'school day' : 'no school'}${evening.length ? `; evening plans: ${evening.join(', ')}` : ''}${planned.length ? `; already planned: ${planned.join(', ')}` : ''}`;
+  }).join('\n');
+  const prompt = `You are helping a family with young kids plan meals for the week of ${longDate(ws)}.
+
+What they asked for:
+"""${ask || 'Simple, family-friendly meals.'}"""
+
+The week:
+${context}
+
+Plan exactly these meals (one per line, date and slot):
+${want.map(w => `${w.date} ${w.weekday} ${w.slot}`).join('\n')}
+
+Guidance: keep evenings with plans quick (30 minutes or less, or slow cooker or leftovers). Vary the meals across the week. Reuse ingredients across meals where it makes sense. "lunchbox" means a packed school lunch for a kid.
+
+Stores they shop at: ${st.stores.join(', ') || 'a grocery store'}. Put each ingredient's best store, or "" if any store.
+
+Reply with only JSON in this shape:
+{"meals":[{"date":"YYYY-MM-DD","slot":"dinner","name":"Sheet-pan chicken fajitas","note":"20 minutes; good for the busy Tuesday","ingredients":[{"item":"chicken thighs","qty":"1.5 lb","store":""}]}]}
+List only ingredients to buy: skip salt, pepper, oil, water and common spices.`;
+  if (planCtl) planCtl.abort();
+  planCtl = new AbortController();
+  S.plan = { status: 'loading', ask, onlyEmpty, slotsCount: want.length };
+  schedule();
+  try {
+    const res = await S.sample.json(prompt, { signal: planCtl.signal, onText: () => { if (S.plan && !S.plan.streamed) { S.plan.streamed = true; schedule(); } } });
+    const valid = new Set(want.map(w => w.date + '|' + w.slot));
+    const meals = (res && Array.isArray(res.meals) ? res.meals : []).filter(m => m && valid.has(m.date + '|' + m.slot) && m.name)
+      .map(m => ({ date: m.date, slot: m.slot, name: String(m.name), note: String(m.note || ''), ingredients: (Array.isArray(m.ingredients) ? m.ingredients : []).filter(x => x && x.item).map(x => ({ item: String(x.item), qty: String(x.qty || ''), store: String(x.store || '') })) }))
+      .sort((a, b) => (a.date + a.slot).localeCompare(b.date + b.slot));
+    if (!meals.length) { S.plan = { status: 'error', ask, onlyEmpty, err: "Claude's answer didn't include any meals for this week. Try again, or describe what you want a little differently." }; }
+    else S.plan = { status: 'ready', ask, onlyEmpty, meals, picked: meals.map(() => true) };
+  } catch (e) {
+    const c = e && e.code;
+    if (c === 'cancelled') return;
+    if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(c)) S.plan = { status: 'off', err: 'Meal ideas from Claude are turned off for this page. You can still plan meals by tapping a day.' };
+    else if (c === 'rate_limited') S.plan = { status: 'error', ask, onlyEmpty, err: "You've hit your Claude usage limit for now. Try again a bit later." };
+    else if (c === 'session_expired') S.plan = { status: 'error', ask, onlyEmpty, err: 'Your claude.ai sign-in expired. Reload the page and sign in again.' };
+    else if (c === 'invalid_json') S.plan = { status: 'error', ask, onlyEmpty, err: "Claude's answer came back in the wrong format. Press Suggest meals to try again." };
+    else if (c === 'refused') S.plan = { status: 'error', ask, onlyEmpty, err: "Claude wouldn't plan meals from that request. Try rewording it." };
+    else S.plan = { status: 'error', ask, onlyEmpty, err: "Couldn't reach Claude just now. Press Suggest meals to try again." };
+  }
+  schedule();
+}
+async function usePlan(toList) {
+  const P = S.plan; if (!P || P.status !== 'ready') return;
+  const chosen = P.meals.filter((_, i) => P.picked[i]);
+  if (!chosen.length) { toast('Tick at least one meal'); return; }
+  for (const m of chosen) { const ok = await saveMeal(m.date, m.slot, { name: m.name, ingredients: m.ingredients, notes: m.note, source: 'claude' }); if (!ok) return; }
+  let n = 0;
+  if (toList) n = await addIngredients(chosen.flatMap(m => m.ingredients.map(x => ({ ...x, meal: m.name }))));
+  S.plan = { status: 'idle', ask: P.ask, onlyEmpty: P.onlyEmpty };
+  schedule();
+  toast(`Added ${chosen.length} meal${chosen.length === 1 ? '' : 's'}${toList ? ` and ${n} grocery item${n === 1 ? '' : 's'}` : ''}`);
+}
+
+// ---------- backups ----------
+const BACKUP_COLLECTIONS = ['care', 'events', 'groceries', 'tasks', 'gmeta', 'meals'];
+async function collectBackup() {
+  const out = { app: 'family-planner', version: 2, exportedAt: new Date().toISOString(), family: {} };
+  for (const id of ['settings', 'patterns']) { const s = await S.db.doc('family/' + id).get(); if (s.exists) out.family[id] = s.data(); }
+  for (const c of BACKUP_COLLECTIONS) { const q = await S.db.collection(c).limit(1000).get(); out[c] = {}; q.docs.forEach(d => { out[c][d.id] = d.data(); }); }
+  return out;
+}
+const backupName = () => { const d = new Date(); return `Family Planner backup ${todayStr()} ${pad(d.getHours())}${pad(d.getMinutes())}.json`; };
+function backupStatus() {
+  const last = loadLocal('fp.lastDrive', null);
+  return last ? `Last Google Drive backup from this device: ${last}.` : 'No Google Drive backup from this device yet.';
+}
+async function backupToDrive(auto) {
+  if (!S.db || !S.mcp) return false;
+  try {
+    const data = await collectBackup();
+    await S.mcp.callTool('Google Drive', 'create_file', { title: backupName(), textContent: JSON.stringify(data), contentMimeType: 'application/json', disableConversionToGoogleType: true });
+    const d = new Date(); saveLocal('fp.lastDrive', `${longDate(todayStr())} at ${fmtTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`)}`); saveLocal('fp.lastDriveDay', todayStr());
+    schedule(); if (!auto) toast('Backed up to Google Drive'); return true;
+  } catch (e) {
+    const c = e && e.code;
+    const msg = c === 'needs_reauth' ? 'Google Drive needs reconnecting in claude.ai Settings → Connectors.'
+      : c === 'server_not_connected' ? "Google Drive isn't connected. Add it in claude.ai Settings → Connectors."
+      : (c === 'not_in_manifest' || c === 'not_granted' || c === 'blocked_by_policy') ? 'Google Drive is turned off for this page. Turn it on from the Permissions menu.'
+      : c === 'server_unavailable' ? "Google Drive didn't answer. Check Drive before trying again, in case the backup went through."
+      : "Couldn't back up to Google Drive: " + ((e && e.message) || 'unknown error');
+    if (!auto) toast(msg); else console.warn('Auto backup skipped:', msg);
+    return false;
+  }
+}
+async function maybeAutoBackup(now) {
+  if (!loadLocal('fp.autoDrive', false) || !S.db || !S.mcp) return;
+  if (loadLocal('fp.lastDriveDay', '') === todayStr() && !now) return;
+  if (!now) { const st = S.perms ? await S.perms.state('mcp:Google Drive').catch(() => 'unavailable') : 'prompt'; if (st !== 'granted') return; }
+  backupToDrive(!now);
+}
+async function downloadBackup() {
+  if (!S.db || !S.downloads) return;
+  try {
+    const data = await collectBackup();
+    await S.downloads.save({ filename: backupName().replace(/ /g, '-').toLowerCase(), data: JSON.stringify(data, null, 1) });
+    toast('Backup saved');
+  } catch (e) { if (e && e.code !== 'declined') toast("Couldn't save the backup file here. Try Back up to Google Drive instead."); }
+}
+async function readRestoreFile(file) {
+  try {
+    const data = JSON.parse(await file.text());
+    if (!data || data.app !== 'family-planner' || !data.family) throw new Error('not a planner backup');
+    S.restore = { data, when: data.exportedAt ? new Date(data.exportedAt).toLocaleString() : file.name };
+  } catch { S.restore = null; toast("That file isn't a Family Planner backup."); }
+  schedule();
+}
+async function doRestore() {
+  const data = S.restore && S.restore.data; S.restore = null; schedule();
+  if (!data || !guard()) return;
+  toast('Restoring…');
+  try {
+    for (const id of ['settings', 'patterns']) if (data.family[id]) await S.db.doc('family/' + id).set(data.family[id]);
+    for (const c of BACKUP_COLLECTIONS) {
+      const keep = data[c] || {};
+      const now = await S.db.collection(c).limit(1000).get();
+      for (const d of now.docs) if (!keep[d.id]) await S.db.doc(c + '/' + d.id).delete();
+      for (const [id, body] of Object.entries(keep)) await S.db.doc(c + '/' + id).set(body);
+    }
+    toast('Backup restored');
+  } catch { toast('The restore stopped partway. Try it again from the same file.'); }
+}
+
 // ---------- sheets ----------
 function openSheet(html, onMount) {
   const root = document.getElementById('sheet-root');
@@ -644,7 +1014,8 @@ function openSheet(html, onMount) {
 function closeSheet() { document.getElementById('sheet-root').innerHTML = ''; }
 
 function careSheet(kidId, block, ds) {
-  const k = kid(kidId), b = BLOCKS.find(x => x.key === block);
+  const k = kid(kidId), b = blockDef(block);
+  const everyLabel = b.type === 'school' ? `Every ${DOW_LONG[dowOf(ds)]} school day` : b.type === 'off' ? `Every no-school ${DOW_LONG[dowOf(ds)]}` : `Every ${DOW_LONG[dowOf(ds)]}`;
   const o = ownerOf(kidId, block, ds);
   const pat = (S.patterns[kidId] && S.patterns[kidId][block] && S.patterns[kidId][block][dowOf(ds)]) || '';
   let scope = 'day';
@@ -654,12 +1025,12 @@ function careSheet(kidId, block, ds) {
     ${settings().kids.length > 1 ? `<p class="small muted" style="margin:0">${esc(k ? k.name : '')}</p>` : ''}
     <div class="seg-ctl" role="group" aria-label="Apply to">
       <button type="button" data-scope="day" aria-pressed="true">Just this day</button>
-      <button type="button" data-scope="pattern" aria-pressed="false">Every ${DOW_LONG[dowOf(ds)]}</button>
+      <button type="button" data-scope="pattern" aria-pressed="false">${esc(everyLabel)}</button>
     </div>
     <div class="opts">
       ${ppl.map(p => `<button class="opt" data-pick="${esc(p.id)}" aria-pressed="${o.v === p.id}"><span class="dot" style="--c:${colorVar(p.color)}"></span>${esc(p.name)}</button>`).join('')}
       <button class="opt" data-pick="na" aria-pressed="${o.v === 'na'}"><span class="dot" style="--c:var(--na)"></span>Not needed this day</button>
-      ${!ppl.length ? '<p class="small muted">Add people who can cover care in Family setup.</p>' : ''}
+      ${!ppl.length ? '<p class="small muted">Add people who can cover care in Setup.</p>' : ''}
     </div>
     <div class="actions">
       ${o.src === 'day' ? `<button class="btn left" data-pick="__reset">Back to usual (${esc(ownerLabel(pat))})</button>` : ''}
@@ -678,7 +1049,7 @@ function careSheet(kidId, block, ds) {
         next[kidId][block][dowOf(ds)] = val; S.patterns = next; schedule();
         // clear a one-day change on this date so the new usual shows
         if (o.src === 'day') await setCareDay(ds, kidId, block, null);
-        await savePatterns(next) && toast(`Every ${DOW_LONG[dowOf(ds)]}: ${ownerLabel(val)}`);
+        await savePatterns(next) && toast(`${everyLabel}: ${ownerLabel(val)}`);
       } else {
         await setCareDay(ds, kidId, block, val) && toast(`${b.label}: ${ownerLabel(val)}`);
       }
@@ -878,13 +1249,24 @@ document.addEventListener('click', async e => {
   const a = t.dataset.act;
   if (a === 'scrim') { if (e.target === t) closeSheet(); return; }
   if (a === 'close') { closeSheet(); return; }
-  if (a === 'care') { if (!settings().people.length) { toast('Add who can cover care in Family setup first.'); location.hash = '#family'; return; } careSheet(t.dataset.kid, t.dataset.block, t.dataset.ds); return; }
+  if (a === 'care') { if (!settings().people.length) { toast('Add who can cover care in Setup first.'); location.hash = '#family'; return; } careSheet(t.dataset.kid, t.dataset.block, t.dataset.ds); return; }
   if (a === 'newev') { if (guard()) eventSheet(null, t.dataset.ds); return; }
   if (a === 'ev') { const ev = S.events.find(x => x.id === t.dataset.id); if (ev && guard()) eventSheet(ev, t.dataset.ds); return; }
   if (a === 'gev') { gEventSheet(t.dataset.id, t.dataset.cal); return; }
   if (a === 'wk') { const d = Number(t.dataset.d); S.weekStart = d ? addDays(S.weekStart, d) : mondayOf(todayStr()); syncWatches(); schedule(); return; }
   if (a === 'gconnect') { connectGoogle(); return; }
   if (a === 'gperm') { try { await S.perms.manage(); location.reload(); } catch { toast("Open this page's Permissions menu to turn Google Calendar back on."); } return; }
+  if (a === 'daytype') { if (guard()) await setDayType(t.dataset.ds, t.dataset.v === '1'); return; }
+  if (a === 'marknoschool') { if (!guard()) return; const days = t.dataset.days.split(','); for (const ds of days) await setDayType(ds, false); toast(`Marked ${days.length} day${days.length === 1 ? '' : 's'} as no school`); return; }
+  if (a === 'meal') { if (guard()) mealSheet(t.dataset.ds, t.dataset.slot); return; }
+  if (a === 'mwk') { const d = Number(t.dataset.d); S.mealWeek = d ? addDays(S.mealWeek, d) : defaultMealWeek(); if (S.plan && S.plan.status === 'ready') S.plan = { status: 'idle', ask: S.plan.ask }; schedule(); return; }
+  if (a === 'mtolist') { const n = await addIngredients(weekIngredients(S.mealWeek)); toast(n ? `Added ${n} item${n === 1 ? '' : 's'} to the grocery list` : 'Everything is already on the list'); return; }
+  if (a === 'mpuse') { const tl = document.getElementById('mp-tolist'); await usePlan(!tl || tl.checked); return; }
+  if (a === 'mpdiscard') { S.plan = { status: 'idle', ask: S.plan && S.plan.ask }; schedule(); return; }
+  if (a === 'bkdrive') { t.disabled = true; t.textContent = 'Backing up…'; await backupToDrive(false); schedule(); return; }
+  if (a === 'bkdl') { downloadBackup(); return; }
+  if (a === 'bkrestore') { doRestore(); return; }
+  if (a === 'bkcancel') { S.restore = null; schedule(); return; }
   if (a === 'gclear') { const done = S.groceries.filter(g => g.done); for (const g of done) await write(() => S.db.doc('groceries/' + g.id).delete()); toast(`Cleared ${done.length} item${done.length === 1 ? '' : 's'}`); return; }
   if (a === 'gdel') { await write(() => S.db.doc('groceries/' + t.dataset.id).delete()); return; }
   if (a === 'tdel') { await write(() => S.db.doc('tasks/' + t.dataset.id).delete()); return; }
@@ -899,10 +1281,17 @@ document.addEventListener('click', async e => {
   if (a === 'srm') { const st = JSON.parse(JSON.stringify(settings())); st.stores.splice(Number(t.dataset.i), 1); S.settings = st; schedule(); await saveSettings(st); return; }
 });
 document.addEventListener('change', async e => {
-  const t = e.target; const a = t.dataset && t.dataset.act; if (!a) return;
+  const t = e.target;
+  if (t.id === 'bk-file') { const f = t.files && t.files[0]; t.value = ''; if (f) readRestoreFile(f); return; }
+  const a = t.dataset && t.dataset.act; if (!a) return;
   if (a === 'gdone') { const done = t.checked; await write(() => S.db.doc('groceries/' + t.dataset.id).update({ done })); return; }
   if (a === 'tdone') { const done = t.checked; await write(() => S.db.doc('tasks/' + t.dataset.id).update({ done, doneAt: done ? Date.now() : 0 }), done ? 'Done' : null); return; }
-  if (a === 'blk') { const st = JSON.parse(JSON.stringify(settings())); st.blocks = BLOCKS.map(b => b.key).filter(k => k === t.dataset.key ? t.checked : st.blocks.includes(k)); S.settings = st; schedule(); await saveSettings(st); return; }
+  if (a === 'blk') { const st = JSON.parse(JSON.stringify(settings())); st.careBlocks = BLOCKS.map(b => b.key).filter(k => k === t.dataset.key ? t.checked : st.careBlocks.includes(k)); S.settings = st; schedule(); await saveSettings(st); return; }
+  if (a === 'mslot') { const st = JSON.parse(JSON.stringify(settings())); st.mealSlots = MEAL_SLOTS.map(b => b.key).filter(k => k === t.dataset.key ? t.checked : st.mealSlots.includes(k)); S.settings = st; schedule(); await saveSettings(st); return; }
+  if (a === 'schoolday') { const st = JSON.parse(JSON.stringify(settings())); const d = Number(t.dataset.d); st.schoolDays = [0,1,2,3,4,5,6].filter(x => x === d ? t.checked : st.schoolDays.includes(x)); S.settings = st; schedule(); await saveSettings(st); return; }
+  if (a === 'kidschool') { const st = JSON.parse(JSON.stringify(settings())); const k = st.kids.find(x => x.id === t.dataset.id); if (!k) return; k.school = t.checked; S.settings = st; schedule(); await saveSettings(st); return; }
+  if (a === 'bkauto') { saveLocal('fp.autoDrive', t.checked); if (t.checked) maybeAutoBackup(true); return; }
+  if (a === 'mppick') { if (S.plan && S.plan.picked) { S.plan.picked[Number(t.dataset.i)] = t.checked; schedule(); } return; }
   if (a === 'pat') {
     const next = JSON.parse(JSON.stringify(S.patterns || {})); const { kid: k, block: b, d } = t.dataset;
     next[k] = next[k] || {}; next[k][b] = next[k][b] || ['', '', '', '', '', '', '']; next[k][b][Number(d)] = t.value;
@@ -918,6 +1307,12 @@ document.addEventListener('change', async e => {
 });
 document.addEventListener('submit', async e => {
   const f = e.target; e.preventDefault();
+  if (f.id === 'mpform') {
+    if (!S.sample) return;
+    if (!guard()) return;
+    planMeals(f.querySelector('#mp-ask').value.trim(), f.querySelector('#mp-empty').checked);
+    return;
+  }
   if (f.id === 'gform') {
     const name = f.querySelector('#g-name').value.trim(); if (!name) return;
     const store = f.querySelector('#g-store').value; f.querySelector('#g-name').value = '';
@@ -951,7 +1346,9 @@ function route() {
 window.addEventListener('hashchange', route);
 
 // ---------- boot ----------
+function defaultMealWeek() { const t = todayStr(); return dowOf(t) === 0 ? addDays(t, 1) : mondayOf(t); }
 S.weekStart = mondayOf(todayStr());
+S.mealWeek = defaultMealWeek();
 route();
 // a new day while the page stays open
 let lastDay = todayStr();
@@ -959,19 +1356,21 @@ setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekSt
 
 (async () => {
   const c = window.claude;
-  if (!c || !c.use) { S.dbMissing = true; S.settings = null; schedule(); S.gState = 'unavailable'; return; }
-  const [db, user, mcp, perms] = await Promise.all([c.use('db'), c.use('user'), c.use('mcp'), c.use('permissions')]);
-  S.db = db; S.user = user; S.mcp = mcp; S.perms = perms;
+  if (!c || !c.use) { S.dbMissing = true; S.settings = null; S.sample = null; schedule(); S.gState = 'unavailable'; return; }
+  const [db, user, mcp, perms, sample, downloads] = await Promise.all([c.use('db'), c.use('user'), c.use('mcp'), c.use('permissions'), c.use('sample'), c.use('downloads')]);
+  S.db = db; S.user = user; S.mcp = mcp; S.perms = perms; S.sample = sample; S.downloads = downloads;
   if (user) { try { const w = await user.can('data.write'); if (w === false) S.canWrite = false; } catch {} }
   if (!db) { S.dbMissing = true; schedule(); }
   else {
     const err = e => { if (e && e.code === 'revoked') { S.dbMissing = true; schedule(); } };
-    db.doc('family/settings').onSnapshot(s => { S.settings = s.exists ? { ...DEFAULT_SETTINGS, ...s.data() } : { ...DEFAULT_SETTINGS }; schedule(); }, err);
+    db.doc('family/settings').onSnapshot(s => { S.settings = s.exists ? { ...s.data() } : {}; schedule(); }, err);
     db.doc('family/patterns').onSnapshot(s => { const d = s.exists ? s.data() : null; S.patterns = (d && d.p) || {}; schedule(); }, err);
     db.collection('care').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.care = m; schedule(); }, err);
     db.collection('events').onSnapshot(s => { S.events = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('groceries').onSnapshot(s => { S.groceries = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('tasks').onSnapshot(s => { S.tasks = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
+    db.collection('meals').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.meals = m; schedule(); }, err);
+    setTimeout(() => maybeAutoBackup(false), 4000);
     db.collection('gmeta').onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.gmeta = m; schedule(); }, err);
   }
   if (!mcp) { S.gState = 'unavailable'; schedule(); return; }
