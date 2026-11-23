@@ -288,6 +288,32 @@ button.due.nodue { color: var(--muted); opacity: .8; }
 .late { color: var(--gap); font-weight: 600; }
 .wadds { display: flex; gap: 4px; margin: 4px 6px 8px; }
 .wadds .wadd { flex: 1; margin: 0; }
+.daystrip { display: none; }
+@media (max-width: 760px) {
+  .daystrip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .dsday { position: relative; display: grid; justify-items: center; gap: 0; padding: 6px 0; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+  .dsday .dsd { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .dsday .dsn { font-size: 1.05rem; font-weight: 700; }
+  .dsday.today .dsn { color: var(--accent); }
+  .dsday.on { background: var(--accent); border-color: var(--accent); }
+  .dsday.on .dsd, .dsday.on .dsn { color: var(--accent-ink); }
+  .dsgap { position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--gap); }
+  .week .wday:not(.sel) { display: none; }
+  .week { touch-action: pan-y; }
+}
+.dayhead .qabtn { margin-left: auto; }
+.quickadd { margin-top: 10px; display: grid; gap: 6px; }
+.qchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.qchip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; font-size: .85rem; font-weight: 600; }
+.qchip:hover { background: var(--sunk); }
+.qchip.staple { color: var(--muted); font-weight: 500; border-style: dashed; }
+.qafiles { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.qalist li { align-items: flex-start; }
+.qalist input { margin-top: 3px; }
+.qtype { display: inline-block; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--accent-soft); color: var(--fg); }
+.qtype.task { background: color-mix(in srgb, var(--o4) 22%, var(--surface)); }
+.qtype.noschool { background: var(--sunk); }
+.rep { font-size: .76rem; color: var(--muted); white-space: nowrap; }
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -375,7 +401,7 @@ const S = {
   db: null, user: null, mcp: null, perms: null,
   dbReady: false, dbMissing: false, canWrite: true,
   settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {}, meals: {},
-  dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
+  me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
   g: {},            // calendarId -> { events, err, at }
   gCals: null,      // list from list_calendars
   gState: 'idle',   // idle | off | ask | on | unavailable
@@ -717,7 +743,7 @@ function renderToday() {
   const openG = S.groceries.filter(g => !g.done).length;
   const hasPattern = Object.keys(S.patterns || {}).length > 0 || Object.keys(S.rules || {}).length > 0;
   return `
-  <div class="dayhead"><h2>${esc(longDate(t))}</h2><span class="muted">Here's what's happening today.</span></div>
+  <div class="dayhead"><h2>${esc(longDate(t))}</h2><span class="muted">Here's what's happening today.</span>${S.sample ? '<button class="btn primary qabtn" data-act="quickadd">✦ Quick add</button>' : ''}</div>
   ${gBlock()}
   ${noSchoolBanner(t, 14)}
   <div class="today-grid">
@@ -766,9 +792,11 @@ function renderWeek() {
   const people = settings().people;
   const days = [...Array(7)].map((_, i) => addDays(ws, i));
   const gapCount = weekGaps(ws).length;
+  if (!S.wkDay || S.wkDay < ws || S.wkDay > we) S.wkDay = t >= ws && t <= we ? t : ws;
   return `
   <div class="weekbar">
     <h2>${esc(shortDate(ws))} – ${esc(shortDate(we))}</h2>
+    ${S.sample ? '<button class="btn primary" data-act="quickadd">✦ Quick add</button>' : ''}
     ${gapCount ? `<span class="chip" style="--c:var(--gap)">${gapCount} care gap${gapCount === 1 ? '' : 's'}</span>` : ''}
     <button class="iconbtn" data-act="wk" data-d="-7" aria-label="Previous week">‹</button>
     <button class="btn" data-act="wk" data-d="0">This week</button>
@@ -777,12 +805,14 @@ function renderWeek() {
   ${gBlock()}
   ${noSchoolBanner(ws, 7)}
   ${people.length ? `<div class="legend">${people.map(p => `<span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>`).join('')}<span class="chip" style="--c:var(--gap)">Nobody yet</span></div>` : ''}
-  <div class="week">${days.map(ds => {
+  <div class="daystrip" role="tablist" aria-label="Day">${days.map(ds => { const gn = ds >= t ? gapsFrom(ds, 1).length : 0;
+    return `<button type="button" role="tab" class="dsday${ds === S.wkDay ? ' on' : ''}${ds === t ? ' today' : ''}" aria-selected="${ds === S.wkDay}" data-act="wkday" data-ds="${ds}"><span class="dsd">${DOW[dowOf(ds)].slice(0, 2)}</span><span class="dsn tnum">${parseYmd(ds).getDate()}</span>${gn ? '<i class="dsgap" aria-label="has gaps"></i>' : ''}</button>`; }).join('')}</div>
+  <div class="week" id="weekgrid">${days.map(ds => {
     const its = itemsOn(ds).map(i => ({ ...i, ds }));
     const gn = ds >= t ? gapsFrom(ds, 1).length : 0;
     const school = isSchool(ds), hint = calNoSchool(ds);
     const dinner = settings().mealSlots.includes('dinner') ? mealAt(ds, 'dinner') : null;
-    return `<section class="wday${ds === t ? ' is-today' : ''}" aria-label="${esc(longDate(ds))}">
+    return `<section class="wday${ds === t ? ' is-today' : ''}${ds === S.wkDay ? ' sel' : ''}" aria-label="${esc(longDate(ds))}">
       <div class="wday-h"><span><span class="dn">${DOW[dowOf(ds)]}</span> <span class="dd">${esc(shortDate(ds))}</span></span>${gn ? `<span class="gapn">${gn} gap${gn === 1 ? '' : 's'}</span>` : ''}</div>
       ${wxLine(ds)}
       ${settings().kids.length ? `<div class="wtype"><button class="pill${school ? ' on' : ''}${hint ? ' warn' : ''}" data-act="daytype" data-ds="${ds}" data-v="${school ? 0 : 1}" aria-label="${school ? 'School day' : 'No school'}. Tap to switch.">${school ? 'School day' : 'No school'}${hint ? ' ?' : ''}</button></div>` : ''}
@@ -793,7 +823,7 @@ function renderWeek() {
       <div class="wev">${its.map(i => evItem(i, true)).join('')}</div>
       ${(() => { const due = tasksDue(ds); const late = ds === t ? S.tasks.filter(x => !x.done && x.due && x.due < t) : [];
         const all = [...late, ...due]; if (!all.length) return '';
-        return `<ul class="wtasks" aria-label="Tasks due">${all.map(x => { const p = person(x.owner); return `<li class="${x.done ? 'done' : ''}"><input type="checkbox" id="wt-${esc(ds)}-${esc(x.id)}" data-act="tdone" data-id="${esc(x.id)}" ${x.done ? 'checked' : ''} aria-label="Done: ${esc(x.title)}"><button type="button" class="tedit" data-act="tedit" data-id="${esc(x.id)}">${esc(x.title)}${x.due < ds ? ' <span class="late small">overdue</span>' : ''}${p ? ` <span class="small muted">· ${esc(p.name)}</span>` : ''}</button></li>`; }).join('')}</ul>`; })()}
+        return `<ul class="wtasks" aria-label="Tasks due">${all.map(x => { const p = person(x.owner); return `<li class="${x.done ? 'done' : ''}"><input type="checkbox" id="wt-${esc(ds)}-${esc(x.id)}" data-act="tdone" data-id="${esc(x.id)}" ${x.done ? 'checked' : ''} aria-label="Done: ${esc(x.title)}"><button type="button" class="tedit" data-act="tedit" data-id="${esc(x.id)}">${esc(x.title)}${x.repeat ? ' <span class="small muted">↻</span>' : ''}${x.due < ds ? ' <span class="late small">overdue</span>' : ''}${p ? ` <span class="small muted">· ${esc(p.name)}</span>` : ''}</button></li>`; }).join('')}</ul>`; })()}
       ${dinner ? `<button class="wdinner" data-act="meal" data-ds="${ds}" data-slot="dinner"><span class="sl">Dinner</span> ${esc(dinner.name)}</button>` : ''}
       <div class="wadds"><button class="wadd" data-act="newev" data-ds="${ds}">+ Event</button><button class="wadd" data-act="newtask" data-ds="${ds}">+ Task</button></div>
     </section>`;
@@ -803,7 +833,7 @@ function renderWeek() {
 function taskLi(x) {
   const p = person(x.owner); const late = x.due && x.due < todayStr() && !x.done;
   return `<li class="${x.done ? 'done' : ''}"><input type="checkbox" id="tk-${esc(x.id)}" data-act="tdone" data-id="${esc(x.id)}" ${x.done ? 'checked' : ''} aria-label="Done: ${esc(x.title)}">
-    <button type="button" class="grow tedit" data-act="tedit" data-id="${esc(x.id)}" aria-label="Edit ${esc(x.title)}"><span class="tt">${esc(x.title)}</span>${p ? ` <span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>` : ''}${x.notes ? `<span class="tnote">${esc(x.notes)}</span>` : ''}</button>
+    <button type="button" class="grow tedit" data-act="tedit" data-id="${esc(x.id)}" aria-label="Edit ${esc(x.title)}"><span class="tt">${esc(x.title)}</span>${p ? ` <span class="chip" style="--c:${colorVar(p.color)}">${esc(p.name)}</span>` : ''}${x.repeat ? ` <span class="rep" title="${esc(repeatLabel(x.repeat))}">↻ ${esc(repeatLabel(x.repeat).replace('Every ', '').replace(/^day$/, 'daily').replace(/^week$/, 'weekly').replace(/^month$/, 'monthly').replace(/^year$/, 'yearly'))}</span>` : ''}${x.notes ? `<span class="tnote">${esc(x.notes)}</span>` : ''}</button>
     <button type="button" class="due tnum${late ? ' late' : ''}${x.due ? '' : ' nodue'}" data-act="tedit" data-id="${esc(x.id)}" aria-label="Change due date">${x.due ? `${late ? 'Overdue · ' : ''}${esc(x.due === todayStr() ? 'Today' : x.due === addDays(todayStr(), 1) ? 'Tomorrow' : shortDate(x.due))}` : '+ Date'}</button>
     <button class="xbtn" data-act="tdel" data-id="${esc(x.id)}" aria-label="Delete ${esc(x.title)}">×</button></li>`;
 }
@@ -883,12 +913,36 @@ function renderGroceries() {
       <select id="g-store" aria-label="Store">${stores.map(s => `<option>${esc(s)}</option>`).join('')}</select>
       <button class="btn primary" type="submit">Add</button>
     </form>
+    ${quickGroceries()}
     ${!items.length ? '<p class="empty" style="margin-top:10px">The list is empty. Anything either of you adds shows up on both phones.</p>' :
       Object.entries(groups).filter(([, l]) => l.length).map(([s, l]) => `<h3 class="eyebrow group-h">${esc(s)}</h3><ul class="checklist">${
         l.sort((a, b) => (a.done - b.done) || (a.createdAt || 0) - (b.createdAt || 0)).map(i => `<li class="${i.done ? 'done' : ''}"><input type="checkbox" id="gi-${esc(i.id)}" data-act="gdone" data-id="${esc(i.id)}" ${i.done ? 'checked' : ''} aria-label="Got ${esc(i.name)}"><span class="grow">${esc(i.name)}${i.qty ? ` <span class="small muted">${esc(i.qty)}</span>` : ''}${i.meal ? `<br><span class="small muted">for ${esc(i.meal)}</span>` : ''}</span><button class="xbtn" data-act="gdel" data-id="${esc(i.id)}" aria-label="Remove ${esc(i.name)}">×</button></li>`).join('')
       }</ul>`).join('')}
   </section>
   </div>`;
+}
+// Quick add: what you buy most and most recently, padded with common staples until there's history.
+const STAPLES = ['Milk', 'Eggs', 'Bread', 'Bananas', 'Butter', 'Yogurt', 'Cheese', 'Apples', 'Coffee', 'Paper towels'];
+function quickGroceries() {
+  const open = new Set(S.groceries.filter(g => !g.done).map(g => normItem(g.name)));
+  const now = Date.now();
+  const mem = Object.values(S.memo || {}).filter(m => m && m.name && !open.has(normItem(m.name)))
+    .sort((a, b) => ((b.n || 1) + Math.max(0, 14 - (now - (b.last || 0)) / 864e5) / 2) - ((a.n || 1) + Math.max(0, 14 - (now - (a.last || 0)) / 864e5) / 2));
+  const picks = mem.slice(0, 14).map(m => ({ name: m.name, store: m.store || '' }));
+  for (const s of STAPLES) { if (picks.length >= 10) break; if (!open.has(normItem(s)) && !picks.some(p => normItem(p.name) === normItem(s))) picks.push({ name: s, store: '', staple: true }); }
+  if (!picks.length) return '';
+  return `<div class="quickadd"><span class="eyebrow">Quick add</span><div class="qchips">${picks.map(p => `<button type="button" class="qchip${p.staple ? ' staple' : ''}" data-act="gquick" data-name="${esc(p.name)}" data-store="${esc(p.store)}">+ ${esc(p.name)}</button>`).join('')}</div></div>`;
+}
+async function addGrocery(name, store) {
+  if (!guard()) return;
+  const ok = await write(() => S.db.collection('groceries').doc(uid()).set({ name, store, done: false, createdAt: Date.now() }));
+  if (!ok) return;
+  const k = normItem(name); if (!k) return;
+  const memo = JSON.parse(JSON.stringify(S.memo || {}));
+  const old = memo[k] || {}; memo[k] = { name, store: store || old.store || '', n: (old.n || 0) + 1, last: Date.now() };
+  const keys = Object.keys(memo); if (keys.length > 150) keys.sort((a, b) => (memo[a].last || 0) - (memo[b].last || 0)).slice(0, keys.length - 150).forEach(x => delete memo[x]);
+  S.memo = memo;
+  try { await S.db.doc('family/grocerymemo').set({ items: memo }); } catch {}
 }
 // Evening events (3pm or later) hint that dinner should be quick.
 function busyNote(ds) {
@@ -1056,26 +1110,74 @@ function noSchoolDays() {
   return out;
 }
 let nsBusy = false;
+// Two-way sync of no-school days with Google Calendar.
+// - A "No school" event in Google marks the day (schoolSrc 'calendar'); if that event goes away, the mark goes too.
+// - Marking a day "No school" here adds an all-day "No school" event to your Google Calendar (gEv);
+//   switching it back to a school day deletes that event, and deleting it in Google switches the day back.
+// Only the person whose calendar holds the event changes it; marks set by hand otherwise stay as they are.
+const nsComplete = () => S.selCals.length > 0 && S.selCals.every(c => Array.isArray(S.nsEvents[c]));
+const isAutoMark = d => d && d.school === false && (d.schoolSrc === 'calendar' || (!d.schoolSrc && d.schoolNote));
+const mineToManage = d => d.schoolBy ? d.schoolBy === S.me : S.isOwner;
 async function applyNoSchool() {
   if (nsBusy || !S.careReady || !S.db || !S.canWrite) return;
   nsBusy = true;
   try {
-    const todo = [...noSchoolDays()].filter(([ds]) => dayMark(ds) === null && settings().schoolDays.includes(dowOf(ds))).sort();
-    let n = 0;
-    for (const [ds, title] of todo) {
+    const t = todayStr(), cal = noSchoolDays(); let added = 0, removed = 0;
+    for (const [ds, title] of [...cal].sort()) {
+      if (dayMark(ds) !== null || !settings().schoolDays.includes(dowOf(ds))) continue;
       const cur = S.care[ds] ? JSON.parse(JSON.stringify(S.care[ds])) : { date: ds, v: {} };
-      cur.date = ds; cur.v = cur.v || {}; cur.school = false; cur.schoolNote = String(title).slice(0, 120);
+      Object.assign(cur, { date: ds, v: cur.v || {}, school: false, schoolSrc: 'calendar', schoolNote: String(title).slice(0, 120) });
+      if (S.me) cur.schoolBy = S.me;
       S.care[ds] = cur;
-      try { await S.db.doc('care/' + ds).set(cur); n++; } catch { break; }
+      try { await S.db.doc('care/' + ds).set(cur); added++; } catch { break; }
     }
-    if (n) { schedule(); toast(`Marked ${n} no-school day${n === 1 ? '' : 's'} from your calendar`); }
+    if (nsComplete()) {
+      const primaryIds = S.selCals.includes('primary') ? new Set((S.nsEvents.primary || []).filter(e => e && e.status !== 'cancelled').map(e => e.id)) : null;
+      for (const d of Object.values(S.care)) {
+        if (!d || !d.date || d.date < t) continue;
+        const cur = JSON.parse(JSON.stringify(d)); let changed = false;
+        if (isAutoMark(d) && mineToManage(d) && !cal.has(d.date)) { delete cur.school; delete cur.schoolSrc; delete cur.schoolNote; delete cur.schoolBy; changed = true; }
+        if (d.gEv && d.gEv.by === S.me && primaryIds && !primaryIds.has(d.gEv.id)) { delete cur.gEv; if (cur.school === false) { delete cur.school; delete cur.schoolSrc; } changed = true; }
+        if (!changed) continue;
+        S.care[d.date] = cur;
+        try { await S.db.doc('care/' + d.date).set(cur); removed++; } catch { break; }
+      }
+    }
+    if (added || removed) { schedule(); toast([added && `Marked ${added} no-school day${added === 1 ? '' : 's'}`, removed && `${removed} day${removed === 1 ? '' : 's'} back to school`].filter(Boolean).join(' · ') + ' from your calendar'); }
   } finally { nsBusy = false; }
 }
-function setDayType(ds, school) {
+async function addNoSchoolToGoogle(ds) {
+  const input = { summary: 'No school', allDay: true, startTime: ds + 'T00:00:00', endTime: addDays(ds, 1) + 'T00:00:00', description: 'Added by Family Planner.', availability: 'AVAILABILITY_FREE', notificationLevel: 'NONE', calendarId: 'primary' };
+  const r = await S.mcp.callTool(GC, 'create_event', input);
+  let id = r && r.payload && (r.payload.id || (r.payload.event && r.payload.event.id));
+  if (!id) { // find the event we just made
+    const l = await S.mcp.callTool(GC, 'list_events', { calendarId: 'primary', startTime: ds + 'T00:00:00', endTime: addDays(ds, 1) + 'T00:00:00', fullText: 'Family Planner' }, { cache: false });
+    const ev = ((l && l.payload && l.payload.events) || []).find(e => e && e.summary === 'No school' && e.start && e.start.date === ds);
+    id = ev && ev.id;
+  }
+  return id || null;
+}
+async function setDayType(ds, school) {
   const cur = S.care[ds] ? JSON.parse(JSON.stringify(S.care[ds])) : { date: ds, v: {} };
-  cur.date = ds; cur.v = cur.v || {}; cur.school = school; delete cur.schoolNote;
+  cur.date = ds; cur.v = cur.v || {}; cur.school = school; cur.schoolSrc = 'manual'; delete cur.schoolNote; delete cur.schoolBy;
   S.care[ds] = cur; schedule();
-  return write(() => S.db.doc('care/' + ds).set(cur));
+  const ok = await write(() => S.db.doc('care/' + ds).set(cur));
+  if (!ok || !S.mcp || S.gState !== 'on' || !S.me || ds < todayStr()) return ok;
+  try {
+    if (!school && !cur.gEv && !noSchoolDays().has(ds)) {
+      const id = await addNoSchoolToGoogle(ds);
+      if (id) { const now = JSON.parse(JSON.stringify(S.care[ds] || cur)); now.gEv = { id, cal: 'primary', by: S.me }; S.care[ds] = now; await S.db.doc('care/' + ds).set(now); }
+    } else if (school && cur.gEv && cur.gEv.by === S.me) {
+      await S.mcp.callTool(GC, 'delete_event', { calendarId: cur.gEv.cal || 'primary', eventId: cur.gEv.id, notificationLevel: 'NONE' });
+      const now = JSON.parse(JSON.stringify(S.care[ds] || cur)); delete now.gEv; S.care[ds] = now; await S.db.doc('care/' + ds).set(now);
+    } else if (school && noSchoolDays().has(ds)) {
+      toast(`Marked as a school day. Your Google Calendar still says “${noSchoolDays().get(ds)}”; change it there if it's wrong.`);
+    }
+    S.mcp.invalidate(GC, 'list_events').catch(() => {});
+  } catch (e) {
+    toast(e && e.code === 'server_unavailable' ? "Google Calendar didn't answer; check it before trying again." : "Saved here, but Google Calendar wasn't updated: " + ((e && e.message) || 'unknown error'));
+  }
+  return ok;
 }
 
 // ---------- meals ----------
@@ -1338,6 +1440,148 @@ function careSheet(kidId, block, ds) {
   });
 }
 
+// ---------- quick add with Claude ----------
+function qaHtml() {
+  const Q = S.qa || {};
+  const files = Q.files || [];
+  let res = '';
+  if (Q.status === 'loading') res = `<p class="gnote" aria-live="polite">Reading${files.length ? ` ${files.length} file${files.length === 1 ? '' : 's'}` : ''}…</p>`;
+  else if (Q.status === 'error') res = `<div class="gerr" role="alert">${esc(Q.err)}</div>`;
+  else if (Q.status === 'ready') res = Q.items.length ? `
+    <h4 class="eyebrow" style="margin:4px 0 0">Found ${Q.items.length} item${Q.items.length === 1 ? '' : 's'}</h4>
+    <ul class="checklist qalist">${Q.items.map((it, i) => `<li><input type="checkbox" id="qa-pick-${i}" data-i="${i}" class="qapick" ${it.pick ? 'checked' : ''} aria-label="Add ${esc(it.title)}">
+      <span class="grow"><span class="qtype ${it.type}">${it.type === 'event' ? 'Event' : it.type === 'task' ? 'Task' : 'No school'}</span> <b>${esc(it.title)}</b><br>
+      <span class="small muted">${esc(qaWhen(it))}${it.kids && it.kids.length ? ' · ' + esc(it.kids.map(id => (kid(id) || {}).name).filter(Boolean).join(', ')) : ''}${it.owner && person(it.owner) ? ' · ' + esc(person(it.owner).name) : ''}</span>
+      ${it.notes ? `<br><span class="small muted">${esc(it.notes)}</span>` : ''}</span></li>`).join('')}</ul>
+    ${S.gState === 'on' && Q.items.some(i => i.type === 'event') ? '<label class="toggles small"><span><input type="checkbox" id="qa-gcal"> Also add the events to Google Calendar</span></label>' : ''}
+    <p class="gnote" style="margin:0">You can change anything after it's added.</p>` : '<p class="empty">Nothing with a date turned up. Try adding more detail.</p>';
+  return `<h3>Quick add</h3>
+    <p class="small muted" style="margin:0">Type or say what's coming up, paste a school email, or add a photo or screenshot. Claude finds the events, to-dos and no-school days.</p>
+    <form id="qaform" class="opts" style="gap:10px">
+      <span class="withmic"><textarea id="qa-text" rows="4" placeholder="Dentist Tue 3pm for Zephyr, Baba takes her. Picture day is Friday, bring $15 by Thursday.">${esc(Q.text || '')}</textarea>${micBtn('qa-text')}</span>
+      <div class="qafiles">
+        <label class="btn" for="qa-file">Add photo or file</label>
+        <input type="file" id="qa-file" multiple accept="image/*,.txt,.eml,.html,.htm,text/plain" hidden>
+        ${files.map((f, i) => `<span class="chip">${esc(f.name)} <button type="button" class="xbtn" data-x="rmfile" data-i="${i}" aria-label="Remove ${esc(f.name)}">×</button></span>`).join('')}
+      </div>
+      ${res}
+      <div class="actions">
+        <button type="button" class="btn" data-act="close">Cancel</button>
+        ${Q.status === 'ready' && Q.items.length ? `<button type="button" class="btn" data-x="again">Read again</button><button type="button" class="btn primary" data-x="add">Add ${Q.items.filter(i => i.pick).length}</button>`
+          : `<button type="submit" class="btn primary" ${Q.status === 'loading' ? 'disabled' : ''}>${Q.status === 'loading' ? 'Reading…' : 'Find dates'}</button>`}
+      </div>
+    </form>`;
+}
+function qaWhen(it) {
+  const d = it.type === 'task' ? it.due : it.date;
+  if (!d) return 'No date';
+  const base = `${DOW[dowOf(d)]} ${shortDate(d)}`;
+  return it.type === 'event' && !it.allDay && it.time ? `${base}, ${fmtTime(it.time)}${it.endTime ? '–' + fmtTime(it.endTime) : ''}` : base;
+}
+function qaSheet() {
+  S.qa = { status: 'idle', text: '', files: [] };
+  openSheet(qaHtml(), sh => {
+    if (S.sample && S.sample.limits) S.sample.limits().then(l => { if (l && l.images) S.qa.imgLimit = l.images; }).catch(() => {});
+    const redraw = () => { const keep = sh.querySelector('#qa-text'); if (keep) S.qa.text = keep.value; sh.innerHTML = qaHtml(); };
+    sh.addEventListener('change', async e => {
+      if (e.target.id === 'qa-file') {
+        for (const f of e.target.files || []) {
+          if (f.type.startsWith('image/')) {
+            if (!S.qa.imgLimit) { toast("Photos can't be read in this view. Paste the text instead."); continue; }
+            if (S.qa.files.filter(x => x.img).length >= (S.qa.imgLimit.maxCount || 5)) { toast("That's the most photos at once."); continue; }
+            S.qa.files.push({ name: f.name, img: f });
+          } else {
+            let txt = await f.text();
+            if (/html?$|eml$/i.test(f.name)) txt = txt.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ');
+            S.qa.files.push({ name: f.name, text: txt.replace(/[ \t]+\n/g, '\n').slice(0, 40000) });
+          }
+        }
+        redraw();
+      }
+      if (e.target.classList.contains('qapick')) { S.qa.items[Number(e.target.dataset.i)].pick = e.target.checked; const b = sh.querySelector('[data-x="add"]'); if (b) b.textContent = `Add ${S.qa.items.filter(i => i.pick).length}`; }
+    });
+    sh.addEventListener('click', async e => {
+      const b = e.target.closest('[data-x]'); if (!b) return;
+      if (b.dataset.x === 'rmfile') { S.qa.files.splice(Number(b.dataset.i), 1); redraw(); }
+      if (b.dataset.x === 'again') { S.qa.status = 'idle'; S.qa.items = null; redraw(); }
+      if (b.dataset.x === 'add') { const g = sh.querySelector('#qa-gcal'); await qaAdd(!!(g && g.checked)); }
+    });
+    sh.addEventListener('submit', async e => {
+      e.preventDefault(); if (e.target.id !== 'qaform') return;
+      S.qa.text = sh.querySelector('#qa-text').value.trim();
+      if (!S.qa.text && !S.qa.files.length) { toast('Type something or add a photo first.'); return; }
+      S.qa.status = 'loading'; redraw();
+      await qaRun(); if (document.getElementById('qaform')) redraw();
+    });
+  });
+}
+async function qaRun() {
+  const st = settings(), t = todayStr();
+  const texts = S.qa.files.filter(f => f.text).map(f => `--- File: ${f.name} ---\n${f.text}`).join('\n\n');
+  const imgs = S.qa.files.filter(f => f.img).map(f => f.img);
+  const prompt = `You turn messages for a family into calendar items. Today is ${longDate(t)} (${t}).
+Kids: ${st.kids.map(k => k.name).join(', ') || 'none listed'}. People who look after them: ${st.people.map(p => p.name).join(', ') || 'none listed'}.
+
+Find every dated thing in the message below${imgs.length ? ' and in the attached image(s)' : ''}:
+- "event": something happening at a time or on a day (appointments, parties, picture day, concerts, early pickup).
+- "task": something someone must do by a date (return a form, pay a fee, buy a gift, sign up). Use the deadline as "due".
+- "noschool": a day with no school (holidays, teacher days, breaks). One item per date; a break gives one item per weekday, at most 60.
+Work out real dates from words like "Tuesday" or "next Friday" (the next one on or after today). Skip things already past. Use 24-hour "HH:MM" times. Only name kids and people from the lists above, and only when the message clearly says so.
+
+<message>
+${(S.qa.text || '').slice(0, 20000)}
+${texts}
+</message>
+
+Reply with only JSON in this shape:
+{"items":[{"type":"event","title":"Dentist","date":"YYYY-MM-DD","allDay":false,"time":"15:00","endTime":"","kids":["Zephyr"],"owner":"Baba","notes":""},{"type":"task","title":"Return field trip form","due":"YYYY-MM-DD","owner":"","notes":"$15"},{"type":"noschool","date":"YYYY-MM-DD","title":"Teacher in-service day"}]}`;
+  const dOk = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+  const tOk = s => (typeof s === 'string' && /^\d{2}:\d{2}$/.test(s)) ? s : '';
+  const kidId = n => { const k = st.kids.find(k => k.name.toLowerCase() === String(n).toLowerCase()); return k && k.id; };
+  const pplId = n => { const p = st.people.find(p => p.name.toLowerCase() === String(n || '').toLowerCase()); return p ? p.id : ''; };
+  try {
+    const res = await S.sample.json(prompt, imgs.length ? { images: imgs } : {});
+    const items = (res && Array.isArray(res.items) ? res.items : []).map(x => {
+      if (!x || !x.title) return null;
+      if (x.type === 'task') return { type: 'task', title: String(x.title), due: dOk(x.due) ? x.due : '', owner: pplId(x.owner), notes: String(x.notes || ''), pick: true };
+      if (!dOk(x.date) || x.date < t) return null;
+      if (x.type === 'noschool') return { type: 'noschool', title: String(x.title), date: x.date, pick: true };
+      const time = tOk(x.time);
+      return { type: 'event', title: String(x.title), date: x.date, allDay: !time || !!x.allDay, time, endTime: tOk(x.endTime), kids: (Array.isArray(x.kids) ? x.kids : []).map(kidId).filter(Boolean), owner: pplId(x.owner), notes: String(x.notes || ''), pick: true };
+    }).filter(Boolean).sort((a, b) => ((a.date || a.due || '9') + (a.time || '')).localeCompare((b.date || b.due || '9') + (b.time || '')));
+    S.qa.items = items; S.qa.status = 'ready';
+  } catch (e) {
+    const c = e && e.code;
+    S.qa.status = 'error';
+    S.qa.err = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(c) ? 'Claude is turned off for this page, so quick add is unavailable.'
+      : (c === 'images_unavailable' || c === 'image_rejected') ? "That photo couldn't be read. Try a clearer photo, or paste the text."
+      : c === 'rate_limited' ? "You've hit your Claude usage limit for now. Try again later."
+      : c === 'prompt_too_large' ? 'That was too much text at once. Paste just the part with the dates.'
+      : c === 'invalid_json' ? "Claude's answer came back in the wrong format. Press Find dates to try again."
+      : c === 'session_expired' ? 'Your claude.ai sign-in expired. Reload the page and sign in again.'
+      : "Couldn't reach Claude just now. Press Find dates to try again.";
+  }
+}
+async function qaAdd(toGoogle) {
+  const picks = (S.qa.items || []).filter(i => i.pick); if (!picks.length) { toast('Tick at least one item'); return; }
+  if (!guard()) return;
+  closeSheet();
+  let n = 0;
+  for (const it of picks) {
+    if (it.type === 'event') {
+      const id = uid();
+      const ev = { title: it.title, date: it.date, allDay: it.allDay, time: it.allDay ? '' : it.time, endTime: it.allDay ? '' : it.endTime, kids: it.kids, owner: it.owner, notes: it.notes, repeat: null, skip: [], gcal: null, createdAt: Date.now() };
+      if (await write(() => S.db.doc('events/' + id).set(ev))) { n++; if (toGoogle) await pushToGoogle(id, ev); }
+    } else if (it.type === 'task') {
+      if (await write(() => S.db.doc('tasks/' + uid()).set({ title: it.title, due: it.due, owner: it.owner, notes: it.notes, repeat: '', done: false, createdAt: Date.now() }))) n++;
+    } else if (it.type === 'noschool') {
+      if (await setDayType(it.date, false)) n++;
+    }
+  }
+  S.qa = null;
+  toast(`Added ${n} item${n === 1 ? '' : 's'}`);
+}
+
 function taskSheet(x, due) {
   const isNew = !x;
   const t = x ? JSON.parse(JSON.stringify(x)) : { id: uid(), title: '', due: due || '', owner: '', notes: '', done: false };
@@ -1351,6 +1595,7 @@ function taskSheet(x, due) {
         <label class="field"><span>Who's doing it</span><select id="tf-owner"><option value="">Anyone</option>${ppl.map(p => `<option value="${esc(p.id)}" ${t.owner === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>
       </div>
       ${t.due ? '<button type="button" class="textlink" data-x="nodate">Remove the due date</button>' : ''}
+      <label class="field"><span>Repeats</span><select id="tf-repeat">${REPEATS.map(r => `<option value="${r.key}" ${(t.repeat || '') === r.key ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select></label>
       <label class="field"><span>Notes</span><span class="withmic"><textarea id="tf-notes" rows="3" placeholder="Phone number, part number, where it is…">${esc(t.notes || '')}</textarea>${micBtn('tf-notes')}</span></label>
       ${!isNew ? `<label class="toggles"><span><input type="checkbox" id="tf-done" ${t.done ? 'checked' : ''}> Done</span></label>` : ''}
       <div class="actions">
@@ -1369,11 +1614,48 @@ function taskSheet(x, due) {
       const q = s => sh.querySelector(s);
       const title = q('#tf-title').value.trim(); if (!title) return;
       const done = q('#tf-done') ? q('#tf-done').checked : false;
-      const next = { title, due: q('#tf-due').value, owner: q('#tf-owner').value, notes: q('#tf-notes').value.trim(), done, doneAt: done ? (t.doneAt || Date.now()) : 0, createdAt: t.createdAt || Date.now() };
+      const repeat = q('#tf-repeat').value;
+      let due = q('#tf-due').value; if (repeat && !due) due = todayStr();
+      const next = { title, due, owner: q('#tf-owner').value, notes: q('#tf-notes').value.trim(), repeat, done: !!t.done, doneAt: t.doneAt || 0, nextId: t.nextId || '', createdAt: t.createdAt || Date.now() };
       closeSheet();
-      await write(() => S.db.doc('tasks/' + t.id).set(next), isNew ? 'Task added' : 'Task saved');
+      const ok = await write(() => S.db.doc('tasks/' + t.id).set(next), isNew ? 'Task added' : 'Task saved');
+      if (ok && !isNew && done !== !!t.done) { S.tasks = S.tasks.map(y => y.id === t.id ? { ...next, id: t.id } : y); await completeTask(t.id, done); }
     });
   });
+}
+const REPEATS = [
+  { key: '', label: "Doesn't repeat" }, { key: 'daily', label: 'Every day' }, { key: 'weekly', label: 'Every week' },
+  { key: 'biweekly', label: 'Every 2 weeks' }, { key: 'monthly', label: 'Every month' }, { key: 'quarterly', label: 'Every 3 months' },
+  { key: 'yearly', label: 'Every year' },
+];
+const repeatLabel = k => (REPEATS.find(r => r.key === k) || {}).label || '';
+function addMonths(ds, n) {
+  const d = parseYmd(ds), day = d.getDate();
+  d.setDate(1); d.setMonth(d.getMonth() + n);
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, last)); return ymd(d);
+}
+function nextDue(ds, rep) {
+  return rep === 'daily' ? addDays(ds, 1) : rep === 'weekly' ? addDays(ds, 7) : rep === 'biweekly' ? addDays(ds, 14)
+    : rep === 'monthly' ? addMonths(ds, 1) : rep === 'quarterly' ? addMonths(ds, 3) : rep === 'yearly' ? addMonths(ds, 12) : ds;
+}
+// Ticking off a repeating task creates the next one; unticking it removes that next one (if it isn't done).
+async function completeTask(id, done) {
+  const x = S.tasks.find(y => y.id === id); if (!x) return;
+  if (done) {
+    const upd = { done: true, doneAt: Date.now() };
+    let msg = 'Done';
+    if (x.repeat && !x.nextId) {
+      const nid = uid(); const due = nextDue(x.due || todayStr(), x.repeat);
+      const ok = await write(() => S.db.doc('tasks/' + nid).set({ title: x.title, owner: x.owner || '', notes: x.notes || '', repeat: x.repeat, due, done: false, createdAt: Date.now() }));
+      if (ok) { upd.nextId = nid; msg = `Done. Next one due ${due === addDays(todayStr(), 1) ? 'tomorrow' : shortDate(due)}`; }
+    }
+    await write(() => S.db.doc('tasks/' + id).update(upd), msg);
+  } else {
+    const upd = { done: false, doneAt: 0 };
+    if (x.nextId) { const n = S.tasks.find(y => y.id === x.nextId); if (n && !n.done) await write(() => S.db.doc('tasks/' + n.id).delete()); upd.nextId = ''; }
+    await write(() => S.db.doc('tasks/' + id).update(upd));
+  }
 }
 const tasksDue = ds => S.tasks.filter(x => x.due === ds).sort((a, b) => (a.done - b.done) || (a.createdAt || 0) - (b.createdAt || 0));
 
@@ -1576,7 +1858,9 @@ document.addEventListener('click', async e => {
   if (a === 'newev') { if (guard()) eventSheet(null, t.dataset.ds); return; }
   if (a === 'ev') { const ev = S.events.find(x => x.id === t.dataset.id); if (ev && guard()) eventSheet(ev, t.dataset.ds); return; }
   if (a === 'gev') { gEventSheet(t.dataset.id, t.dataset.cal); return; }
-  if (a === 'wk') { const d = Number(t.dataset.d); S.weekStart = d ? addDays(S.weekStart, d) : mondayOf(todayStr()); syncWatches(); syncNoSchoolWatches(); schedule(); return; }
+  if (a === 'quickadd') { if (guard()) qaSheet(); return; }
+  if (a === 'wkday') { S.wkDay = t.dataset.ds; schedule(); return; }
+  if (a === 'wk') { const d = Number(t.dataset.d); S.weekStart = d ? addDays(S.weekStart, d) : mondayOf(todayStr()); S.wkDay = d && S.wkDay ? addDays(S.wkDay, d) : todayStr(); syncWatches(); syncNoSchoolWatches(); schedule(); return; }
   if (a === 'gconnect') { connectGoogle(); return; }
   if (a === 'gperm') { try { await S.perms.manage(); location.reload(); } catch { toast("Open this page's Permissions menu to turn Google Calendar back on."); } return; }
   if (a === 'daytype') { if (guard()) await setDayType(t.dataset.ds, t.dataset.v === '1'); return; }
@@ -1590,6 +1874,7 @@ document.addEventListener('click', async e => {
   if (a === 'bkdl') { downloadBackup(); return; }
   if (a === 'bkrestore') { doRestore(); return; }
   if (a === 'bkcancel') { S.restore = null; schedule(); return; }
+  if (a === 'gquick') { const stores = settings().stores; await addGrocery(t.dataset.name, stores.includes(t.dataset.store) ? t.dataset.store : (stores[0] || '')); return; }
   if (a === 'gclear') { const done = S.groceries.filter(g => g.done); for (const g of done) await write(() => S.db.doc('groceries/' + g.id).delete()); toast(`Cleared ${done.length} item${done.length === 1 ? '' : 's'}`); return; }
   if (a === 'gdel') { await write(() => S.db.doc('groceries/' + t.dataset.id).delete()); return; }
   if (a === 'tedit') { const x = S.tasks.find(y => y.id === t.dataset.id); if (x && guard()) taskSheet(x); return; }
@@ -1610,7 +1895,7 @@ document.addEventListener('change', async e => {
   if (t.id === 'bk-file') { const f = t.files && t.files[0]; t.value = ''; if (f) readRestoreFile(f); return; }
   const a = t.dataset && t.dataset.act; if (!a) return;
   if (a === 'gdone') { const done = t.checked; await write(() => S.db.doc('groceries/' + t.dataset.id).update({ done })); return; }
-  if (a === 'tdone') { const done = t.checked; await write(() => S.db.doc('tasks/' + t.dataset.id).update({ done, doneAt: done ? Date.now() : 0 }), done ? 'Done' : null); return; }
+  if (a === 'tdone') { if (guard()) await completeTask(t.dataset.id, t.checked); return; }
   if (a === 'blk') { const st = JSON.parse(JSON.stringify(settings())); st.careBlocks = BLOCKS.map(b => b.key).filter(k => k === t.dataset.key ? t.checked : st.careBlocks.includes(k)); S.settings = st; schedule(); await saveSettings(st); return; }
   if (a === 'mslot') { const st = JSON.parse(JSON.stringify(settings())); st.mealSlots = MEAL_SLOTS.map(b => b.key).filter(k => k === t.dataset.key ? t.checked : st.mealSlots.includes(k)); S.settings = st; schedule(); await saveSettings(st); return; }
   if (a === 'schoolday') { const st = JSON.parse(JSON.stringify(settings())); const d = Number(t.dataset.d); st.schoolDays = [0,1,2,3,4,5,6].filter(x => x === d ? t.checked : st.schoolDays.includes(x)); S.settings = st; schedule(); await saveSettings(st); return; }
@@ -1641,7 +1926,7 @@ document.addEventListener('submit', async e => {
   if (f.id === 'gform') {
     const name = f.querySelector('#g-name').value.trim(); if (!name) return;
     const store = f.querySelector('#g-store').value; f.querySelector('#g-name').value = '';
-    await write(() => S.db.collection('groceries').doc(uid()).set({ name, store, done: false, createdAt: Date.now() }));
+    await addGrocery(name, store);
     f.querySelector('#g-name') && document.getElementById('g-name').focus();
     return;
   }
@@ -1669,6 +1954,17 @@ function route() {
   schedule();
 }
 window.addEventListener('hashchange', route);
+// Phones: swipe left/right on the Week view to move a day.
+let swipe = null;
+document.addEventListener('touchstart', e => { const g = e.target.closest && e.target.closest('#weekgrid'); swipe = g && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!swipe || S.view !== 'week' || !matchMedia('(max-width: 760px)').matches) { swipe = null; return; }
+  const dx = e.changedTouches[0].clientX - swipe.x, dy = e.changedTouches[0].clientY - swipe.y; swipe = null;
+  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.6) return;
+  const next = addDays(S.wkDay || todayStr(), dx < 0 ? 1 : -1), ws = mondayOf(next);
+  if (ws !== S.weekStart) { S.weekStart = ws; syncWatches(); syncNoSchoolWatches(); }
+  S.wkDay = next; schedule();
+}, { passive: true });
 
 // ---------- boot ----------
 function defaultMealWeek() { const t = todayStr(); return dowOf(t) === 0 ? addDays(t, 1) : mondayOf(t); }
@@ -1684,7 +1980,7 @@ setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekSt
   if (!c || !c.use) { S.dbMissing = true; S.settings = null; S.sample = null; schedule(); S.gState = 'unavailable'; return; }
   const [db, user, mcp, perms, sample, downloads, dict] = await Promise.all([c.use('db'), c.use('user'), c.use('mcp'), c.use('permissions'), c.use('sample'), c.use('downloads'), c.use('dictation')]);
   S.db = db; S.user = user; S.mcp = mcp; S.perms = perms; S.sample = sample; S.downloads = downloads; S.dict = dict; if (dict) { wireDictation(dict); schedule(); }
-  if (user) { try { const w = await user.can('data.write'); if (w === false) S.canWrite = false; } catch {} }
+  if (user) { try { const w = await user.can('data.write'); if (w === false) S.canWrite = false; S.me = await user.id(); S.isOwner = await user.isOwner(); } catch {} }
   if (!db) { S.dbMissing = true; schedule(); }
   else {
     const err = e => { if (e && e.code === 'revoked') { S.dbMissing = true; schedule(); } };
@@ -1696,6 +1992,7 @@ setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekSt
     db.collection('tasks').onSnapshot(s => { S.tasks = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('meals').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.meals = m; schedule(); }, err);
     setTimeout(() => maybeAutoBackup(false), 4000);
+    db.doc('family/grocerymemo').onSnapshot(s => { const d = s.exists ? s.data() : null; S.memo = (d && d.items) || {}; schedule(); }, err);
     db.collection('gmeta').onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.gmeta = m; schedule(); }, err);
   }
   if (!mcp) { S.gState = 'unavailable'; schedule(); return; }
