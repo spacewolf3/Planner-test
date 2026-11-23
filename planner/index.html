@@ -194,12 +194,29 @@ table.pattern select { width: 100%; padding: 5px 4px; font-size: .82rem; }
 .callist label { display: flex; gap: 8px; align-items: center; }
 
 /* sheet */
-.scrim { position: fixed; inset: 0; background: rgba(10, 18, 26, .45); z-index: 20; display: grid; place-items: center; padding: 16px; }
-.sheet { background: var(--surface); color: var(--fg); border-radius: 14px; width: min(520px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; padding: 18px; box-shadow: var(--shadow); display: grid; gap: 12px; }
+.scrim { position: fixed; inset: 0; background: rgba(10, 18, 26, .45); z-index: 20; display: grid; place-items: center; padding: 16px; overscroll-behavior: contain; }
+/* Pop-ups: never wider than the screen, scroll inside themselves, Save bar pinned to the bottom. */
+.sheet { background: var(--surface); color: var(--fg); border-radius: 14px; width: min(520px, 100%); max-width: 100%; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 18px; box-shadow: var(--shadow); display: grid; gap: 12px; min-width: 0; }
+.sheet > *, .sheet form > *, .sheet .field, .sheet .fieldrow > * { min-width: 0; max-width: 100%; }
+.sheet > .actions, .sheet form > .actions { max-width: none; }
+.sheet .actions { position: sticky; bottom: -18px; z-index: 1; background: var(--surface); margin: 4px -18px -18px; padding: 12px 18px; border-top: 1px solid var(--line); }
+html.modal-open, html.modal-open body { overflow: hidden; }
+.sheet:focus { outline: none; }
 @media (max-width: 560px) {
   .scrim { place-items: end stretch; padding: 0; }
-  .sheet { width: 100%; border-radius: 14px 14px 0 0; max-height: 88vh; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+  .sheet { width: 100%; border-radius: 14px 14px 0 0; max-height: 90vh; max-height: 92dvh; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .sheet .actions { bottom: calc(-18px - env(safe-area-inset-bottom, 0px)); margin: 4px -16px calc(-18px - env(safe-area-inset-bottom, 0px)); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .sheet .actions .btn { flex: 1 1 auto; text-align: center; }
+  .sheet .actions .left { margin-right: 0; flex-basis: 100%; order: 2; }
+  .fieldrow > .f-date { flex-basis: 100%; }
 }
+/* Safari on iPhone zooms the page when a text box's text is under 16px. */
+@media (max-width: 760px), (pointer: coarse) {
+  input, select, textarea { font-size: 16px; }
+}
+/* Safari's date and time boxes ignore width unless their native look is turned off. */
+input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; width: 100%; min-width: 0; max-width: 100%; min-height: 40px; display: block; text-align: left; }
+input[type="date"]::-webkit-date-and-time-value, input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 .sheet h3 { font-size: 1.2rem; }
 .field { display: grid; gap: 4px; }
 .field > span { font-size: .8rem; color: var(--muted); font-weight: 600; }
@@ -1248,9 +1265,14 @@ function openSheet(html, onMount) {
   root.innerHTML = `<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
   const sh = root.querySelector('.sheet');
   if (onMount) onMount(sh);
-  const f = sh.querySelector('input,select,button'); if (f) f.focus();
+  document.documentElement.classList.add('modal-open');
+  // On touch screens, don't jump into a text box: that opens the keyboard and makes Safari zoom.
+  sh.setAttribute('tabindex', '-1');
+  const touch = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+  const f = touch ? null : sh.querySelector('input,select,textarea');
+  (f || sh).focus({ preventScroll: true });
 }
-function closeSheet() { document.getElementById('sheet-root').innerHTML = ''; }
+function closeSheet() { document.getElementById('sheet-root').innerHTML = ''; document.documentElement.classList.remove('modal-open'); }
 
 function careSheet(kidId, block, ds) {
   const k = kid(kidId), b = blockDef(block);
@@ -1305,7 +1327,7 @@ function eventSheet(ev, ds) {
     <form id="evform" class="opts" style="gap:12px">
       <label class="field"><span>What</span><span class="withmic"><input type="text" id="ef-title" value="${esc(e.title)}" placeholder="Dentist, swim lesson, birthday party…" required>${micBtn('ef-title')}</span></label>
       <div class="fieldrow">
-        <label class="field"><span>Date</span><input type="date" id="ef-date" value="${esc(e.date)}" required></label>
+        <label class="field f-date"><span>Date</span><input type="date" id="ef-date" value="${esc(e.date)}" required></label>
         <label class="field"><span>Start</span><input type="time" id="ef-time" value="${esc(e.time || '')}" ${e.allDay ? 'disabled' : ''}></label>
         <label class="field"><span>End</span><input type="time" id="ef-end" value="${esc(e.endTime || '')}" ${e.allDay ? 'disabled' : ''}></label>
       </div>
