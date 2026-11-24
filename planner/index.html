@@ -913,12 +913,12 @@ function renderGroceries() {
           return `<button class="mealcell${m ? '' : ' empty'}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${slots.length > 1 ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')}</div></div>`).join('')}</div>
       ${planned ? `<div class="actions" style="margin-top:10px"><button class="btn" data-act="mtolist">Add this week's ingredients to the list</button></div>` : ''}
     </section>
-    ${renderIdeas()}
     <section class="panel" aria-labelledby="h-mp">
       <div class="panel-head"><h2 id="h-mp">Plan meals with Claude</h2></div>
       ${renderPlanBox()}
     </section>
   </div>
+  <div class="stack">
   <section class="panel" aria-labelledby="h-g">
     <div class="panel-head"><h2 id="h-g">Grocery list</h2>${anyDone ? '<button class="btn" data-act="gclear">Clear checked</button>' : ''}</div>
     <form class="addrow" id="gform">
@@ -932,6 +932,8 @@ function renderGroceries() {
         l.sort((a, b) => (a.done - b.done) || (a.createdAt || 0) - (b.createdAt || 0)).map(i => `<li class="${i.done ? 'done' : ''}"><input type="checkbox" id="gi-${esc(i.id)}" data-act="gdone" data-id="${esc(i.id)}" ${i.done ? 'checked' : ''} aria-label="Got ${esc(i.name)}"><span class="grow">${esc(i.name)}${i.qty ? ` <span class="small muted">${esc(i.qty)}</span>` : ''}${i.meal ? `<br><span class="small muted">for ${esc(i.meal)}</span>` : ''}</span><button class="xbtn" data-act="gdel" data-id="${esc(i.id)}" aria-label="Remove ${esc(i.name)}">×</button></li>`).join('')
       }</ul>`).join('')}
   </section>
+  ${renderIdeas()}
+  </div>
   </div>`;
 }
 // Quick add: what you buy most and most recently, padded with common staples until there's history.
