@@ -326,6 +326,8 @@ button.due.nodue { color: var(--muted); opacity: .8; }
 .planit { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
 .planit .btn { justify-self: start; }
 input[type="url"] { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; min-width: 0; width: 100%; }
+.mealmore { flex-basis: 100%; text-align: left; border: 0; background: transparent; padding: 0 2px; color: var(--muted); font-size: .8rem; font-weight: 600; }
+.mealmore:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -342,7 +344,8 @@ input[type="url"] { border: 1px solid var(--line); background: var(--surface); b
 .mealday.is-today .md-h b { color: var(--accent); }
 .md-h { display: grid; font-size: .9rem; padding-top: 6px; }
 .md-h .busy { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
-.md-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
+.md-slots { display: flex; flex-wrap: wrap; gap: 6px; }
+.md-slots .mealcell { flex: 1 1 140px; }
 .mealcell { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; text-align: left; min-width: 0; }
 .mealcell .mn { font-weight: 600; overflow-wrap: anywhere; }
 .mealcell.empty { border-style: dashed; background: transparent; }
@@ -867,6 +870,8 @@ function renderTasks() {
 }
 
 function mealAt(ds, slot) { const d = S.meals[ds]; return d && d.slots && d.slots[slot] && d.slots[slot].name ? d.slots[slot] : null; }
+// Meals shown for a day: the ones turned on in Setup, plus any other meal planned for just that day.
+const daySlots = ds => MEAL_SLOTS.filter(s => settings().mealSlots.includes(s.key) || mealAt(ds, s.key));
 const normItem = s => String(s || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 function renderPlanBox() {
@@ -902,15 +907,17 @@ function renderGroceries() {
   const anyDone = items.some(i => i.done);
   const ws = S.mealWeek, days = [...Array(7)].map((_, i) => addDays(ws, i)), t = todayStr();
   const slots = MEAL_SLOTS.filter(s => st.mealSlots.includes(s.key));
-  const planned = days.reduce((n, ds) => n + slots.filter(s => mealAt(ds, s.key)).length, 0);
+  const planned = days.reduce((n, ds) => n + MEAL_SLOTS.filter(s => mealAt(ds, s.key)).length, 0);
   return `<div class="two">
   <div class="stack">
     <section class="panel" aria-labelledby="h-m">
       <div class="panel-head"><h2 id="h-m">Meal plan · ${esc(shortDate(ws))} – ${esc(shortDate(addDays(ws, 6)))}</h2>
         <span class="weekbar"><button class="iconbtn" data-act="mwk" data-d="-7" aria-label="Previous week">‹</button><button class="btn" data-act="mwk" data-d="0">This week</button><button class="iconbtn" data-act="mwk" data-d="7" aria-label="Next week">›</button></span></div>
       <div class="mealgrid">${days.map(ds => `<div class="mealday${ds === t ? ' is-today' : ''}"><div class="md-h"><b>${DOW[dowOf(ds)]}</b> <span class="muted">${esc(shortDate(ds))}</span>${busyNote(ds) ? `<span class="busy">${esc(busyNote(ds))}</span>` : ''}</div>
-        <div class="md-slots">${slots.map(s => { const m = mealAt(ds, s.key);
-          return `<button class="mealcell${m ? '' : ' empty'}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${slots.length > 1 ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')}</div></div>`).join('')}</div>
+        <div class="md-slots">${(() => { const ds2 = daySlots(ds); const more = ds2.length < MEAL_SLOTS.length;
+          return ds2.map(s => { const m = mealAt(ds, s.key);
+            return `<button class="mealcell${m ? '' : ' empty'}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${ds2.length > 1 || s.key !== 'dinner' ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')
+            + (more ? `<button class="mealmore" data-act="mextra" data-ds="${ds}" aria-label="Add another meal on ${esc(longDate(ds))}">+ Meal</button>` : ''); })()}</div></div>`).join('')}</div>
       ${planned ? `<div class="actions" style="margin-top:10px"><button class="btn" data-act="mtolist">Add this week's ingredients to the list</button></div>` : ''}
     </section>
     <section class="panel" aria-labelledby="h-mp">
@@ -1191,7 +1198,7 @@ async function addIngredients(list) {
   return n;
 }
 function weekIngredients(ws) {
-  const out = []; const slots = settings().mealSlots;
+  const out = []; const slots = MEAL_SLOTS.map(s => s.key);
   for (let i = 0; i < 7; i++) for (const s of slots) { const m = mealAt(addDays(ws, i), s); if (m) for (const x of (m.ingredients || [])) out.push({ ...x, meal: m.name }); }
   return out;
 }
@@ -1331,7 +1338,7 @@ function ideaEditSheet(r) {
 // View an idea: ingredients and steps, link, plan it, add to the grocery list.
 function ideaSheet(id) {
   const r = recipe(id); if (!r) return;
-  const st = settings(); const slots = MEAL_SLOTS.filter(s => st.mealSlots.includes(s.key));
+  const slots = MEAL_SLOTS;
   const link = safeUrl(r.url);
   let firstFree = todayStr(); for (let i = 0; i < 14; i++) { const d = addDays(todayStr(), i); if (!mealAt(d, 'dinner')) { firstFree = d; break; } }
   openSheet(`
@@ -1999,6 +2006,16 @@ document.addEventListener('click', async e => {
   if (a === 'newev') { if (guard()) eventSheet(null, t.dataset.ds); return; }
   if (a === 'ev') { const ev = S.events.find(x => x.id === t.dataset.id); if (ev && guard()) eventSheet(ev, t.dataset.ds); return; }
   if (a === 'gev') { gEventSheet(t.dataset.id, t.dataset.cal); return; }
+  if (a === 'mextra') {
+    if (!guard()) return;
+    const ds = t.dataset.ds, shown = daySlots(ds).map(s => s.key);
+    openSheet(`<h3>Add a meal · ${esc(longDate(ds))}</h3><p class="small muted" style="margin:0">Just for this day. To show a meal every day, turn it on in Setup.</p>
+      <div class="opts">${MEAL_SLOTS.filter(s => !shown.includes(s.key)).map(s => `<button class="opt" data-slot="${s.key}">${esc(s.label)}</button>`).join('')}</div>
+      <div class="actions"><button class="btn" data-act="close">Cancel</button></div>`, sh => {
+      sh.addEventListener('click', e => { const b = e.target.closest('[data-slot]'); if (b) mealSheet(ds, b.dataset.slot); });
+    });
+    return;
+  }
   if (a === 'ridea-new') { if (guard()) ideaAddSheet(); return; }
   if (a === 'ridea') { ideaSheet(t.dataset.id); return; }
   if (a === 'quickadd') { if (guard()) qaSheet(); return; }
