@@ -396,6 +396,22 @@ body.kiosk main { max-width: none; padding-block: 16px; }
   .k-time { font-size: 2.4rem; }
   .k-evs li { grid-template-columns: 76px minmax(0, 1fr); }
 }
+.clgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+@media (max-width: 560px) { .clgrid { grid-template-columns: 1fr; } }
+.clmeta { display: flex; align-items: center; gap: 6px; }
+.btn.small { padding: 4px 8px; font-size: .8rem; }
+.clcard .checklist label.grow { cursor: pointer; }
+.cladd { margin-top: 8px; }
+.pbulk { margin: 8px 0 0; }
+.pbulk summary { cursor: pointer; font-size: .85rem; color: var(--muted); font-weight: 600; }
+.pbulk textarea { margin: 6px 0; }
+.pchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pchip { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 4px 3px 11px; font-size: .88rem; background: var(--surface); }
+.pchip button { border: 0; background: transparent; color: var(--muted); font-size: .75rem; padding: 2px 6px; border-radius: 999px; }
+.pchip button:hover { background: var(--sunk); color: var(--fg); }
+.pchip .px { font-size: 1rem; line-height: 1; }
+.mealcell.away { background: var(--sunk); border-style: solid; border-color: transparent; }
+.mealcell.away .mn { font-weight: 500; font-style: italic; }
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -436,6 +452,7 @@ table.pattern caption { text-align: left; font-size: .72rem; text-transform: upp
       <a href="#week" data-v="week">Week</a>
       <a href="#groceries" data-v="groceries">Meals &amp; groceries</a>
       <a href="#tasks" data-v="tasks">Tasks</a>
+      <a href="#lists" data-v="lists">Lists</a>
       <a href="#family" data-v="family">Setup</a>
     </nav>
   </div>
@@ -484,7 +501,7 @@ const S = {
   db: null, user: null, mcp: null, perms: null,
   dbReady: false, dbMissing: false, canWrite: true,
   settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {}, meals: {},
-  recipes: [], ra: null, boxFilter: 'all', boxQuery: '', boxTag: '', me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
+  lists: [], pantry: [], pWhere: 'pantry', recipes: [], ra: null, boxFilter: 'all', boxQuery: '', boxTag: '', me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
   g: {},            // calendarId -> { events, err, at }
   gCals: null,      // list from list_calendars
   gState: 'idle',   // idle | off | ask | on | unavailable
@@ -856,6 +873,104 @@ function renderKitchen() {
 setInterval(() => { const el = document.getElementById('k-time'); if (el) el.textContent = clock(); if (S.view === 'kitchen') { const k = document.querySelector('.kitchen'); if (k) k.classList.toggle('night', isNight()); } }, 20000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.view === 'kitchen' && loadLocal('fp.kwake', false)) keepAwake(true); });
 
+// Meals that need no cooking or shopping: leftovers, eating out, dinner at someone's place.
+const NOT_HOSTS = /^(mama|baba|mom|dad|mommy|daddy|me|us|at home|home|school|sitter|nanny|camp|daycare)$/i;
+function quickMeals(slot) {
+  const label = slot === 'dinner' ? 'Dinner' : (MEAL_SLOTS.find(s => s.key === slot) || {}).label || 'Meal';
+  return [{ name: 'Leftovers', kind: 'leftovers' }, { name: 'Eating out', kind: 'out' }, { name: 'Takeout', kind: 'out' },
+    ...settings().people.filter(p => !NOT_HOSTS.test(p.name.trim())).map(p => ({ name: `${label} at ${p.name}'s`, kind: 'away' }))];
+}
+
+// ---------- checklists ----------
+const STARTERS = {
+  'Camping': ['Tent and stakes', 'Sleeping bags', 'Sleeping pads', 'Pillows', 'Headlamps and batteries', 'Camp chairs', 'Stove and fuel', 'Lighter', 'Pots, plates and utensils', 'Cooler and ice', 'Water bottles', 'Warm layers', 'Rain jackets', 'Sunscreen', 'Bug spray', 'First aid kit', 'Wipes and trash bags', 'Kids\' comfort toys'],
+  'Day trip': ['Water bottles', 'Snacks', 'Sunscreen', 'Hats', 'Change of clothes', 'Diapers and wipes', 'Jackets', 'Phone charger', 'First aid basics', 'Car seats checked'],
+  'School': ['Backpack', 'Lunchbox', 'Water bottle', 'Folder and homework', 'Library book', 'Jacket', 'Sign any forms', 'Spare clothes in cubby'],
+  'Beach': ['Swimsuits', 'Towels', 'Sunscreen', 'Hats', 'Sand toys', 'Umbrella', 'Snacks and water', 'Change of clothes', 'Bag for wet things'],
+  'Travel': ['IDs and tickets', 'Chargers', 'Medications', 'Toothbrushes', 'Pajamas', 'Clothes for each day', 'Snacks for the trip', 'Headphones and tablets', 'Car seats'],
+};
+const listById = id => S.lists.find(l => l.id === id);
+function clCard(l) {
+  const items = l.items || [], done = items.filter(i => i.done).length;
+  return `<section class="panel clcard" aria-labelledby="cl-h-${esc(l.id)}">
+    <div class="panel-head"><h2 id="cl-h-${esc(l.id)}">${esc(l.name)}</h2>
+      <span class="clmeta"><span class="small muted tnum">${done}/${items.length}</span>${done ? `<button class="btn ghost small" data-act="cl-reset" data-l="${esc(l.id)}">Uncheck all</button>` : ''}<button class="iconbtn" data-act="cl-edit" data-l="${esc(l.id)}" aria-label="Rename or delete ${esc(l.name)}">⋯</button></span></div>
+    ${items.length ? `<ul class="checklist">${items.map(i => `<li class="${i.done ? 'done' : ''}"><input type="checkbox" id="cl-${esc(l.id)}-${esc(i.id)}" data-act="cl-tick" data-l="${esc(l.id)}" data-i="${esc(i.id)}" ${i.done ? 'checked' : ''}><label class="grow" for="cl-${esc(l.id)}-${esc(i.id)}">${esc(i.text)}</label><button class="xbtn" data-act="cl-rm" data-l="${esc(l.id)}" data-i="${esc(i.id)}" aria-label="Remove ${esc(i.text)}">×</button></li>`).join('')}</ul>` : '<p class="empty">No items yet.</p>'}
+    <form class="addrow cladd" data-cl="${esc(l.id)}"><span class="withmic"><input type="text" id="cl-add-${esc(l.id)}" placeholder="Add an item" aria-label="Add an item to ${esc(l.name)}">${micBtn('cl-add-' + l.id)}</span><button class="btn" type="submit">Add</button></form>
+  </section>`;
+}
+function renderLists() {
+  const lists = [...S.lists].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  return `<div class="weekbar"><h2>Checklists</h2><button class="btn primary" data-act="cl-new">+ New checklist</button></div>
+    ${lists.length ? `<div class="clgrid">${lists.map(clCard).join('')}</div>`
+      : `<section class="panel"><p class="empty" style="margin-top:0">Keep the lists you use again and again: camping, day trips, school mornings. Tick things off as you pack, then "Uncheck all" for next time.</p>
+        <div class="qchips">${Object.keys(STARTERS).map(n => `<button class="qchip" data-act="cl-starter" data-n="${esc(n)}">+ ${esc(n)}</button>`).join('')}</div></section>`}`;
+}
+function saveListItems(id, items) {
+  const l = listById(id); if (!l) return;
+  l.items = items; schedule();
+  return write(() => S.db.doc('checklists/' + id).update({ items }));
+}
+function newList(name, texts) {
+  const id = uid();
+  return write(() => S.db.doc('checklists/' + id).set({ name, items: (texts || []).map(t => ({ id: uid(), text: t, done: false })), createdAt: Date.now() }), `Added ${name}`);
+}
+function clNewSheet() {
+  openSheet(`<h3>New checklist</h3>
+    <form id="clnew" class="opts" style="gap:10px">
+      <label class="field"><span>Name</span><input type="text" id="cln-name" placeholder="Camping, day trip, school mornings…" required></label>
+      <div class="field"><span>Start from</span><select id="cln-from"><option value="">An empty list</option>${Object.keys(STARTERS).map(n => `<option>${esc(n)}</option>`).join('')}</select></div>
+      <p class="gnote" style="margin:0">Starter items are suggestions; edit them to match your family.</p>
+      <div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary">Create</button></div>
+    </form>`, sh => {
+    const from = sh.querySelector('#cln-from'), nm = sh.querySelector('#cln-name');
+    from.addEventListener('change', () => { if (from.value && !nm.value.trim()) nm.value = from.value; });
+    sh.querySelector('#clnew').addEventListener('submit', async e => { e.preventDefault(); const name = nm.value.trim(); if (!name) return; closeSheet(); await newList(name, STARTERS[from.value] || []); });
+  });
+}
+function clEditSheet(id) {
+  const l = listById(id); if (!l) return;
+  openSheet(`<h3>${esc(l.name)}</h3>
+    <form id="cledit" class="opts" style="gap:10px">
+      <label class="field"><span>Name</span><input type="text" id="cle-name" value="${esc(l.name)}" required></label>
+      <div class="actions"><button type="button" class="btn danger left" data-x="del">Delete list</button><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary">Save</button></div>
+    </form>`, sh => {
+    sh.addEventListener('click', async e => { const b = e.target.closest('[data-x="del"]'); if (!b) return; if (b.dataset.sure) { closeSheet(); await write(() => S.db.doc('checklists/' + id).delete(), 'List deleted'); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to delete'; } });
+    sh.querySelector('#cledit').addEventListener('submit', async e => { e.preventDefault(); const name = sh.querySelector('#cle-name').value.trim(); if (!name) return; closeSheet(); await write(() => S.db.doc('checklists/' + id).update({ name }), 'Saved'); });
+  });
+}
+
+// ---------- pantry & freezer ----------
+const WHERE = [{ key: 'pantry', label: 'Pantry' }, { key: 'fridge', label: 'Fridge' }, { key: 'freezer', label: 'Freezer' }];
+function savePantry(items) {
+  S.pantry = items; schedule();
+  return write(() => S.db.doc('family/pantry').set({ items }));
+}
+function onHand(item) {
+  const k = normItem(item); if (!k) return false;
+  return (S.pantry || []).some(p => { const n = normItem(p.name); return n && (n === k || new RegExp('(^| )' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '( |$)').test(k)); });
+}
+function renderPantry() {
+  const items = S.pantry || [];
+  return `<section class="panel" aria-labelledby="h-pantry">
+    <div class="panel-head"><h2 id="h-pantry">Pantry &amp; freezer</h2><span class="small muted">${items.length} on hand</span></div>
+    <p class="small muted" style="margin:0 0 8px">What you usually have. Claude plans around it, and recipe ingredients you have aren't added to the grocery list.</p>
+    <form class="addrow" id="pform"><span class="withmic"><input type="text" id="p-name" placeholder="Rice, frozen peas, chicken thighs…" aria-label="Item on hand">${micBtn('p-name')}</span>
+      <select id="p-where" aria-label="Where">${WHERE.map(w => `<option value="${w.key}" ${S.pWhere === w.key ? 'selected' : ''}>${w.label}</option>`).join('')}</select><button class="btn primary" type="submit">Add</button></form>
+    <details class="pbulk"><summary>Paste a whole list</summary>
+      <textarea id="p-bulk" rows="5" placeholder="One item per line, or separated by commas"></textarea>
+      <button class="btn" data-act="pbulk">Add these</button></details>
+    ${WHERE.map(w => { const l = items.filter(i => (i.where || 'pantry') === w.key).sort((a, b) => a.name.localeCompare(b.name));
+      return l.length ? `<h3 class="eyebrow group-h">${w.label}</h3><div class="pchips">${l.map(i => `<span class="pchip">${esc(i.name)}<button type="button" data-act="plow" data-id="${esc(i.id)}" title="Running low: add to the grocery list" aria-label="Running low on ${esc(i.name)}: add to the grocery list">+ list</button><button type="button" class="px" data-act="prm" data-id="${esc(i.id)}" aria-label="Remove ${esc(i.name)}">×</button></span>`).join('')}</div>` : ''; }).join('')}
+  </section>`;
+}
+function addPantryNames(names, where) {
+  const have = new Set((S.pantry || []).map(p => normItem(p.name)));
+  const add = names.map(n => n.trim()).filter(n => n && !have.has(normItem(n))).map(n => { have.add(normItem(n)); return { id: uid(), name: n, where, added: Date.now() }; });
+  if (!add.length) { toast('Already on the list'); return; }
+  return savePantry([...(S.pantry || []), ...add]);
+}
+
 function renderToday() {
   const t = todayStr(), tm = addDays(t, 1);
   const thisWk = mondayOf(t);
@@ -1023,7 +1138,7 @@ function renderGroceries() {
       <div class="mealgrid">${days.map(ds => `<div class="mealday${ds === t ? ' is-today' : ''}"><div class="md-h"><b>${DOW[dowOf(ds)]}</b> <span class="muted">${esc(shortDate(ds))}</span>${busyNote(ds) ? `<span class="busy">${esc(busyNote(ds))}</span>` : ''}</div>
         <div class="md-slots">${(() => { const ds2 = daySlots(ds); const more = ds2.length < MEAL_SLOTS.length;
           return ds2.map(s => { const m = mealAt(ds, s.key);
-            return `<button class="mealcell${m ? '' : ' empty'}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${ds2.length > 1 || s.key !== 'dinner' ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')
+            return `<button class="mealcell${m ? '' : ' empty'}${m && m.kind ? ' away' : ''}" data-act="meal" data-ds="${ds}" data-slot="${s.key}">${ds2.length > 1 || s.key !== 'dinner' ? `<span class="sl">${esc(s.label)}</span>` : ''}<span class="mn">${m ? esc(m.name) : '+ Add'}</span></button>`; }).join('')
             + (more ? `<button class="mealmore" data-act="mextra" data-ds="${ds}" aria-label="Add another meal on ${esc(longDate(ds))}">+ Meal</button>` : ''); })()}</div></div>`).join('')}</div>
       ${planned ? `<div class="actions" style="margin-top:10px"><button class="btn" data-act="mtolist">Add this week's ingredients to the list</button></div>` : ''}
     </section>
@@ -1031,6 +1146,7 @@ function renderGroceries() {
       <div class="panel-head"><h2 id="h-mp">Plan meals with Claude</h2></div>
       ${renderPlanBox()}
     </section>
+    ${renderPantry()}
   </div>
   <div class="stack">
   <section class="panel" aria-labelledby="h-g">
@@ -1178,12 +1294,15 @@ function render() {
   else if (!S.canWrite) top = `<div class="banner">You can view this planner but not change it. Ask the owner for edit access.</div>`;
   const v = S.view;
   document.body.classList.toggle('kiosk', v === 'kitchen');
-  const body = v === 'kitchen' ? renderKitchen() : v === 'week' ? renderWeek() : v === 'tasks' ? renderTasks() : v === 'groceries' ? renderGroceries() : v === 'family' ? renderFamily() : renderToday();
+  const body = v === 'kitchen' ? renderKitchen() : v === 'week' ? renderWeek() : v === 'tasks' ? renderTasks() : v === 'lists' ? renderLists() : v === 'groceries' ? renderGroceries() : v === 'family' ? renderFamily() : renderToday();
   main.innerHTML = top + body;
   for (const [id, val] of Object.entries(keep)) { const el = document.getElementById(id); if (el && el.tagName !== 'SELECT' && document.activeElement !== el && el.dataset.act !== 'rename' && el.dataset.act !== 'srename') { if (!el.value) el.value = val; } }
   if (focusId) { const el = document.getElementById(focusId); if (el) { el.value = keep[focusId] ?? el.value; el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch {} } }
   document.querySelectorAll('#tabs a').forEach(a => { a.toggleAttribute('aria-current', a.dataset.v === v); if (a.dataset.v === v) a.setAttribute('aria-current', 'page'); });
   const gapsN = S.settings ? weekGaps(mondayOf(todayStr())).length : 0;
+  // keep the current tab visible when the tab bar scrolls (phones)
+  const nav = document.getElementById('tabs'), cur = nav.querySelector('a[aria-current="page"]');
+  if (cur && nav.scrollWidth > nav.clientWidth) { const l = cur.offsetLeft - nav.offsetLeft, r = l + cur.offsetWidth; if (l < nav.scrollLeft || r > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = Math.max(0, l - 24); }
   const wk = document.querySelector('#tabs a[data-v="week"]'); wk.innerHTML = `Week${gapsN ? `<span class="badge" aria-label="${gapsN} care gaps">${gapsN}</span>` : ''}`;
 }
 let rq = 0; function schedule() { cancelAnimationFrame(rq); rq = requestAnimationFrame(render); }
@@ -1304,7 +1423,7 @@ async function addIngredients(list) {
   const stores = settings().stores;
   let n = 0;
   for (const x of list) {
-    const key = normItem(x.item); if (!key || open.has(key)) continue;
+    const key = normItem(x.item); if (!key || open.has(key) || onHand(x.item)) continue;
     open.add(key);
     const store = stores.includes(x.store) ? x.store : (stores[0] || '');
     const ok = await write(() => S.db.collection('groceries').doc(uid()).set({ name: String(x.item).trim(), qty: x.qty || '', store, meal: x.meal || '', done: false, createdAt: Date.now() }));
@@ -1559,6 +1678,7 @@ function mealSheet(ds, slot) {
   const label = (MEAL_SLOTS.find(s => s.key === slot) || {}).label || slot;
   openSheet(`
     <h3>${esc(label)} · ${esc(longDate(ds))}</h3>
+    <div class="field"><span>Quick picks</span><div class="qchips">${quickMeals(slot).map(q => `<button type="button" class="qchip" data-x="qpick" data-name="${esc(q.name)}" data-kind="${q.kind}">${esc(q.name)}</button>`).join('')}</div></div>
     <form id="mealform" class="opts" style="gap:12px">
       ${S.recipes.length ? `<label class="field"><span>From your meal ideas</span><select id="mf-idea"><option value="">Choose one…</option>${[...S.recipes].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(r => `<option value="${esc(r.id)}" ${m.recipeId === r.id ? 'selected' : ''}>${esc(r.title)}</option>`).join('')}</select></label>` : ''}
       ${m.recipeId && recipe(m.recipeId) ? '<button type="button" class="textlink" data-x="recipe">View the recipe and steps</button>' : mealAt(ds, slot) ? '<button type="button" class="textlink" data-x="tobox">Save this meal to the recipe box</button>' : ''}
@@ -1575,6 +1695,7 @@ function mealSheet(ds, slot) {
     sh.addEventListener('click', async e => {
       const x = e.target.closest('[data-x]'); if (!x) return;
       if (x.dataset.x === 'recipe') { ideaSheet(m.recipeId); return; }
+      if (x.dataset.x === 'qpick') { closeSheet(); await saveMeal(ds, slot, { name: x.dataset.name, kind: x.dataset.kind, ingredients: [], notes: '' }) && toast(`${(MEAL_SLOTS.find(s => s.key === slot) || {}).label || 'Meal'}: ${x.dataset.name}`); return; }
       if (x.dataset.x === 'tobox') {
         const id = uid(), link = safeUrl((m.notes || '').trim());
         const ok = await saveIdea(id, { title: m.name, url: link, source: link ? srcName(link) : '', ingredients: (m.ingredients || []).map(i => ({ item: i.item, qty: i.qty || '' })), steps: [], notes: link ? '' : (m.notes || ''), tags: [], rating: '', timesPlanned: 1, lastPlanned: ds, complete: true, createdAt: Date.now() }, 'Saved to the recipe box');
@@ -1634,6 +1755,9 @@ Guidance: keep evenings with plans quick (30 minutes or less, or slow cooker or 
 ${S.recipes.filter(r => r.rating !== 'nope').length ? `Recipes from their recipe box. Use some of these when they fit the request, favorites most, and avoid ones planned in the last two weeks; copy the name exactly:
 ${[...S.recipes].filter(r => r.rating !== 'nope').sort((a, b) => isFav(b) - isFav(a)).slice(0, 40).map(r => `- ${r.title}${isFav(r) ? ' (family favorite)' : ''}${r.time ? ` (${r.time})` : ''}${r.lastPlanned ? ` (last planned ${r.lastPlanned})` : ''}`).join('\n')}
 
+` : ''}${(S.pantry || []).length ? `On hand now (use these where it makes sense; don't list them as ingredients to buy):
+${WHERE.map(w => { const l = (S.pantry || []).filter(i => (i.where || 'pantry') === w.key).map(i => i.name); return l.length ? `- ${w.label}: ${l.join(', ')}` : ''; }).filter(Boolean).join('\n')}
+
 ` : ''}Stores they shop at: ${st.stores.join(', ') || 'a grocery store'}. Put each ingredient's best store, or "" if any store.
 
 Reply with only JSON in this shape:
@@ -1678,10 +1802,10 @@ async function usePlan(toList) {
 }
 
 // ---------- backups ----------
-const BACKUP_COLLECTIONS = ['care', 'events', 'groceries', 'tasks', 'gmeta', 'meals', 'recipes'];
+const BACKUP_COLLECTIONS = ['care', 'events', 'groceries', 'tasks', 'gmeta', 'meals', 'recipes', 'checklists'];
 async function collectBackup() {
   const out = { app: 'family-planner', version: 2, exportedAt: new Date().toISOString(), family: {} };
-  for (const id of ['settings', 'patterns']) { const s = await S.db.doc('family/' + id).get(); if (s.exists) out.family[id] = s.data(); }
+  for (const id of ['settings', 'patterns', 'pantry', 'grocerymemo']) { const s = await S.db.doc('family/' + id).get(); if (s.exists) out.family[id] = s.data(); }
   for (const c of BACKUP_COLLECTIONS) { const q = await S.db.collection(c).limit(1000).get(); out[c] = {}; q.docs.forEach(d => { out[c][d.id] = d.data(); }); }
   return out;
 }
@@ -1735,7 +1859,7 @@ async function doRestore() {
   if (!data || !guard()) return;
   toast('Restoring…');
   try {
-    for (const id of ['settings', 'patterns']) if (data.family[id]) await S.db.doc('family/' + id).set(data.family[id]);
+    for (const id of ['settings', 'patterns', 'pantry', 'grocerymemo']) if (data.family[id]) await S.db.doc('family/' + id).set(data.family[id]);
     for (const c of BACKUP_COLLECTIONS) {
       const keep = data[c] || {};
       const now = await S.db.collection(c).limit(1000).get();
@@ -2200,6 +2324,14 @@ document.addEventListener('click', async e => {
   }
   if (a === 'kwake') { saveLocal('fp.kwake', true); await keepAwake(true); toast(cookLock ? 'The screen will stay on while this is open' : "This device won't keep the screen on. Set Auto-Lock to Never in its settings instead."); schedule(); return; }
   if (a === 'kcook') { cookSheet(t.dataset.id); return; }
+  if (a === 'cl-new') { if (guard()) clNewSheet(); return; }
+  if (a === 'cl-starter') { if (guard()) await newList(t.dataset.n, STARTERS[t.dataset.n] || []); return; }
+  if (a === 'cl-edit') { if (guard()) clEditSheet(t.dataset.l); return; }
+  if (a === 'cl-reset') { const l = listById(t.dataset.l); if (l && guard()) await saveListItems(l.id, (l.items || []).map(i => ({ ...i, done: false }))); return; }
+  if (a === 'cl-rm') { const l = listById(t.dataset.l); if (l && guard()) await saveListItems(l.id, (l.items || []).filter(i => i.id !== t.dataset.i)); return; }
+  if (a === 'prm') { if (guard()) await savePantry((S.pantry || []).filter(i => i.id !== t.dataset.id)); return; }
+  if (a === 'plow') { const i = (S.pantry || []).find(x => x.id === t.dataset.id); if (i && guard()) { await addGrocery(i.name, settings().stores[0] || ''); toast(`${i.name} added to the grocery list`); } return; }
+  if (a === 'pbulk') { const ta = document.getElementById('p-bulk'); if (!ta || !guard()) return; const names = ta.value.split(/[\n,]+/); const where = (document.getElementById('p-where') || {}).value || 'pantry'; ta.value = ''; await addPantryNames(names, where); return; }
   if (a === 'boxf') { S.boxFilter = t.dataset.f; schedule(); return; }
   if (a === 'boxtag') { S.boxTag = S.boxTag === t.dataset.t ? '' : t.dataset.t; schedule(); return; }
   if (a === 'ridea-new') { if (guard()) ideaAddSheet(); return; }
@@ -2240,6 +2372,7 @@ document.addEventListener('change', async e => {
   const t = e.target;
   if (t.id === 'bk-file') { const f = t.files && t.files[0]; t.value = ''; if (f) readRestoreFile(f); return; }
   const a = t.dataset && t.dataset.act; if (!a) return;
+  if (a === 'cl-tick') { const l = listById(t.dataset.l); if (l && guard()) await saveListItems(l.id, (l.items || []).map(i => i.id === t.dataset.i ? { ...i, done: t.checked } : i)); return; }
   if (a === 'gdone') { const done = t.checked; await write(() => S.db.doc('groceries/' + t.dataset.id).update({ done })); return; }
   if (a === 'tdone') { if (guard()) await completeTask(t.dataset.id, t.checked); return; }
   if (a === 'blk') { const st = JSON.parse(JSON.stringify(settings())); st.careBlocks = BLOCKS.map(b => b.key).filter(k => k === t.dataset.key ? t.checked : st.careBlocks.includes(k)); S.settings = st; schedule(); await saveSettings(st); return; }
@@ -2262,6 +2395,8 @@ document.addEventListener('change', async e => {
 });
 document.addEventListener('submit', async e => {
   const f = e.target; e.preventDefault();
+  if (f.classList.contains('cladd')) { const id = f.dataset.cl, inp = f.querySelector('input'); const text = inp.value.trim(); if (!text || !guard()) return; inp.value = ''; const l = listById(id); if (l) await saveListItems(id, [...(l.items || []), { id: uid(), text, done: false }]); const again = document.getElementById('cl-add-' + id); if (again) again.focus(); return; }
+  if (f.id === 'pform') { const n = f.querySelector('#p-name').value.trim(); if (!n || !guard()) return; S.pWhere = f.querySelector('#p-where').value; f.querySelector('#p-name').value = ''; await addPantryNames([n], S.pWhere); return; }
   if (f.id === 'wxform') { searchPlace(f.querySelector('#wx-q').value.trim()); return; }
   if (f.id === 'mpform') {
     if (!S.sample) return;
@@ -2297,7 +2432,7 @@ document.addEventListener('input', e => { if (e.target.id === 'box-q') { clearTi
 
 function route() {
   const h = (location.hash || '').slice(1);
-  S.view = ['today','week','groceries','tasks','family','kitchen'].includes(h) ? h : 'today';
+  S.view = ['today','week','groceries','tasks','lists','family','kitchen'].includes(h) ? h : 'today';
   if (S.view !== 'kitchen' && !document.querySelector('.cooking')) keepAwake(false);
   if (S.view === 'kitchen' && loadLocal('fp.kwake', false)) keepAwake(true);
   if (S.view === 'family' && S.mcp && S.gState === 'on' && !S.gCals) loadCalendars();
@@ -2343,6 +2478,8 @@ setInterval(() => { if (todayStr() !== lastDay) { lastDay = todayStr(); S.weekSt
     db.collection('meals').where('date', '>=', addDays(todayStr(), -60)).onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.meals = m; schedule(); }, err);
     setTimeout(() => maybeAutoBackup(false), 4000);
     db.doc('family/grocerymemo').onSnapshot(s => { const d = s.exists ? s.data() : null; S.memo = (d && d.items) || {}; schedule(); }, err);
+    db.collection('checklists').onSnapshot(s => { S.lists = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
+    db.doc('family/pantry').onSnapshot(s => { const d = s.exists ? s.data() : null; S.pantry = (d && Array.isArray(d.items)) ? d.items : []; schedule(); }, err);
     db.collection('recipes').onSnapshot(s => { S.recipes = s.docs.map(d => ({ id: d.id, ...d.data() })); schedule(); }, err);
     db.collection('gmeta').onSnapshot(s => { const m = {}; s.docs.forEach(d => { m[d.id] = d.data(); }); S.gmeta = m; schedule(); }, err);
   }
