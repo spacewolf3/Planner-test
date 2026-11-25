@@ -301,7 +301,8 @@ button.due.nodue { color: var(--muted); opacity: .8; }
   .week .wday:not(.sel) { display: none; }
   .week { touch-action: pan-y; }
 }
-.dayhead .qabtn { margin-left: auto; }
+a.btn { text-decoration: none; color: var(--fg); display: inline-block; }
+a.btn.primary { color: var(--accent-ink); }
 .quickadd { margin-top: 10px; display: grid; gap: 6px; }
 .qchips { display: flex; flex-wrap: wrap; gap: 6px; }
 .qchip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; font-size: .85rem; font-weight: 600; }
@@ -328,6 +329,73 @@ button.due.nodue { color: var(--muted); opacity: .8; }
 input[type="url"] { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; min-width: 0; width: 100%; }
 .mealmore { flex-basis: 100%; text-align: left; border: 0; background: transparent; padding: 0 2px; color: var(--muted); font-size: .8rem; font-weight: 600; }
 .mealmore:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.boxbar { display: grid; gap: 8px; margin-bottom: 10px; }
+.boxbar .seg-ctl { flex-wrap: wrap; justify-self: start; max-width: 100%; }
+input[type="search"] { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 10px; width: 100%; min-width: 0; }
+.qchip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.star { color: var(--o4); }
+.rate { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.rate .btn { margin-left: auto; }
+.sheet.cooking { width: min(760px, 100%); }
+.cook { display: grid; gap: 10px; font-size: 1.15rem; }
+.cook-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; position: sticky; top: -18px; background: var(--surface); padding: 6px 0; z-index: 1; }
+.cook-h h3 { font-size: 1.5rem; }
+.cook-ing { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cook-ing label { display: flex; gap: 10px; align-items: flex-start; }
+.cook-ing input { width: 22px; height: 22px; margin-top: 3px; accent-color: var(--accent); flex: none; }
+.cook-ing input:checked + span { text-decoration: line-through; color: var(--muted); }
+.cook-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.cstep { display: flex; gap: 12px; text-align: left; width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; font-size: 1.15rem; line-height: 1.45; }
+.cstep .cn { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--sunk); display: grid; place-items: center; font-weight: 700; font-size: .95rem; }
+.cstep.now { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.cstep.now .cn { background: var(--accent); color: var(--accent-ink); }
+.cstep.past { opacity: .55; }
+.cook-note { margin: 0; font-size: 1rem; color: var(--muted); }
+.dayhead .dh-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+body.kiosk header.top, body.kiosk::before { display: none; }
+body.kiosk main { max-width: none; padding-block: 16px; }
+.kitchen { display: grid; gap: 16px; font-size: 1.2rem; }
+.kitchen.night { filter: brightness(.6); }
+.k-top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.k-date { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; }
+.k-time { font-family: var(--font-display); font-size: 3.2rem; font-weight: 700; line-height: 1; }
+.k-wx { display: flex; gap: 12px; align-items: center; font-size: 1.4rem; }
+.k-wxi { font-size: 3rem; line-height: 1; }
+.k-sub { display: block; font-size: .85rem; color: var(--muted); font-weight: 500; }
+.k-actions { margin-left: auto; display: flex; gap: 8px; }
+.k-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.k-span { grid-column: 1 / -1; }
+.k-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; min-width: 0; }
+.k-card h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
+.k-kid { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; align-items: center; padding: 6px 0; }
+.k-kname { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.35rem; }
+.k-kname .dot { width: 14px; height: 14px; }
+.k-blocks { display: flex; flex-wrap: wrap; gap: 8px; }
+.k-block { flex: 1 1 150px; border-radius: 12px; padding: 8px 14px; background: color-mix(in srgb, var(--c) 18%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); }
+.k-block.gap { background: var(--gap-soft); border: 2px dashed var(--gap); }
+.k-block.gap .k-bo { color: var(--gap); }
+.k-block.na { background: transparent; border-style: dotted; }
+.k-block.na .k-bo { color: var(--muted); font-weight: 500; }
+.k-bl { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; }
+.k-bo { font-size: 1.45rem; font-weight: 700; }
+.k-evs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.k-evs li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.k-t { color: var(--muted); font-size: 1.05rem; }
+.k-et { font-weight: 700; font-size: 1.35rem; overflow-wrap: anywhere; }
+.k-who { margin-left: 8px; font-size: .85rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: color-mix(in srgb, var(--c) 18%, var(--surface)); vertical-align: middle; }
+.k-more { color: var(--muted); font-size: 1rem; }
+.k-dinner { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 0; font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--fg); }
+.k-tasks { margin: 0; padding-left: 22px; display: grid; gap: 6px; font-size: 1.2rem; }
+.k-empty { color: var(--muted); margin: 0; }
+.k-tom .k-bo { font-size: 1.15rem; }
+.k-tom .k-et { font-size: 1.15rem; }
+.k-tomgrid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) {
+  .k-grid, .k-tomgrid { grid-template-columns: 1fr; }
+  .k-kid { grid-template-columns: 1fr; }
+  .k-time { font-size: 2.4rem; }
+  .k-evs li { grid-template-columns: 76px minmax(0, 1fr); }
+}
 /* school day + meals */
 .daytype { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; }
 .hint { font-size: .8rem; color: var(--gap); font-weight: 600; }
@@ -416,7 +484,7 @@ const S = {
   db: null, user: null, mcp: null, perms: null,
   dbReady: false, dbMissing: false, canWrite: true,
   settings: null, patterns: {}, care: {}, events: [], groceries: [], tasks: [], gmeta: {}, meals: {},
-  recipes: [], ra: null, me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
+  recipes: [], ra: null, boxFilter: 'all', boxQuery: '', boxTag: '', me: null, isOwner: false, memo: {}, wkDay: null, qa: null, dict: null, wx: {}, wxState: 'idle', wxErr: null, wxAt: 0, wxSearch: null, rules: {}, nsEvents: {}, careReady: false, mealWeek: null, sample: undefined, downloads: null, plan: null, restore: null,
   g: {},            // calendarId -> { events, err, at }
   gCals: null,      // list from list_calendars
   gState: 'idle',   // idle | off | ask | on | unavailable
@@ -749,6 +817,45 @@ function noSchoolBanner(start, days) {
   return `<div class="banner"><span>Your calendar says “${esc(calNoSchool(hits[0]))}” on ${esc(span)}.</span><button class="btn primary" data-act="marknoschool" data-days="${hits.join(',')}">Mark ${hits.length === 1 ? 'it' : `all ${hits.length} days`} as no school</button></div>`;
 }
 
+// ---------- kitchen display ----------
+// A big-text, read-at-a-glance view for a tablet or old phone on the counter.
+const clock = () => { const d = new Date(); return fmtTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`); };
+const isNight = () => { const h = new Date().getHours(); return h >= 21 || h < 6; };
+function kCare(ds, compact) {
+  const kids = settings().kids;
+  if (!kids.length) return '<p class="k-empty">Add your kids in Setup.</p>';
+  return kids.map(k => `<div class="k-kid"><div class="k-kname"><span class="dot" style="--c:${colorVar(k.color)}"></span>${esc(k.name)}</div>
+    <div class="k-blocks">${compact && blocksFor(k, ds).every(b => ownerOf(k.id, b.key, ds).v === 'na') ? '<span class="k-empty">No care needed</span>' : ''}${blocksFor(k, ds).map(b => { const o = ownerOf(k.id, b.key, ds); const gap = !o.v || (o.v !== 'na' && !person(o.v));
+      if (o.v === 'na' && compact) return '';
+      return `<div class="k-block${gap ? ' gap' : o.v === 'na' ? ' na' : ''}" style="--c:${ownerColor(o.v)}"><span class="k-bl">${esc(b.label)}</span><span class="k-bo">${esc(gap ? 'Nobody yet' : ownerLabel(o.v))}</span></div>`; }).join('')}</div></div>`).join('');
+}
+function kEvents(ds, max) {
+  const its = itemsOn(ds); if (!its.length) return '<p class="k-empty">Nothing scheduled.</p>';
+  return `<ul class="k-evs">${its.slice(0, max).map(i => { const owner = i.kind === 'p' ? i.e.owner : (S.gmeta[i.ev.id] || {}).owner;
+    return `<li><span class="k-t tnum">${esc(i.allDay ? 'All day' : fmtTime(i.start))}</span><span class="k-et">${esc(i.title)}${owner && person(owner) ? `<span class="k-who" style="--c:${ownerColor(owner)}">${esc(person(owner).name)}</span>` : ''}</span></li>`; }).join('')}${its.length > max ? `<li class="k-more">+ ${its.length - max} more</li>` : ''}</ul>`;
+}
+function renderKitchen() {
+  const t = todayStr(), tm = addDays(t, 1);
+  const w = wxDay(t), d = mealAt(t, 'dinner');
+  const due = S.tasks.filter(x => !x.done && x.due && x.due <= t);
+  return `<div class="kitchen${isNight() ? ' night' : ''}">
+    <header class="k-top">
+      <div><div class="k-date">${esc(longDate(t))}</div><div class="k-time tnum" id="k-time">${esc(clock())}</div></div>
+      ${w && w.day ? `<div class="k-wx"><span class="k-wxi" aria-hidden="true">${wxIcon(w.day.icon)}</span><span><b class="tnum">${esc(w.day.temperature)}°</b> / ${esc(w.night.temperature)}°<br><span class="k-sub">${esc(w.day.phrase || '')}${rainPct(w) >= 30 ? ` · ${rainPct(w)}% rain` : ''}</span></span></div>` : ''}
+      <div class="k-actions">${'wakeLock' in navigator ? `<button class="btn" data-act="kwake">${cookLock ? 'Screen stays on' : 'Keep screen on'}</button>` : ''}<a class="btn" href="#today">Exit</a></div>
+    </header>
+    <div class="k-grid">
+      <section class="k-card k-span"><h2>${isSchool(t) ? 'School day' : 'No school'} · who has the kids</h2>${kCare(t)}</section>
+      <section class="k-card"><h2>Today</h2>${kEvents(t, 6)}</section>
+      <section class="k-card"><h2>Dinner</h2>${d ? `<button class="k-dinner" ${d.recipeId && recipe(d.recipeId) ? `data-act="kcook" data-id="${esc(d.recipeId)}"` : 'disabled'}>${esc(d.name)}${d.recipeId && recipe(d.recipeId) && (recipe(d.recipeId).steps || []).length ? '<span class="k-sub">Tap to cook</span>' : ''}</button>` : '<p class="k-empty">Not planned yet.</p>'}
+        ${due.length ? `<h2 style="margin-top:14px">To do today</h2><ul class="k-tasks">${due.slice(0, 5).map(x => `<li>${esc(x.title)}${x.due < t ? ' <span class="late">overdue</span>' : ''}${person(x.owner) ? ` <span class="k-sub">· ${esc(person(x.owner).name)}</span>` : ''}</li>`).join('')}</ul>` : ''}</section>
+      <section class="k-card k-span k-tom"><h2>Tomorrow · ${esc(DOW_LONG[dowOf(tm)])}${isSchool(tm) ? '' : ' · no school'}</h2><div class="k-tomgrid"><div>${kCare(tm, true)}</div><div>${kEvents(tm, 4)}</div></div></section>
+    </div>
+  </div>`;
+}
+setInterval(() => { const el = document.getElementById('k-time'); if (el) el.textContent = clock(); if (S.view === 'kitchen') { const k = document.querySelector('.kitchen'); if (k) k.classList.toggle('night', isNight()); } }, 20000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.view === 'kitchen' && loadLocal('fp.kwake', false)) keepAwake(true); });
+
 function renderToday() {
   const t = todayStr(), tm = addDays(t, 1);
   const thisWk = mondayOf(t);
@@ -758,7 +865,7 @@ function renderToday() {
   const openG = S.groceries.filter(g => !g.done).length;
   const hasPattern = Object.keys(S.patterns || {}).length > 0 || Object.keys(S.rules || {}).length > 0;
   return `
-  <div class="dayhead"><h2>${esc(longDate(t))}</h2><span class="muted">Here's what's happening today.</span>${S.sample ? '<button class="btn primary qabtn" data-act="quickadd">✦ Quick add</button>' : ''}</div>
+  <div class="dayhead"><h2>${esc(longDate(t))}</h2><span class="muted">Here's what's happening today.</span><span class="dh-actions">${S.sample ? '<button class="btn primary" data-act="quickadd">✦ Quick add</button>' : ''}<a class="btn" href="#kitchen">Kitchen display</a></span></div>
   ${gBlock()}
   ${noSchoolBanner(t, 14)}
   <div class="today-grid">
@@ -1041,6 +1148,10 @@ function renderFamily() {
     ${S.mcp ? `<form class="addrow" id="wxform"><input type="text" id="wx-q" placeholder="Town or ZIP code" aria-label="Town or ZIP code" required><button class="btn" type="submit">Find</button></form>
     ${S.wxSearch ? (S.wxSearch.status === 'loading' ? '<p class="empty">Searching…</p>' : S.wxSearch.status === 'error' ? '<p class="gnote">Couldn\'t search right now. Check that AccuWeather is connected in claude.ai Settings → Connectors.</p>' : S.wxSearch.results.length ? `<div class="opts" style="margin-top:8px">${S.wxSearch.results.map(r => `<button class="opt" data-act="wxpick" data-key="${esc(r.locationKey)}" data-name="${esc(r.name)}">${esc(r.name)}</button>`).join('')}</div>` : `<p class="empty">No places found for “${esc(S.wxSearch.q)}”.</p>`) : ''}` : '<p class="gnote">Weather isn\'t available in this view.</p>'}
   </section>
+  <section class="panel" aria-labelledby="h-kd">
+    <div class="panel-head"><h2 id="h-kd">Kitchen display</h2><a class="btn" href="#kitchen">Open it</a></div>
+    <p class="small muted" style="margin:0">A big-text view for a tablet or old phone on the counter: today's care, events, weather, dinner and tomorrow. It updates by itself and dims at night. On that device, open the planner, tap Kitchen display, then Keep screen on.</p>
+  </section>
   <section class="panel" aria-labelledby="h-bk">
     <div class="panel-head"><h2 id="h-bk">Backups</h2></div>
     <p class="small muted" style="margin:0 0 10px">Your planner is saved on claude.ai. A backup is an extra copy of everything (kids, schedules, events, meals, groceries and tasks) that you keep yourself.</p>
@@ -1066,7 +1177,8 @@ function render() {
   if (S.dbMissing) top = `<div class="banner warn">Sign in to claude.ai to see and edit the family's plan. Nothing you change here is saved.</div>`;
   else if (!S.canWrite) top = `<div class="banner">You can view this planner but not change it. Ask the owner for edit access.</div>`;
   const v = S.view;
-  const body = v === 'week' ? renderWeek() : v === 'tasks' ? renderTasks() : v === 'groceries' ? renderGroceries() : v === 'family' ? renderFamily() : renderToday();
+  document.body.classList.toggle('kiosk', v === 'kitchen');
+  const body = v === 'kitchen' ? renderKitchen() : v === 'week' ? renderWeek() : v === 'tasks' ? renderTasks() : v === 'groceries' ? renderGroceries() : v === 'family' ? renderFamily() : renderToday();
   main.innerHTML = top + body;
   for (const [id, val] of Object.entries(keep)) { const el = document.getElementById(id); if (el && el.tagName !== 'SELECT' && document.activeElement !== el && el.dataset.act !== 'rename' && el.dataset.act !== 'srename') { if (!el.value) el.value = val; } }
   if (focusId) { const el = document.getElementById(focusId); if (el) { el.value = keep[focusId] ?? el.value; el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch {} } }
@@ -1178,6 +1290,9 @@ async function setDayType(ds, school) {
 function saveMeal(ds, slot, meal) {
   const cur = S.meals[ds] ? JSON.parse(JSON.stringify(S.meals[ds])) : { date: ds, slots: {} };
   cur.date = ds; cur.slots = cur.slots || {};
+  const before = cur.slots[slot] && cur.slots[slot].recipeId;
+  const r = meal && meal.recipeId && meal.recipeId !== before ? recipe(meal.recipeId) : null;
+  if (r && S.db) S.db.doc('recipes/' + r.id).update({ timesPlanned: (r.timesPlanned || 0) + 1, lastPlanned: !r.lastPlanned || ds > r.lastPlanned ? ds : r.lastPlanned }).catch(() => {});
   if (meal) cur.slots[slot] = meal; else delete cur.slots[slot];
   S.meals[ds] = cur; schedule();
   return write(() => S.db.doc('meals/' + ds).set(cur));
@@ -1218,15 +1333,35 @@ function slugTitle(u) {
   try { const segs = new URL(u).pathname.split('/').filter(Boolean).filter(s => !/^(p|reel|reels|recipe|recipes|\d+)$/i.test(s) && /[a-z]/i.test(s) && s.length > 3);
     const s = segs.pop(); return s && /-/.test(s) ? s.replace(/[-_]+/g, ' ').replace(/\.\w+$/, '').replace(/^\w/, c => c.toUpperCase()) : ''; } catch { return ''; }
 }
+const TAGS = ['Quick', 'Kid-friendly', 'Vegetarian', 'Slow cooker', 'Make-ahead', 'Freezer-friendly', 'One-pan', 'Soup', 'Pasta', 'Baking', 'Holiday'];
+const isFav = r => r.rating === 'fav';
+const madeLine = r => r.timesPlanned ? `Planned ${r.timesPlanned} time${r.timesPlanned === 1 ? '' : 's'}${r.lastPlanned ? `, last ${shortDate(r.lastPlanned)}` : ''}` : 'Not made yet';
+function boxList() {
+  const f = S.boxFilter || 'all', q = normItem(S.boxQuery || ''), tag = S.boxTag || '';
+  return [...S.recipes]
+    .filter(r => f === 'all' ? r.rating !== 'nope' : f === 'fav' ? isFav(r) : f === 'try' ? !r.timesPlanned && !isFav(r) && r.rating !== 'nope' : r.rating === 'nope')
+    .filter(r => !tag || (r.tags || []).includes(tag))
+    .filter(r => !q || normItem([r.title, ...(r.tags || []), ...(r.ingredients || []).map(x => x.item)].join(' ')).includes(q))
+    .sort((a, b) => (isFav(b) - isFav(a)) || (b.createdAt || 0) - (a.createdAt || 0));
+}
 function renderIdeas() {
-  const list = [...S.recipes].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const all = S.recipes, list = boxList();
+  const counts = { all: all.filter(r => r.rating !== 'nope').length, fav: all.filter(isFav).length, try: all.filter(r => !r.timesPlanned && !isFav(r) && r.rating !== 'nope').length, nope: all.filter(r => r.rating === 'nope').length };
+  const usedTags = TAGS.filter(t => all.some(r => (r.tags || []).includes(t)));
   return `<section class="panel" aria-labelledby="h-ideas">
-    <div class="panel-head"><h2 id="h-ideas">Meal ideas</h2><button class="btn primary" data-act="ridea-new">+ Add idea</button></div>
+    <div class="panel-head"><h2 id="h-ideas">Recipe box</h2><button class="btn primary" data-act="ridea-new">+ Add recipe</button></div>
+    ${all.length ? `<div class="boxbar">
+      <div class="seg-ctl" role="group" aria-label="Show">${[['all', 'All'], ['fav', 'Favorites'], ['try', 'To try'], ...(counts.nope ? [['nope', 'Not again']] : [])].map(([k, l]) => `<button type="button" data-act="boxf" data-f="${k}" aria-pressed="${(S.boxFilter || 'all') === k}">${l} <span class="tnum muted">${counts[k]}</span></button>`).join('')}</div>
+      ${all.length > 5 ? `<input type="search" id="box-q" placeholder="Search recipes or ingredients" value="${esc(S.boxQuery || '')}" aria-label="Search recipes">` : ''}
+      ${usedTags.length ? `<div class="qchips">${usedTags.map(t => `<button type="button" class="qchip${S.boxTag === t ? ' on' : ''}" data-act="boxtag" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>` : ''}
+    </div>` : ''}
     ${list.length ? `<ul class="ideas">${list.map(r => `<li><button type="button" class="idea" data-act="ridea" data-id="${esc(r.id)}">
-        <span class="it">${esc(r.title || 'Untitled recipe')}</span>
-        <span class="small muted">${[r.source, (r.ingredients || []).length ? `${r.ingredients.length} ingredients` : '', r.time].filter(Boolean).map(esc).join(' · ')}${!(r.ingredients || []).length ? ' <span class="needs">Needs details</span>' : ''}</span>
+        <span class="it">${isFav(r) ? '<span class="star" aria-label="Favorite">★</span> ' : ''}${esc(r.title || 'Untitled recipe')}</span>
+        <span class="small muted">${[r.source, r.time, (r.tags || []).slice(0, 3).join(', ')].filter(Boolean).map(esc).join(' · ')}${!(r.ingredients || []).length ? ' <span class="needs">Needs details</span>' : ''}</span>
+        <span class="small muted">${esc(madeLine(r))}</span>
       </button></li>`).join('')}</ul>`
-      : '<p class="empty">Save recipes you want to try, from Instagram, a website or anywhere. Paste the link plus the caption or a screenshot, and Claude pulls out the ingredients and steps.</p>'}
+      : all.length ? '<p class="empty">Nothing here yet.</p>'
+      : '<p class="empty">Save recipes you want to try or love to make: from Instagram, a website or anywhere. Paste the link plus the caption or a screenshot, and Claude pulls out the ingredients and steps. Or save any meal from your meal plan.</p>'}
   </section>`;
 }
 function ideaFormHtml(r, opts) {
@@ -1239,6 +1374,7 @@ function ideaFormHtml(r, opts) {
     <div class="fieldrow"><label class="field"><span>Time</span><input type="text" id="ra-time" value="${esc(r.time || '')}" placeholder="30 min"></label><label class="field"><span>Serves</span><input type="text" id="ra-serves" value="${esc(r.servings || '')}" placeholder="4"></label></div>
     <label class="field"><span>Ingredients, one per line</span><textarea id="ra-ing" rows="7">${esc(ingLines(r.ingredients))}</textarea></label>
     <label class="field"><span>Steps, one per line</span><textarea id="ra-steps" rows="7">${esc((r.steps || []).join('\n'))}</textarea></label>
+    <div class="field"><span>Tags</span><div class="daypick">${TAGS.map(t => `<label><input type="checkbox" name="ra-tag" value="${esc(t)}" ${(r.tags || []).includes(t) ? 'checked' : ''}><span>${esc(t)}</span></label>`).join('')}</div></div>
     <label class="field"><span>Notes</span><input type="text" id="ra-notes" value="${esc(r.notes || '')}" placeholder="Kids liked it, double the sauce…"></label>` : ''}`;
 }
 // Add a new idea: link + caption/screenshots -> Claude -> review -> save.
@@ -1301,14 +1437,15 @@ ${text.slice(0, 30000)}
 </post>
 
 Reply with only JSON in this shape:
-{"title":"Short recipe name","servings":"4","time":"30 min","ingredients":[{"item":"chicken thighs","qty":"1.5 lb"}],"steps":["Heat the oven to 425°F.","…"],"notes":"","complete":true}
-Set "complete" to false when the ingredients or steps are missing or cut off.`;
+{"title":"Short recipe name","servings":"4","time":"30 min","tags":["Quick"],"ingredients":[{"item":"chicken thighs","qty":"1.5 lb"}],"steps":["Heat the oven to 425°F.","…"],"notes":"","complete":true}
+Set "complete" to false when the ingredients or steps are missing or cut off. Pick "tags" only from: ${TAGS.join(', ')}.`;
   try {
     const r = await S.sample.json(prompt, imgs.length ? { images: imgs } : {});
     const arr = v => Array.isArray(v) ? v : [];
     S.ra.draft = { url, source: srcName(url), title: String((r && r.title) || slugTitle(url) || ''), servings: String((r && r.servings) || ''), time: String((r && r.time) || ''),
       ingredients: arr(r && r.ingredients).filter(x => x && x.item).map(x => ({ item: String(x.item), qty: String(x.qty || '') })),
-      steps: arr(r && r.steps).map(String).filter(Boolean), notes: String((r && r.notes) || ''), complete: !(r && r.complete === false) };
+      steps: arr(r && r.steps).map(String).filter(Boolean), notes: String((r && r.notes) || ''), complete: !(r && r.complete === false),
+      tags: arr(r && r.tags).map(String).filter(t => TAGS.includes(t)) };
     S.ra.status = 'idle';
   } catch (e) {
     const c = e && e.code;
@@ -1326,7 +1463,8 @@ function readIdeaForm(sh, base) {
   const url = safeUrl(q('#ra-url').value);
   return { title, url, source: url ? srcName(url) : (base.source || ''), time: q('#ra-time').value.trim(), servings: q('#ra-serves').value.trim(),
     ingredients: parseIngLines(q('#ra-ing').value), steps: q('#ra-steps').value.split('\n').map(s => s.trim()).filter(Boolean),
-    notes: q('#ra-notes').value.trim(), complete: true, createdAt: base.createdAt || Date.now() };
+    notes: q('#ra-notes').value.trim(), complete: true, createdAt: base.createdAt || Date.now(),
+    tags: [...sh.querySelectorAll('input[name="ra-tag"]:checked')].map(i => i.value), rating: base.rating || '', timesPlanned: base.timesPlanned || 0, lastPlanned: base.lastPlanned || '' };
 }
 const saveIdea = (id, r, msg) => write(() => S.db.doc('recipes/' + id).set(r), msg);
 function ideaEditSheet(r) {
@@ -1335,22 +1473,28 @@ function ideaEditSheet(r) {
     sh.querySelector('#reform').addEventListener('submit', async e => { e.preventDefault(); const n = readIdeaForm(sh, r); if (!n) return; closeSheet(); await saveIdea(r.id, n, 'Saved'); });
   });
 }
-// View an idea: ingredients and steps, link, plan it, add to the grocery list.
+// View a recipe: ingredients and steps, rating, cook view, plan it, add to the grocery list.
 function ideaSheet(id) {
   const r = recipe(id); if (!r) return;
   const slots = MEAL_SLOTS;
   const link = safeUrl(r.url);
   let firstFree = todayStr(); for (let i = 0; i < 14; i++) { const d = addDays(todayStr(), i); if (!mealAt(d, 'dinner')) { firstFree = d; break; } }
   openSheet(`
-    <h3>${esc(r.title)}</h3>
+    <h3>${isFav(r) ? '<span class="star">★</span> ' : ''}${esc(r.title)}</h3>
     <p class="small muted" style="margin:0">${[r.time, r.servings && `Serves ${r.servings}`].filter(Boolean).map(esc).join(' · ')}${link ? `${r.time || r.servings ? ' · ' : ''}<a href="${esc(link)}" target="_blank" rel="noopener">Open on ${esc(r.source || 'the web')}</a>` : ''}</p>
+    <p class="small muted" style="margin:0">${esc(madeLine(r))}${(r.tags || []).length ? ' · ' + esc(r.tags.join(', ')) : ''}</p>
+    <div class="rate" role="group" aria-label="How did the family like it?">
+      <button type="button" class="qchip${isFav(r) ? ' on' : ''}" data-x="fav" aria-pressed="${isFav(r)}">★ Family favorite</button>
+      <button type="button" class="qchip${r.rating === 'nope' ? ' on' : ''}" data-x="nope" aria-pressed="${r.rating === 'nope'}">Not again</button>
+      ${(r.steps || []).length ? '<button type="button" class="btn primary" data-x="cook">Cook it</button>' : ''}
+    </div>
     ${(r.ingredients || []).length ? `<div><h4 class="eyebrow">Ingredients</h4><ul class="recipe-ing">${r.ingredients.map(x => `<li>${x.qty ? `<span class="tnum">${esc(x.qty)}</span> ` : ''}${esc(x.item)}</li>`).join('')}</ul></div>` : '<p class="gnote" style="margin:0">No ingredients yet. Tap Edit to add them.</p>'}
     ${(r.steps || []).length ? `<div><h4 class="eyebrow">Steps</h4><ol class="recipe-steps">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>` : ''}
     ${r.notes ? `<p style="margin:0">${esc(r.notes)}</p>` : ''}
     <form id="planit" class="planit">
       <h4 class="eyebrow">Plan it</h4>
       <div class="fieldrow"><label class="field"><span>Day</span><input type="date" id="pi-date" value="${firstFree}" required></label>
-        ${slots.length > 1 ? `<label class="field"><span>Meal</span><select id="pi-slot">${slots.map(s => `<option value="${s.key}" ${s.key === 'dinner' ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select></label>` : `<input type="hidden" id="pi-slot" value="${slots[0] ? slots[0].key : 'dinner'}">`}</div>
+        <label class="field"><span>Meal</span><select id="pi-slot">${slots.map(s => `<option value="${s.key}" ${s.key === 'dinner' ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select></label></div>
       ${(r.ingredients || []).length ? '<label class="toggles small"><span><input type="checkbox" id="pi-list" checked> Add the ingredients to the grocery list</span></label>' : ''}
       <button type="submit" class="btn primary">Add to meal plan</button>
     </form>
@@ -1363,8 +1507,13 @@ function ideaSheet(id) {
     sh.addEventListener('click', async e => {
       const b = e.target.closest('[data-x]'); if (!b) return;
       if (b.dataset.x === 'edit') ideaEditSheet(r);
+      if (b.dataset.x === 'cook') cookSheet(r.id);
+      if (b.dataset.x === 'fav' || b.dataset.x === 'nope') {
+        const rating = r.rating === b.dataset.x ? '' : b.dataset.x;
+        if (await write(() => S.db.doc('recipes/' + r.id).update({ rating }), rating === 'fav' ? 'Marked as a family favorite' : rating === 'nope' ? "Marked as not again; it won't be suggested" : 'Rating cleared')) { r.rating = rating; ideaSheet(r.id); }
+      }
       if (b.dataset.x === 'list') { closeSheet(); const n = await addIngredients(r.ingredients.map(x => ({ ...x, meal: r.title }))); toast(n ? `Added ${n} item${n === 1 ? '' : 's'} to the grocery list` : 'Everything is already on the list'); }
-      if (b.dataset.x === 'del') { if (b.dataset.sure) { closeSheet(); await write(() => S.db.doc('recipes/' + r.id).delete(), 'Meal idea deleted'); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to delete'; } }
+      if (b.dataset.x === 'del') { if (b.dataset.sure) { closeSheet(); await write(() => S.db.doc('recipes/' + r.id).delete(), 'Recipe deleted'); } else { b.dataset.sure = '1'; b.textContent = 'Tap again to delete'; } }
     });
     sh.querySelector('#planit').addEventListener('submit', async e => {
       e.preventDefault();
@@ -1377,6 +1526,33 @@ function ideaSheet(id) {
     });
   });
 }
+// Cooking view: big text, tick ingredients, tap a step to mark your place; keeps the screen on where allowed.
+let cookLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && !cookLock && navigator.wakeLock) { cookLock = await navigator.wakeLock.request('screen'); cookLock.addEventListener('release', () => { cookLock = null; }); }
+    if (!on && cookLock) { await cookLock.release(); cookLock = null; }
+  } catch { cookLock = null; }
+}
+function cookSheet(id) {
+  const r = recipe(id); if (!r) return;
+  keepAwake(true);
+  openSheet(`
+    <div class="cook">
+      <div class="cook-h"><h3>${esc(r.title)}</h3><button type="button" class="btn" data-x="done">Done</button></div>
+      ${(r.ingredients || []).length ? `<h4 class="eyebrow">Ingredients</h4><ul class="cook-ing">${r.ingredients.map((x, i) => `<li><label><input type="checkbox" id="ck-i-${i}"> <span>${x.qty ? `<b class="tnum">${esc(x.qty)}</b> ` : ''}${esc(x.item)}</span></label></li>`).join('')}</ul>` : ''}
+      <h4 class="eyebrow">Steps</h4>
+      <ol class="cook-steps">${(r.steps || []).map((s, i) => `<li><button type="button" class="cstep${i === 0 ? ' now' : ''}" data-step="${i}"><span class="cn tnum">${i + 1}</span><span>${esc(s)}</span></button></li>`).join('')}</ol>
+      ${r.notes ? `<p class="cook-note">${esc(r.notes)}</p>` : ''}
+    </div>`, sh => {
+    sh.classList.add('cooking');
+    sh.addEventListener('click', e => {
+      if (e.target.closest('[data-x="done"]')) { keepAwake(false); closeSheet(); return; }
+      const st = e.target.closest('[data-step]'); if (!st) return;
+      sh.querySelectorAll('.cstep').forEach(x => { const n = Number(x.dataset.step), cur = Number(st.dataset.step); x.classList.toggle('now', n === cur); x.classList.toggle('past', n < cur); });
+    });
+  });
+}
 
 function mealSheet(ds, slot) {
   const m = mealAt(ds, slot) || { name: '', ingredients: [], notes: '' };
@@ -1385,7 +1561,7 @@ function mealSheet(ds, slot) {
     <h3>${esc(label)} · ${esc(longDate(ds))}</h3>
     <form id="mealform" class="opts" style="gap:12px">
       ${S.recipes.length ? `<label class="field"><span>From your meal ideas</span><select id="mf-idea"><option value="">Choose one…</option>${[...S.recipes].sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(r => `<option value="${esc(r.id)}" ${m.recipeId === r.id ? 'selected' : ''}>${esc(r.title)}</option>`).join('')}</select></label>` : ''}
-      ${m.recipeId && recipe(m.recipeId) ? '<button type="button" class="textlink" data-x="recipe">View the recipe and steps</button>' : ''}
+      ${m.recipeId && recipe(m.recipeId) ? '<button type="button" class="textlink" data-x="recipe">View the recipe and steps</button>' : mealAt(ds, slot) ? '<button type="button" class="textlink" data-x="tobox">Save this meal to the recipe box</button>' : ''}
       <label class="field"><span>Meal</span><span class="withmic"><input type="text" id="mf-name" value="${esc(m.name)}" placeholder="Sheet-pan chicken fajitas" required>${micBtn('mf-name')}</span></label>
       <label class="field"><span>Ingredients to buy, one per line</span><span class="withmic"><textarea id="mf-ing" rows="6" placeholder="1.5 lb chicken thighs&#10;3 bell peppers&#10;tortillas">${esc((m.ingredients || []).map(x => (x.qty ? x.qty + ' ' : '') + x.item).join('\n'))}</textarea>${micBtn('mf-ing')}</span></label>
       <label class="field"><span>Notes</span><span class="withmic"><input type="text" id="mf-notes" value="${esc(m.notes || '')}" placeholder="Recipe link, who's cooking…">${micBtn('mf-notes')}</span></label>
@@ -1399,6 +1575,12 @@ function mealSheet(ds, slot) {
     sh.addEventListener('click', async e => {
       const x = e.target.closest('[data-x]'); if (!x) return;
       if (x.dataset.x === 'recipe') { ideaSheet(m.recipeId); return; }
+      if (x.dataset.x === 'tobox') {
+        const id = uid(), link = safeUrl((m.notes || '').trim());
+        const ok = await saveIdea(id, { title: m.name, url: link, source: link ? srcName(link) : '', ingredients: (m.ingredients || []).map(i => ({ item: i.item, qty: i.qty || '' })), steps: [], notes: link ? '' : (m.notes || ''), tags: [], rating: '', timesPlanned: 1, lastPlanned: ds, complete: true, createdAt: Date.now() }, 'Saved to the recipe box');
+        if (ok) { closeSheet(); const cur = JSON.parse(JSON.stringify(m)); cur.recipeId = id; await saveMeal(ds, slot, cur); }
+        return;
+      }
       if (x.dataset.x === 'clear') { closeSheet(); await saveMeal(ds, slot, null) && toast('Meal removed'); }
       if (x.dataset.x === 'list') { closeSheet(); const n = await addIngredients((m.ingredients || []).map(i => ({ ...i, meal: m.name }))); toast(n ? `Added ${n} item${n === 1 ? '' : 's'} to the grocery list` : 'Everything is already on the list'); }
     });
@@ -1449,8 +1631,8 @@ ${want.map(w => `${w.date} ${w.weekday} ${w.slot}`).join('\n')}
 
 Guidance: keep evenings with plans quick (30 minutes or less, or slow cooker or leftovers). Vary the meals across the week. Reuse ingredients across meals where it makes sense. "lunchbox" means a packed school lunch for a kid.
 
-${S.recipes.length ? `Saved meal ideas they want to try. Use some of these when they fit the request, with the name copied exactly:
-${S.recipes.slice(0, 40).map(r => `- ${r.title}${r.time ? ` (${r.time})` : ''}`).join('\n')}
+${S.recipes.filter(r => r.rating !== 'nope').length ? `Recipes from their recipe box. Use some of these when they fit the request, favorites most, and avoid ones planned in the last two weeks; copy the name exactly:
+${[...S.recipes].filter(r => r.rating !== 'nope').sort((a, b) => isFav(b) - isFav(a)).slice(0, 40).map(r => `- ${r.title}${isFav(r) ? ' (family favorite)' : ''}${r.time ? ` (${r.time})` : ''}${r.lastPlanned ? ` (last planned ${r.lastPlanned})` : ''}`).join('\n')}
 
 ` : ''}Stores they shop at: ${st.stores.join(', ') || 'a grocery store'}. Put each ingredient's best store, or "" if any store.
 
@@ -2016,6 +2198,10 @@ document.addEventListener('click', async e => {
     });
     return;
   }
+  if (a === 'kwake') { saveLocal('fp.kwake', true); await keepAwake(true); toast(cookLock ? 'The screen will stay on while this is open' : "This device won't keep the screen on. Set Auto-Lock to Never in its settings instead."); schedule(); return; }
+  if (a === 'kcook') { cookSheet(t.dataset.id); return; }
+  if (a === 'boxf') { S.boxFilter = t.dataset.f; schedule(); return; }
+  if (a === 'boxtag') { S.boxTag = S.boxTag === t.dataset.t ? '' : t.dataset.t; schedule(); return; }
   if (a === 'ridea-new') { if (guard()) ideaAddSheet(); return; }
   if (a === 'ridea') { ideaSheet(t.dataset.id); return; }
   if (a === 'quickadd') { if (guard()) qaSheet(); return; }
@@ -2106,10 +2292,14 @@ document.addEventListener('submit', async e => {
   }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+let boxT = 0;
+document.addEventListener('input', e => { if (e.target.id === 'box-q') { clearTimeout(boxT); const v = e.target.value; boxT = setTimeout(() => { S.boxQuery = v; schedule(); }, 200); } });
 
 function route() {
   const h = (location.hash || '').slice(1);
-  S.view = ['today','week','groceries','tasks','family'].includes(h) ? h : 'today';
+  S.view = ['today','week','groceries','tasks','family','kitchen'].includes(h) ? h : 'today';
+  if (S.view !== 'kitchen' && !document.querySelector('.cooking')) keepAwake(false);
+  if (S.view === 'kitchen' && loadLocal('fp.kwake', false)) keepAwake(true);
   if (S.view === 'family' && S.mcp && S.gState === 'on' && !S.gCals) loadCalendars();
   schedule();
 }
