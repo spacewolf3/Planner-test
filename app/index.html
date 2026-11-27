@@ -37,7 +37,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 /* masthead */
-.house{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding-block:18px 12px}
+.house{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:12px;padding-block:18px 12px}
 .mono{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--wood);color:var(--wood);display:grid;place-items:center;
   font-family:var(--f-display);font-size:1.35rem;font-style:italic;letter-spacing:.02em;background:var(--wood-soft)}
 .house h1{font-size:1.75rem}
@@ -191,6 +191,24 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 .daylog .nt,.daylog .when{grid-column:1/-1;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
 .daylog .when{grid-column:auto;display:block}
 .fineprint{color:var(--muted);font-size:.82rem;margin:0}
+.mic{flex:none;width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--accent);display:grid;place-items:center;cursor:pointer;padding:0}
+.mic svg{width:22px;height:22px}
+.mic.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.fieldrow{display:flex;gap:8px;align-items:flex-start}
+.fieldrow>input,.fieldrow>textarea{flex:1;min-width:0}
+.thumb{width:46px;height:46px;border-radius:12px;object-fit:cover;flex:none;background:var(--ok-soft);display:grid;place-items:center;color:var(--ok)}
+.thumb svg{width:22px;height:22px}
+.row.plant .main{flex-direction:row;align-items:center;gap:12px}
+.row .txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tick.drop:hover,.tick.drop:focus-visible{border-color:var(--accent);color:var(--accent)}
+.photo{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:16px;background:var(--surface-2)}
+.prep{background:var(--surface);border-radius:12px;padding:2px 12px}
+.habits .check label{font-weight:700}
+.habits .check .m{font-weight:400}
+.seg.two{grid-template-columns:1fr 1fr}
+.season{display:grid;grid-template-columns:5.5em 1fr;gap:10px;align-items:center}
+select.agosel{min-height:36px;padding:6px 10px;font-size:.88rem;margin-top:8px}
+.jump{margin-bottom:-6px}
 .listbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .areah{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .areah .n{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;margin-left:6px;font-weight:400}
@@ -205,6 +223,7 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
   <header class="house">
     <div class="mono" id="mono" aria-hidden="true">ZW</div>
     <div><p class="greet" id="greet"></p><h1 id="house">The Zhang-Wolfe House</h1></div>
+    <button class="gear" data-act="tab" data-v="guide" aria-label="Cleaning guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg></button>
     <button class="gear" data-act="settings" aria-label="Household settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <div class="rug" aria-hidden="true"></div>
@@ -216,13 +235,15 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 <nav class="tabs" aria-label="Sections">
   <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>To do</button>
   <button data-tab="all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Cleaning</button>
+  <button data-tab="plants"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10M12 20v-7"/><path d="M12 13c0-4 3-7 8-7 0 4-3 7-8 7z"/><path d="M12 11C12 8 10 5 4 5c0 4 3 6 8 6z"/></svg>Plants</button>
   <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>Home</button>
   <button data-tab="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Week</button>
-  <button data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-2-8-5-8-11a8 8 0 0 1 8-6 8 8 0 0 1 8 6c0 6-4 9-8 11z"/><path d="M12 21V9"/><path d="M12 13l-3-2M12 16l3-2"/></svg>Guide</button>
+
 </nav>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div>
 <div class="toast" id="toast" hidden></div>
+<input type="file" id="filepick" accept="image/*" hidden aria-hidden="true" tabindex="-1">
 
 <script>
 /* ---------------- Task library ----------------
@@ -324,18 +345,21 @@ C("l-behind","Laundry","Dust behind & on top of machines",90,15,{s:["Wipe the to
 C("v-vac","Whole house","Clean the vacuum: bin, filter & brush roll",30,15,{sup:"Scissors or seam ripper, soft brush",s:["Unplug or remove the battery.","Empty the bin and tap out the filter over the trash. Wash the filter only if the manual says it's washable, then dry 24 hours.","Cut cat hair and string off the brush roll with scissors or a seam ripper.","Wipe the bin and check the hose for clogs."],eco:"A clean filter and brush roll keep suction strong, so you vacuum less."});
 
 /* Instruments */
-C("i-dust","Instruments","Dust instruments & wipe keys",7,10,{sup:"Soft microfiber cloths, mild dish soap",s:["Dust cases and finishes with a dry microfiber cloth, following the grain.","Piano keys: wipe with a cloth barely damp with water and a drop of dish soap, front to back, then dry right away. Do sharps with a separate cloth.","Wipe strings and fingerboards on stringed instruments after playing.","Close the piano lid when not in use to keep dust off the keys."],eco:"A dry or barely damp microfiber cloth is all most finishes need.",w:"Never spray anything on an instrument. Avoid household furniture polish, silicone sprays and alcohol, which can damage lacquer, ivory and old finishes. Use a polish made for that instrument if you use one at all."});
+C("i-dust","Instruments","Dust the piano & wipe the keys",7,10,{sup:"Soft microfiber cloths, mild dish soap",s:["Dust the case with a dry microfiber cloth, following the grain.","Wipe the keys with a cloth barely damp with water and a drop of dish soap, front to back, then dry right away. Use a separate cloth for the black keys.","Close the lid over the keys when no one is playing, to keep dust and little fingers off."],eco:"A dry or barely damp microfiber cloth is all a piano finish needs.",w:"Never spray anything on the piano. Skip furniture polish, silicone sprays and alcohol, which can damage the finish and keytops. Leave cleaning inside the piano to the tuner."});
+C("i-harp","Instruments","Dust the harp & check the strings",14,10,{sup:"Soft dry microfiber cloth, soft brush",s:["Dust the column, neck and base with a dry microfiber cloth. Use a soft brush around the levers or pedals.","Dust the soundboard gently with a dry cloth only.","Wipe the strings top to bottom with a dry cloth to remove skin oils.","Look for frayed or unraveling strings, especially the wound bass strings, and note which need replacing.","Check the soundboard for new cracks or bulging."],eco:"Dry cloths only. A harp needs no cleaning products.",w:"Never use polish, water or sprays on the soundboard. Keep the harp out of direct sun and away from heat vents, and keep little hands and cat paws off the strings."});
 C("i-humidity","Instruments","Check instrument humidity",7,2,{sup:"Hygrometer",s:["Read the hygrometer near the instruments.","Aim for 40–50% relative humidity.","In winter, run a humidifier or refill case humidifiers. In humid summers, run the AC or a dehumidifier.","Keep instruments away from heat vents, radiators, exterior doors and direct sun."],eco:"Steady humidity prevents cracked soundboards, sticking keys and pitch drift.",w:"Big swings matter more than the exact number. Avoid moving instruments between rooms with very different conditions."});
 U("i-tune","Instruments","Piano tuning",180,0,{s:["Book a piano technician. Twice a year is typical, often spring and fall after the heating or cooling season changes.","Ask them to check the action and humidity while they're there."]});
 U("i-humidifier","Instruments","Clean or refill instrument humidifiers",30,10,{s:["Refill case humidifiers or the piano humidity system (e.g. Dampp-Chaser) as the light or manual says.","Replace pads on schedule. Rinse reservoirs to stop mold."]});
+U("i-harp-reg","Instruments","Harp regulation",730,0,{s:["Book a harp technician every 1–2 years to adjust the levers or pedals so each string plays in tune when engaged.","Ask them to check the neck, soundboard and base while they are there."]});
+U("i-harp-str","Instruments","Order spare harp strings",365,10,{s:["Note which strings broke or were replaced this year.","Order spares for the ones that break most, usually the upper octaves and the wound bass strings, from your harp maker's string chart."]});
 
 /* Plants */
 C("pl-water","Plants","Watering check",4,20,{sup:"Watering can, saucers",s:["Push a finger 1–2 inches into the soil. Only water if it's dry at that depth. Succulents and snake plants can go much drier.","Water slowly until it runs out the drainage holes.","Empty saucers after 30 minutes so roots don't sit in water.","Use room-temperature water. Let tap water sit overnight for sensitive plants like calatheas."],eco:"Overwatering kills more houseplants than underwatering. Checking first saves plants and water.",w:"Wipe up drips on the wood floors right away, and keep pots off wool and silk rugs unless they're on a stand with a deep saucer."});
 C("pl-dust","Plants","Dust plant leaves",30,20,{s:["Support each leaf with one hand and wipe both sides with a damp soft cloth.","Rinse small plants in the shower with lukewarm water.","Let leaves dry before putting plants back in strong sun."],eco:"Clean leaves take in more light, and wiping lets you spot pests early.",w:"Skip leaf-shine products. They clog leaf pores and attract dust."});
 C("pl-pests","Plants","Check plants for pests",14,10,{sup:"Yellow sticky traps, insecticidal soap",s:["Check undersides of leaves and stems for webbing (spider mites), white fluff (mealybugs) or bumps (scale).","Look for tiny flies over the soil (fungus gnats).","Isolate any plant with pests.","Wipe pests off with a damp cloth, then spray with insecticidal soap. Let soil dry out more to stop gnats."],eco:"Sticky traps, wiping and insecticidal soap handle most problems.",alt:"Systemic insecticides work but aren't worth the risk with cats and little kids who may chew leaves or dig in soil.",w:"Keep cats away from treated plants until dry. Neem oil and essential-oil sprays can make cats sick."});
 C("pl-rotate","Plants","Rotate plants toward the light",14,5,{s:["Give each pot a quarter turn so all sides get light.","Move plants back from cold windows in winter."]});
-C("pl-feed","Plants","Fertilize plants (spring–summer)",30,15,{s:["Feed only while plants are actively growing, about March to September. Skip this in winter: mark it done or set it aside.","Dilute liquid fertilizer to half strength.","Water first, then fertilize, so roots don't burn."],eco:"Worm castings or compost tea are gentle options."});
-C("pl-repot","Plants","Check which plants need repotting",365,60,{s:["Look for roots circling the bottom or coming out the drainage holes.","Repot in spring into a pot only 1–2 inches wider.","Use fresh potting mix suited to the plant."],w:"Repot outdoors or over a sheet. Potting soil is hard to get out of rugs."});
+C("pl-feed","Plants","Fertilize plants (spring–summer)",30,15,{mo:[3,4,5,6,7,8,9],s:["Feed only while plants are actively growing. This task pauses on its own from October to February.","Dilute liquid fertilizer to half strength.","Water first, then fertilize, so roots don't burn."],eco:"Worm castings or compost tea are gentle options."});
+C("pl-repot","Plants","Check which plants need repotting",365,60,{mo:[3,4,5,6],s:["Look for roots circling the bottom or coming out the drainage holes.","Repot in spring into a pot only 1–2 inches wider.","Use fresh potting mix suited to the plant."],w:"Repot outdoors or over a sheet. Potting soil is hard to get out of rugs."});
 
 /* Upkeep: home systems */
 U("m-hvac","Home systems","Replace HVAC filter",60,5,{s:["Turn the system off.","Note the arrow on the filter showing airflow direction.","Swap in the new filter. Write the date on its edge."],eco:"With cats, change every 60 days instead of 90.",w:"Use the size printed on the old filter. Add it to the house notes below."});
@@ -347,7 +371,7 @@ U("m-washer-hoses","Home systems","Check washer hoses",365,5,{s:["Look for bulge
 U("m-caulk","Home systems","Inspect caulk & grout seals",365,15,{s:["Check around tubs, showers, and sinks for gaps or mold inside caulk.","Re-caulk where needed."]});
 U("m-fans","Home systems","Switch ceiling fan direction",180,5,{s:["Summer: counterclockwise to push air down.","Winter: clockwise on low to pull air up."]});
 U("m-gutters","Outdoors","Clean gutters",180,60,{s:["Clear leaves in late fall and in spring.","Flush downspouts with a hose.","Hire it out for second stories."],w:"Use a stable ladder with someone holding it."});
-U("m-spigots","Outdoors","Winterize outdoor faucets",365,15,{s:["Disconnect hoses before the first freeze.","Shut off interior valves to outdoor spigots and drain them."]});
+U("m-spigots","Outdoors","Winterize outdoor faucets",365,15,{mo:[9,10,11,12],s:["Disconnect hoses before the first freeze.","Shut off interior valves to outdoor spigots and drain them."]});
 /* Upkeep: safety */
 U("m-smoke","Safety","Test smoke & CO alarms",30,10,{s:["Press and hold the test button on each alarm until it sounds."],w:"Alarms older than 10 years need replacing. Check the date on the back."});
 U("m-batteries","Safety","Replace alarm batteries",365,20,{s:["Replace batteries in every alarm that isn't a sealed 10-year model.","Test each one after."]});
@@ -391,19 +415,23 @@ var KINDS={
   hvac:{label:"Furnace / AC",tasks:["m-hvac","m-hvac-service","h-vents"]},
   waterheater:{label:"Water heater",tasks:["m-water-heater"]},
   vacuum:{label:"Vacuum",tasks:["v-vac"]},
-  piano:{label:"Piano",tasks:["i-dust","i-humidity","i-tune","i-humidifier"]},
+  piano:{label:"Piano",tasks:["i-dust","i-tune"]},
+  harp:{label:"Harp",tasks:["i-harp","i-harp-reg","i-harp-str"]},
   instrument:{label:"Other instrument",tasks:["i-dust","i-humidity"]},
   pool:{label:"Pool pump & filter",tasks:["p-pump","p-filter"]},
   pond:{label:"Pond pump & filter",tasks:["f-filter","f-pump","f-uv"]},
   other:{label:"Other",tasks:[]}
 };
-var SUGGEST=[["dishwasher","Dishwasher"],["washer","Top-load washer"],["dryer","Dryer"],["oven","Oven"],["espresso","Espresso machine"],["pool","Pool pump & filter"],["pond","Pond pump & filter"],["fridge","Refrigerator"],["hvac","Furnace / AC"],["waterheater","Water heater"],["vacuum","Vacuum"],["piano","Piano"]];
+var SUGGEST=[["dishwasher","Dishwasher"],["washer","Top-load washer"],["dryer","Dryer"],["oven","Oven"],["espresso","Espresso machine"],["pool","Pool pump & filter"],["pond","Pond pump & filter"],["fridge","Refrigerator"],["hvac","Furnace / AC"],["waterheater","Water heater"],["vacuum","Vacuum"],["piano","Piano"],["harp","Harp"]];
 var CLEAN_DEFAULT=["f-vacuum","f-mop","h-dust","b-toilet","b-sinks","b-shower","k-counters","k-sink","k-micro","f-mats"];
 
 /* ---------------- Store: db when the page runs in claude.ai, this device otherwise ---------------- */
 var LS="hk-log-v1";
-var COLS={state:"state",custom:"custom",spend:"spend",visits:"visits",apps:"appliances"};
-var S={state:{},custom:{},spend:{},visits:{},apps:{},prefs:{},mode:"local",readonly:false};
+var COLS={state:"state",custom:"custom",spend:"spend",visits:"visits",apps:"appliances",plants:"plants",facts:"facts"};
+var S={state:{},custom:{},spend:{},visits:{},apps:{},plants:{},facts:{},prefs:{},mode:"local",readonly:false};
+var CAP={assets:null,dict:null},dictTarget=null,dictState="idle";
+// Writes still on their way to the store; a live snapshot that arrives first must not undo them on screen.
+var pend={};
 function clone(v){return JSON.parse(JSON.stringify(v))}
 function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");Object.keys(COLS).forEach(function(k){S[k]=v[k]||{}});S.prefs=v.prefs||{}}catch(e){}}
 function lsWrite(){try{var o={prefs:S.prefs};Object.keys(COLS).forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
@@ -415,9 +443,18 @@ function writeErr(e){
   else toast("Couldn’t save that change. Check your connection and try again.");
 }
 function save(kind,id,quiet){
-  var v=S[kind][id];lsWrite();if(!quiet)render();
+  var v=S[kind][id]?clone(S[kind][id]):null;lsWrite();if(!quiet)render();
   if(S.mode!=="db")return;
-  chain(kind+":"+id,function(){var r=dbref.collection(COLS[kind]).doc(id);return v?r.set(clone(v)):r.delete()}).catch(writeErr);
+  (pend[kind]=pend[kind]||{})[id]=v;
+  chain(kind+":"+id,function(){var r=dbref.collection(COLS[kind]).doc(id);return v?r.set(v):r.delete()}).then(function(){if(pend[kind][id]===v)delete pend[kind][id]},writeErr);
+}
+// Many documents at once (start fresh, bulk plants): one write after another so the store's rate limit isn't hit.
+function bulkSave(kind,ids){
+  lsWrite();render();
+  if(S.mode!=="db"||!ids.length)return;
+  var vals=ids.map(function(id){return S[kind][id]?clone(S[kind][id]):null});
+  pend[kind]=pend[kind]||{};ids.forEach(function(id,i){pend[kind][id]=vals[i]});
+  chain("bulk",function(){return ids.reduce(function(p,id,i){return p.then(function(){var r=dbref.collection(COLS[kind]).doc(id);return (vals[i]?r.set(vals[i]):r.delete()).then(function(){if(pend[kind][id]===vals[i])delete pend[kind][id]})})},Promise.resolve())}).catch(writeErr);
 }
 function saveState(id){save("state",id)}
 function savePrefs(){
@@ -431,10 +468,18 @@ function connect(){
     if(!db){footer();return}
     dbref=db;S.mode="db";footer();
     Object.keys(COLS).forEach(function(k){
-      db.collection(COLS[k]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});S[k]=m;lsWrite();render()},function(){});
+      db.collection(COLS[k]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});var pk=pend[k]||{};Object.keys(pk).forEach(function(id){if(pk[id])m[id]=pk[id];else delete m[id]});S[k]=m;lsWrite();render()},function(){});
     });
     db.collection("meta").doc("prefs").onSnapshot(function(d){S.prefs=d.exists?Object.assign({},d.data()):{};lsWrite();render()},function(){});
   }).catch(function(){footer()});
+  window.claude.use("assets").then(function(a){CAP.assets=a;render()}).catch(function(){});
+  window.claude.use("dictation").then(function(d){
+    if(!d)return;CAP.dict=d;
+    d.onFinal(function(e){var x=document.getElementById(dictTarget),t=(e.text||"").trim();if(!x||!t)return;
+      x.value=x.tagName==="TEXTAREA"?(x.value&&!/\n$/.test(x.value)?x.value+"\n":x.value)+t:(x.value?x.value+" ":"")+t});
+    d.onState(function(e){dictState=e.state;document.querySelectorAll(".mic").forEach(function(b){b.classList.toggle("on",dictState!=="idle"&&b.dataset.target===dictTarget)})});
+    render();
+  }).catch(function(){});
 }
 function footer(){document.getElementById("foot").textContent=S.mode==="db"?"Saved to your account · syncs across your devices":"Saved in this browser only"}
 
@@ -447,6 +492,18 @@ function cleanTasks(){return P("cleanTasks",CLEAN_DEFAULT)}
 function rate(){return +P("rate",40)}
 function me(){try{var m=localStorage.getItem("hk-me");if(m&&people().indexOf(m)>=0)return m}catch(e){}return people()[0]||""}
 function setMe(n){try{localStorage.setItem("hk-me",n)}catch(e){}}
+var PREP_DEFAULT=["Pick up toys and clutter from the floors","Clear the kitchen counters","Load and run the dishwasher","Clear the bathroom counters","Put away clean laundry","Leave the payment out"];
+function prepItems(){return P("prepItems",PREP_DEFAULT)}
+function dayStart(d){var x=new Date(d);x.setHours(0,0,0,0);return x}
+function daysTo(d){return Math.round((dayStart(d)-dayStart(new Date()))/DAY)}
+// Next cleaners' visit: step from the scheduled date (or their last visit) in whole cycles to today or later.
+function nextVisit(){
+  var vs=visits(),an=P("cleanAnchor",null),a=an?new Date(an+"T00:00:00"):(vs[0]?dayStart(vs[0].at):null);if(!a)return null;
+  var t=dayStart(new Date()),n=new Date(a),came=vs[0]&&isoDay(new Date(vs[0].at))===isoDay(t);
+  while(n<t||(came&&isoDay(n)===isoDay(t)))n.setDate(n.getDate()+cleanEvery());
+  return n;
+}
+function dayName(d){var n=daysTo(d);return n===0?"today":n===1?"tomorrow":n<7?new Date(d).toLocaleDateString(undefined,{weekday:"short"}):new Date(d).toLocaleDateString(undefined,{month:"short",day:"numeric"})}
 
 /* ---------------- Logic ---------------- */
 var DAY=864e5;
@@ -462,13 +519,30 @@ function until(t){var d=since(t);return d==null?null:every(t)-d}
 function ratio(t){var d=since(t);return d==null?1:d/every(t)}
 function aside(t){var s=st(t.id);if(s.why==="supplies")return "supplies";if(s.why==="later"&&s.until&&new Date(s.until).getTime()>Date.now())return "later";return null}
 function hidden(t){return !!st(t.id).hidden}
+var POOL_KEEP=["p-season","p-safety"],POND_WINTER=["f-test","f-change","f-filter","f-plants","f-uv"];
+function paused(t){
+  var mo=new Date().getMonth()+1;
+  if(t.mo&&t.mo.indexOf(mo)<0)return "Out of season until "+new Date(2000,t.mo[0]-1,1).toLocaleDateString(undefined,{month:"long"});
+  if(P("poolClosed",false)&&t.area==="Pool"&&POOL_KEEP.indexOf(t.id)<0)return "Paused while the pool is closed for winter";
+  if(P("pondWinter",false)&&POND_WINTER.indexOf(t.id)>=0)return "Paused for the pond's winter mode";
+  if(t.id==="pl-water"&&Object.keys(S.plants).length)return "Watering is tracked plant by plant on the Plants tab";
+  return null;
+}
+// Tasks the cleaners handle wait for their next visit (plus a day's grace) unless set to "we do it between visits too".
+function waits(t){if(cleanTasks().indexOf(t.id)<0||st(t.id).between)return false;var n=nextVisit();return !!n&&daysTo(n)>=-1}
+function habit(t){return every(t)===1}
+function resting(t){return !!(paused(t)||waits(t))}
+function isDue(t){return since(t)!=null&&ratio(t)>=1&&!aside(t)&&!resting(t)&&!habit(t)}
+function doneToday(t){var l=last(t);return !!l&&isoDay(new Date(l.at))===isoDay(new Date())}
 function status(t){
   if(aside(t))return {cls:"st-aside",label:aside(t)==="supplies"?"Need supplies":"Later"};
+  var pz=paused(t);if(pz)return {cls:"st-aside",label:/season/.test(pz)?"Off season":"Paused"};
+  if(waits(t))return {cls:"st-ok",label:"Cleaners "+dayName(nextVisit())};
   if(since(t)==null)return {cls:"st-new",label:"Not set up"};
   var r=ratio(t);
   if(r>=1)return {cls:"st-due",label:r>=2?"Overdue":"Due"};
-  if(r>=.75)return {cls:"st-soon",label:"Soon"};
-  return {cls:"st-ok",label:"Fresh"};
+  var u=until(t),dl=dayName(new Date(Date.now()+u*DAY));
+  return {cls:r>=.75?"st-soon":"st-ok",label:u===1?"Due tomorrow":"Due "+dl};
 }
 function fmtEvery(n){if(n===1)return "daily";if(n%365===0)return n===365?"yearly":"every "+(n/365)+" yrs";if(n%30===0&&n>=60)return "every "+(n/30)+" mo";if(n===30)return "monthly";if(n%7===0)return n===7?"weekly":"every "+(n/7)+" wks";return "every "+n+" days"}
 function fmtAgo(d){if(d==null)return "not set up yet";if(d===0)return "today";if(d===1)return "yesterday";if(d<14)return d+" days ago";if(d<60)return Math.round(d/7)+" wks ago";if(d<730)return Math.round(d/30)+" mo ago";return Math.round(d/365)+" yrs ago"}
@@ -480,12 +554,26 @@ function money(n){var r=Math.round(n);return (r<0?"−$":"$")+Math.abs(r).toLoca
 function isoDay(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)}
 function tier(t){var e=every(t);return e<=14?"Routine":e<=90?"Periodic":"Deep clean"}
 function active(list){return tasks().filter(function(t){return (!list||t.list===list)&&!hidden(t)})}
-function byDue(a,b){return ratio(b)-ratio(a)||every(a)-every(b)}
+function rank(t){return resting(t)?-1:ratio(t)}
+function byDue(a,b){return rank(b)-rank(a)||every(a)-every(b)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function findTask(id){return tasks().filter(function(t){return t.id===id})[0]}
 function appsFor(t){return Object.keys(S.apps).filter(function(k){var a=S.apps[k];return t.app===k||(KINDS[a.kind]||KINDS.other).tasks.indexOf(t.id)>=0})}
 function appTasks(id){var a=S.apps[id];if(!a)return [];var ids=(KINDS[a.kind]||KINDS.other).tasks;return tasks().filter(function(t){return ids.indexOf(t.id)>=0||t.app===id})}
 
+function hashId(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h}
+// Rough "last done" for tasks never logged: a fixed number of days ago, or "fresh" to spread due dates out.
+function setAgo(list,ago){
+  var ids=[],prev={};
+  list.forEach(function(t){
+    var d=ago==="fresh"?Math.floor(every(t)*((hashId(t.id)%100)/100)*.85):+ago;
+    prev[t.id]=S.state[t.id]?clone(S.state[t.id]):null;
+    var s=Object.assign({},st(t.id));s.hist=[{at:new Date(Date.now()-d*DAY).toISOString(),note:"",est:true}].concat(s.hist||[]);S.state[t.id]=s;ids.push(t.id);
+  });
+  bulkSave("state",ids);
+  return function(){ids.forEach(function(id){if(prev[id])S.state[id]=prev[id];else delete S.state[id]});bulkSave("state",ids)};
+}
+function unsetTasks(list){return active(list).filter(function(t){return since(t)==null&&!aside(t)&&!resting(t)})}
 function markDone(id,note,atIso,x){
   var s=Object.assign({},st(id));var h=(s.hist||[]).slice();
   var e=Object.assign({at:atIso||new Date().toISOString(),note:note||""},x||{});
@@ -497,6 +585,43 @@ function markDone(id,note,atIso,x){
 function setAside(id,why,days){var s=Object.assign({},st(id));s.why=why;if(days)s.until=new Date(Date.now()+days*DAY).toISOString();else delete s.until;S.state[id]=s;saveState(id)}
 function clearAside(id){var s=Object.assign({},st(id));delete s.why;delete s.until;S.state[id]=s;saveState(id)}
 function patch(id,obj){var s=Object.assign({},st(id),obj);Object.keys(obj).forEach(function(k){if(obj[k]==null||obj[k]==="")delete s[k]});S.state[id]=s;saveState(id)}
+
+/* Plants, one by one */
+var ROOMS=["Plant cabinet","Living room","Kitchen","Family room"];
+var LIGHT=["Low light","Medium light","Bright indirect","Direct sun"];
+function plants(){return Object.keys(S.plants).map(function(k){return Object.assign({id:k},S.plants[k])})}
+function rooms(){var r=ROOMS.slice();plants().forEach(function(p){if(p.room&&r.indexOf(p.room)<0)r.push(p.room)});return r}
+function pEvery(p){return +p.every||7}
+function pLast(p){return (p.hist||[])[0]||null}
+function pSince(p){var l=pLast(p);return l?Math.max(0,Math.floor((Date.now()-new Date(l.at))/DAY)):null}
+function pUntil(p){var d=pSince(p);return d==null?0:pEvery(p)-d}
+function thirsty(p){return pUntil(p)<=0}
+function water(ids){
+  var prev={},now=new Date().toISOString();
+  ids.forEach(function(id){prev[id]=clone(S.plants[id]);var p=Object.assign({},S.plants[id]),e={at:now};if(people().length)e.by=me();p.hist=[e].concat(p.hist||[]).slice(0,30);S.plants[id]=p});
+  bulkSave("plants",ids);
+  return function(){ids.forEach(function(id){S.plants[id]=prev[id]});bulkSave("plants",ids)};
+}
+var FACT_SUG=["Water shutoff","Gas shutoff","Breaker panel","HVAC filter size","Fridge water filter","Paint colors","Wifi","Trash & recycling day"];
+var CONTACT_SUG=["House cleaners","Pool service","Piano tuner","Harp technician","Rug cleaner","Plumber","Electrician","HVAC service","Handyman"];
+function facts(type){return Object.keys(S.facts).map(function(k){return Object.assign({id:k},S.facts[k])}).filter(function(f){return f.type===type}).sort(function(a,b){return String(a.label).localeCompare(String(b.label))})}
+function blob(id){return "/_blob/"+encodeURIComponent(id)}
+// Shrink phone photos before upload: long side 1600px, JPEG.
+function shrink(file){return new Promise(function(res){
+  var url=URL.createObjectURL(file),img=new Image();
+  img.onload=function(){var k=Math.min(1,1600/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(function(b){res(b||file)},"image/jpeg",.82)};
+  img.onerror=function(){URL.revokeObjectURL(url);res(file)};img.src=url;
+})}
+var MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+function micBtn(target){return CAP.dict?'<button type="button" class="mic'+(dictState!=="idle"&&dictTarget===target?" on":"")+'" data-act="mic" data-target="'+target+'" aria-label="Dictate">'+MIC+'</button>':''}
+function micHint(){return CAP.dict?'Tap the microphone to say it.':'To say it instead of typing, use the microphone on your phone’s keyboard.'}
+function photoBlock(kind,id,label){
+  var o=S[kind][id]||{},h='';
+  if(o.photo)h+='<img class="photo" src="'+blob(o.photo)+'" alt="'+esc(label||"Photo")+'">';
+  if(CAP.assets)h+='<div class="btnrow"><button class="btn small" data-act="photo" data-kind="'+kind+'" data-id="'+esc(id)+'">'+(o.photo?"Change photo":"Add a photo")+'</button>'+(o.photo?'<button class="btn small ghost danger" data-act="delphoto" data-kind="'+kind+'" data-id="'+esc(id)+'">Remove photo</button>':'')+'</div>';
+  return h;
+}
 
 /* Cleaners' visits: each visit also logs the tasks they did, marked by "Cleaners" */
 function visits(){return Object.keys(S.visits).map(function(k){return Object.assign({id:k},S.visits[k])}).sort(function(a,b){return new Date(b.at)-new Date(a.at)})}
@@ -537,6 +662,7 @@ function delta(a,b,f){var d=a-b;if(!b&&!a)return "";return (d>0?"+":d<0?"−":"�
 
 /* ---------------- Rendering ---------------- */
 var ui={tab:"today",budget:null,range:"now",area:"All",q:"",upArea:"All",weekOff:0};
+var DROP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>',LEAF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></svg>';
 try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=saved.tab;if(saved.range)ui.range=saved.range}catch(e){}
 function rememberUi(){try{localStorage.setItem("hk-ui",JSON.stringify({tab:ui.tab,range:ui.range}))}catch(e){}}
 var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -554,25 +680,36 @@ function rows(list){return '<ul class="rows">'+list.map(row).join("")+'</ul>'}
 function mins(list){return list.reduce(function(n,t){return n+(t.m||0)},0)}
 
 function cleanersCard(){
-  var vs=visits(),v=vs[0];
-  var h='<section class="cleaners"><p class="eyebrow">House cleaners · '+fmtEvery(cleanEvery())+'</p>';
-  if(v){
-    var ago=Math.floor((Date.now()-new Date(v.at))/DAY),next=new Date(new Date(v.at).getTime()+cleanEvery()*DAY),nd=Math.ceil((next-Date.now())/DAY);
-    h+='<p class="big">'+(ago===0?"Came today":"Last came "+fmtShort(v.at))+'</p><p class="fineprint">'+(v.tasks||[]).length+' tasks covered'+(ago>0?' · '+ago+' day'+(ago>1?'s':'')+' ago':'')+' · next visit '+(nd<=0?'is due':'around '+fmtShort(next))+'</p>';
-  }else h+='<p class="big">No visits logged yet</p><p class="fineprint">Log each visit and the tasks they handle reset on their own.</p>';
-  h+='<div class="btnrow"><button class="btn small wood" data-act="visit">'+(v&&Math.floor((Date.now()-new Date(v.at))/DAY)===0?"Log another visit":"They came today")+'</button>'+(vs.length?'<button class="btn small ghost" data-act="visit">Visits & checklist</button>':'')+'</div></section>';
+  var vs=visits(),v=vs[0],n=nextVisit(),came=v&&isoDay(new Date(v.at))===isoDay(new Date()),dn=n?daysTo(n):null;
+  var wait=active("clean").filter(function(t){return waits(t)}).length;
+  var h='<section class="cleaners"><p class="eyebrow">House cleaners · '+fmtEvery(cleanEvery())+(n?' on '+n.toLocaleDateString(undefined,{weekday:"long"})+'s':'')+'</p>';
+  h+='<p class="big">'+(came?"Came today":dn===0?"Coming today":dn===1?"Coming tomorrow":n?"Next visit "+fmtShort(n):"No visits logged yet")+'</p>';
+  h+='<p class="fineprint">'+(v?(came?(v.tasks||[]).length+' tasks marked done':'Last came '+fmtShort(v.at))+(wait&&!came?' · '+wait+' tasks waiting for them':''):'Log each visit and the tasks they handle reset on their own.')+'</p>';
+  if(!came&&n&&(dn===0||dn===1)){
+    var pp=P("prep",{}),done=pp.date===isoDay(n)?(pp.done||[]):[];
+    h+='<div class="prep"><p class="eyebrow" style="padding-top:8px">Before they come</p>'+prepItems().map(function(x,i){return '<div class="check"><input type="checkbox" id="pp-'+i+'" data-prep="'+i+'"'+(done.indexOf(i)>=0?" checked":"")+'><label for="pp-'+i+'">'+esc(x)+'</label></div>'}).join("")+'</div>';
+  }
+  h+='<div class="btnrow">'+(!came&&n&&dn<=0?'<button class="btn small wood" data-act="camenow">They came · log it</button><button class="btn small ghost" data-act="visit">Change what they did</button>':'<button class="btn small wood" data-act="visit">'+(came?"Log another visit":"Log a visit")+'</button>')+'</div></section>';
   return h;
 }
+function habitsCard(){
+  var hs=active().filter(function(t){return habit(t)&&!aside(t)&&!paused(t)});if(!hs.length)return "";
+  var n=hs.filter(doneToday).length;
+  return '<section class="card habits"><div class="areah"><h3>Every day</h3><span class="fineprint">'+n+' of '+hs.length+' done today</span></div><div>'+hs.map(function(t){var l=last(t),d=doneToday(t);
+    return '<div class="check"><input type="checkbox" id="hb-'+esc(t.id)+'" data-habit="'+esc(t.id)+'"'+(d?" checked":"")+'><label for="hb-'+esc(t.id)+'">'+esc(t.name)+'</label><span class="m">'+(d&&l.by?esc(l.by):t.m?"~"+t.m+" min":"")+'</span></div>'}).join("")+'</div></section>';
+}
 function viewToday(){
-  var all=active(),live=all.filter(function(t){return !aside(t)});
-  var logged=all.filter(function(t){return since(t)!=null}),unset=all.filter(function(t){return since(t)==null&&!aside(t)});
-  var dueNow=live.filter(function(t){return since(t)!=null&&ratio(t)>=1}).length;
+  var all=active(),live=all.filter(function(t){return !aside(t)&&!resting(t)&&!habit(t)});
+  var logged=all.filter(function(t){return since(t)!=null}),unset=unsetTasks().filter(function(t){return !habit(t)});
+  var dry=plants().filter(thirsty);
+  var dueNow=live.filter(isDue).length+dry.length;
   document.getElementById("sub").textContent=dueNow?dueNow+" due now":"all caught up";
   var h="";
-  if(logged.length<8)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>Open a few tasks and tap roughly when you last did them. Your to-do list fills in from there. The “Not set up yet” list at the bottom has them all.</p></div>';
+  if(unset.length>=10)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>'+unset.length+' tasks aren’t set up yet. Start them all fresh and they’ll come due a few at a time over the next weeks, or set rough dates room by room.</p><div class="btnrow"><button class="btn small primary" data-act="fresh">Start everything fresh</button><button class="btn small" data-act="editlist" data-list="clean">Set by room</button></div></div>';
   var dow=new Date().getDay();
   if(dow===0||dow>=5){var wk=weekData(0);if(wk.items.length)h+='<div class="banner"><p class="eyebrow">Your week so far</p><p>'+wk.items.length+' task'+(wk.items.length>1?"s":"")+' · '+fmtHrs(wk.min)+' · saved about '+money(wk.saved)+'</p><div class="btnrow"><button class="btn small" data-act="tab" data-v="week">See the wrap-up</button></div></div>'}
   h+=cleanersCard();
+  h+=habitsCard();
   var ranges=[["now","Due now"],["week","This week"],["month","This month"]];
   var times=[[null,"Any time"],[10,"10 min"],[20,"20 min"],[30,"30 min"],[60,"1 hr"],[120,"2 hrs"]];
   h+='<section class="finder"><div class="seg" role="group" aria-label="When">'+ranges.map(function(r){return '<button data-act="range" data-v="'+r[0]+'" aria-pressed="'+(ui.range===r[0])+'">'+r[1]+'</button>'}).join("")+'</div>'+
@@ -583,8 +720,9 @@ function viewToday(){
   if(ui.budget){var used=0;pick=[];pool.forEach(function(t){var m=t.m||10;if(used+m<=ui.budget){pick.push(t);used+=m}})}
   var cl=pick.filter(function(t){return t.list==="clean"}),up=pick.filter(function(t){return t.list==="upkeep"});
   if(ui.budget||pick.length)h+='<p class="fit">'+(ui.budget?(pick.length?pick.length+" task"+(pick.length>1?"s":"")+" fit · about "+fmtMin(mins(pick))+" of "+fmtMin(ui.budget):"Nothing on this list fits in "+fmtMin(ui.budget)+". Try more time or a wider window."):pick.length+" task"+(pick.length===1?"":"s")+" · about "+fmtMin(mins(pick)))+'</p>';h+='</section>';
-  if(!pick.length&&!ui.budget)h+='<div class="empty"><strong>'+(lim?"Nothing coming due in that window.":"Nothing is due right now.")+'</strong> '+(logged.length?"Enjoy the clean house.":"Set up a few tasks below to get started.")+'</div>';
+  if(!pick.length&&!ui.budget&&!dry.length)h+='<div class="empty"><strong>'+(lim?"Nothing coming due in that window.":"Nothing is due right now.")+'</strong> '+(logged.length?"Enjoy the clean house.":"Set up a few tasks to get started.")+'</div>';
   if(cl.length)h+='<section><div class="section-h"><h2>Cleaning</h2><span class="aside">'+cl.length+' · ~'+fmtMin(mins(cl))+'</span></div>'+rows(cl)+'</section>';
+  if(dry.length)h+='<section><div class="section-h"><h2>Thirsty plants</h2><span class="aside">'+dry.length+'</span></div>'+plantRows(dry)+(dry.length>1?'<div class="btnrow" style="margin-top:10px"><button class="btn small" data-act="waterall">Watered all '+dry.length+'</button></div>':'')+'</section>';
   if(up.length)h+='<section><div class="section-h"><h2>Home upkeep</h2><span class="aside">'+up.length+' · ~'+fmtMin(mins(up))+'</span></div>'+rows(up)+'</section>';
   var later=all.filter(function(t){return aside(t)==="later"}),sup=all.filter(function(t){return aside(t)==="supplies"});
   if(sup.length){
@@ -593,7 +731,32 @@ function viewToday(){
     h+='<details class="aside" open><summary>Waiting on supplies <span>'+sup.length+'</span></summary>'+rows(sup)+'</details>';
   }
   if(later.length)h+='<details class="aside"><summary>Set aside for later <span>'+later.length+'</span></summary>'+rows(later)+'</details>';
-  if(unset.length)h+='<details class="aside"'+(logged.length<8?" open":"")+'><summary><span>Not set up yet <span class="hint">· tap one, say when you last did it</span></span><span>'+unset.length+'</span></summary>'+rows(unset.sort(function(a,b){return a.list.localeCompare(b.list)||a.area.localeCompare(b.area)}))+'</details>';
+  if(unset.length)h+='<details class="aside"><summary><span>Not set up yet <span class="hint">· tap one, say when you last did it</span></span><span>'+unset.length+'</span></summary>'+rows(unset.sort(function(a,b){return a.list.localeCompare(b.list)||a.area.localeCompare(b.area)}))+'</details>';
+  return h;
+}
+function plantRow(p){
+  var d=pSince(p),u=pUntil(p),cls=d==null?"st-soon":u<=0?"st-due":"st-ok",lab=d==null?"Water?":u<0?"Thirsty":u===0?"Water today":"Water "+dayName(new Date(Date.now()+u*DAY));
+  var th=p.photo?'<img class="thumb" src="'+blob(p.photo)+'" alt="" loading="lazy">':'<span class="thumb">'+LEAF+'</span>';
+  return '<li class="row plant '+cls+'" data-plant="'+esc(p.id)+'"><button class="tick drop" data-act="water" aria-label="Watered '+esc(p.name)+'">'+DROP+'</button>'+
+    '<button class="main" data-act="openplant">'+th+'<span class="txt"><span class="name">'+esc(p.name)+'</span><span class="meta">'+esc(p.room||"")+' · '+(d==null?"not watered yet":"watered "+fmtAgo(d))+' · every '+pEvery(p)+' days'+(p.safe==="no"?' · not cat-safe':'')+'</span></span></button>'+
+    '<span class="pill">'+lab+'</span></li>';
+}
+function plantRows(list){return '<ul class="rows">'+list.map(plantRow).join("")+'</ul>'}
+function viewPlants(){
+  var ps=plants(),dry=ps.filter(thirsty);
+  document.getElementById("sub").textContent=ps.length?(dry.length?dry.length+" thirsty":"all watered"):"";
+  var h='';
+  if(!ps.length)h+='<div class="empty"><strong>Add your plants room by room.</strong> Pick a room, then type or say one plant per line. You can add photos, light and cat safety later.</div><div class="btnrow"><button class="btn primary" data-act="addplants">Add plants</button></div>';
+  else h+='<div class="listbar"><span class="fineprint">'+ps.length+' plant'+(ps.length===1?"":"s")+' · '+dry.length+' thirsty</span><button class="btn small" data-act="addplants">Add plants</button></div>';
+  rooms().forEach(function(r){
+    var inr=ps.filter(function(p){return (p.room||"Other")===r}).sort(function(a,b){return pUntil(a)-pUntil(b)||String(a.name).localeCompare(String(b.name))});if(!inr.length)return;
+    var dr=inr.filter(thirsty).length;
+    h+='<section><div class="section-h"><h2>'+esc(r)+'</h2><span class="aside">'+(dr?dr+' thirsty · ':'')+inr.length+'</span></div>'+plantRows(inr)+
+      '<div class="btnrow" style="margin-top:10px">'+(dr>1?'<button class="btn small" data-act="waterroom" data-room="'+esc(r)+'">Watered all '+dr+' thirsty</button>':'')+'<button class="btn small ghost" data-act="addplants" data-room="'+esc(r)+'">Add to '+esc(r)+'</button></div></section>';
+  });
+  var care=active("clean").filter(function(t){return t.area==="Plants"&&t.id!=="pl-water"}).sort(byDue);
+  if(care.length)h+='<section><div class="section-h"><h2>Plant care</h2><span class="aside">all plants</span></div>'+rows(care)+'</section>';
+  h+='<p class="fineprint">With the cats and a little one at home, mark each plant as cat-safe or not on its page. Lilies are the ones to never bring inside. The Guide (book icon at the top) has the full list.</p>';
   return h;
 }
 function areaChips(list,cur,act){
@@ -614,25 +777,38 @@ function viewAll(){
   return h;
 }
 function appRow(id){
-  var a=S.apps[id],ts=appTasks(id).filter(function(t){return !hidden(t)}),due=ts.filter(function(t){return since(t)!=null&&ratio(t)>=1&&!aside(t)}).length;
+  var a=S.apps[id],ts=appTasks(id).filter(function(t){return !hidden(t)}),due=ts.filter(isDue).length;
   var model=[a.brand,a.model].filter(Boolean).join(" ");
   var pill=due?'<span class="pill st-due" style="--st:var(--due);--st-soft:var(--due-soft)">'+due+' due</span>':'<span class="pill st-ok">'+(ts.length?"OK":"—")+'</span>';
   return '<li class="row noTick" data-app="'+esc(id)+'"><button class="main" data-act="openapp"><span class="name">'+esc(a.name||(KINDS[a.kind]||KINDS.other).label)+'</span><span class="meta">'+(model?esc(model):"Add the model number")+' · '+ts.length+' care task'+(ts.length===1?"":"s")+'</span></button>'+pill+'</li>';
 }
+function seasonRow(label,key,opts){var on=!!P(key,false);return '<div class="season"><span>'+label+'</span><div class="seg two" role="group" aria-label="'+label+'">'+opts.map(function(o,i){return '<button data-act="season" data-k="'+key+'" data-v="'+i+'" aria-pressed="'+(on===!!i)+'">'+o+'</button>'}).join("")+'</div></div>'}
+function factRow(f){
+  var sub=f.type==="contact"?[f.name,f.phone].filter(Boolean).join(" · "):(f.value||"").split("\n")[0];
+  return '<li class="row noTick" data-fact="'+esc(f.id)+'"><button class="main" data-act="openfact">'+(f.photo?'<span class="txt">':'')+'<span class="name">'+esc(f.label)+'</span><span class="meta">'+(sub?esc(sub):"Tap to fill in")+'</span>'+(f.photo?'</span>':'')+'</button>'+(f.photo?'<img class="thumb" src="'+blob(f.photo)+'" alt="" loading="lazy">':'<span></span>')+'</li>';
+}
 function viewUpkeep(){
   var all=active("upkeep"),list=all.filter(function(t){return ui.upArea==="All"||t.area===ui.upArea}).sort(byDue);
   var hid=tasks().filter(function(t){return t.list==="upkeep"&&hidden(t)});
-  var due=all.filter(function(t){return since(t)!=null&&ratio(t)>=1&&!aside(t)}).length;
+  var due=all.filter(isDue).length;
   document.getElementById("sub").textContent=due?due+" upkeep due":"";
   var ids=Object.keys(S.apps).sort(function(a,b){return String(S.apps[a].name).localeCompare(String(S.apps[b].name))});
   var have={};ids.forEach(function(k){have[S.apps[k].kind]=1});
   var sug=SUGGEST.filter(function(s){return !have[s[0]]});
-  var h='<section><div class="section-h"><h2>Appliances</h2><span class="aside">'+ids.length+' saved</span></div>';
+  var h='<div class="chips jump">'+[["sec-season","Seasons"],["sec-apps","Appliances"],["sec-upkeep","Upkeep"],["sec-facts","House facts"],["sec-contacts","Contacts"]].map(function(j){return '<button class="chip" data-act="jump" data-v="'+j[0]+'">'+j[1]+'</button>'}).join("")+'</div>';
+  h+='<section class="card" id="sec-season"><h3>Seasons</h3>'+seasonRow("Pool","poolClosed",["Open","Closed for winter"])+seasonRow("Pond","pondWinter",["Active","Winter mode"])+
+    '<p class="fineprint">While the pool is closed only its safety check and the opening reminder stay on. Pond winter mode pauses water tests, water changes, filter rinses, plant trimming and the UV bulb. Plant feeding, repotting and winterizing the faucets follow the calendar on their own.</p></section>';
+  h+='<section id="sec-apps"><div class="section-h"><h2>Appliances</h2><span class="aside">'+ids.length+' saved</span></div>';
   h+=ids.length?'<ul class="rows">'+ids.map(appRow).join("")+'</ul>':'<div class="empty"><strong>Add your appliances.</strong> Save the brand, model and serial number, warranty dates and the manual link. Each one comes with its own care tasks.</div>';
   if(sug.length)h+='<p class="fineprint" style="margin-top:10px">Quick add</p><div class="chips wrap" style="margin-top:6px">'+sug.map(function(s){return '<button class="chip" data-act="quickapp" data-kind="'+s[0]+'" data-name="'+esc(s[1])+'">+ '+esc(s[1])+'</button>'}).join("")+'<button class="chip" data-act="newapp">+ Something else</button></div>';
   h+='</section>';
-  h+='<section><div class="section-h"><h2>Upkeep</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button><button class="btn" data-act="editlist" data-list="upkeep">Edit our list</button></div></section>';
+  h+='<section id="sec-upkeep"><div class="section-h"><h2>Upkeep</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button><button class="btn" data-act="editlist" data-list="upkeep">Edit our list</button></div></section>';
   if(hid.length)h+='<details class="aside"><summary>Hidden <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
+  [["fact","sec-facts","House facts","Shutoffs, filter sizes, paint colors and other things you only need once in a while.",FACT_SUG],["contact","sec-contacts","Contacts","The people who help with the house.",CONTACT_SUG]].forEach(function(g){
+    var fs=facts(g[0]),used={};fs.forEach(function(f){used[f.label]=1});
+    h+='<section id="'+g[1]+'"><div class="section-h"><h2>'+g[2]+'</h2><span class="aside">'+fs.length+' saved</span></div>'+(fs.length?'<ul class="rows">'+fs.map(factRow).join("")+'</ul>':'<p class="fineprint">'+g[3]+'</p>')+
+      '<div class="chips wrap" style="margin-top:10px">'+g[4].filter(function(l){return !used[l]}).map(function(l){return '<button class="chip" data-act="newfact" data-type="'+g[0]+'" data-label="'+esc(l)+'">+ '+esc(l)+'</button>'}).join("")+'<button class="chip" data-act="newfact" data-type="'+g[0]+'" data-label="">+ Something else</button></div></section>';
+  });
   return h;
 }
 function viewWeek(){
@@ -669,7 +845,7 @@ function viewWeek(){
     '<div class="grid2"><div><label class="lbl" for="b-amt">Amount ($)</label><input type="number" id="b-amt" min="0" step="0.01" inputmode="decimal"></div><div><label class="lbl" for="b-date">Date</label><input type="date" id="b-date" value="'+isoDay(off===0?new Date():lastDay)+'"></div></div>'+
     '<div class="btnrow"><button class="btn small primary" type="submit">Add purchase</button></div></form></div></section>';
   if(off===0){
-    var soon=active().filter(function(t){return !aside(t)&&since(t)!=null&&every(t)>7}).map(function(t){return {t:t,d:until(t)}}).filter(function(x){return x.d>=1&&x.d<=7}).sort(function(a,b){return a.d-b.d});
+    var soon=active().filter(function(t){return !aside(t)&&!resting(t)&&since(t)!=null&&every(t)>7}).map(function(t){return {t:t,d:until(t)}}).filter(function(x){return x.d>=1&&x.d<=7}).sort(function(a,b){return a.d-b.d});
     if(soon.length)h+='<section><div class="section-h"><h2>Coming up next week</h2><span class="aside">~'+fmtMin(mins(soon.map(function(x){return x.t})))+'</span></div>'+rows(soon.slice(0,6).map(function(x){return x.t}))+'</section>';
   }
   h+='<p class="fineprint">Savings count each job at what you’d pay someone: a typical flat price for things like dryer vents, gutters and windows, otherwise its time at '+money(rate())+'/hr. Supplies are subtracted. The cleaners’ work and jobs you always hire out aren’t counted. Change the rate in settings (the gear at the top).</p>';
@@ -705,7 +881,7 @@ function viewGuide(){
   h+='<section><div class="section-h"><h2>In this house</h2></div><div class="kit">'+
     '<div class="card"><h3>Wood floors, every room</h3><ul><li>Barely damp microfiber and a pH-neutral cleaner.</li><li>No vinegar, steam mops, oil soaps or standing water.</li><li>Felt pads under furniture, mats at every entry, and saucers under every plant.</li></ul></div>'+
     '<div class="card"><h3>Silk & wool rugs</h3><ul><li>Vacuum with suction only, never a spinning beater bar. Keep the vacuum off fringe.</li><li>Blot spills with cool water. Never rub.</li><li>Only WoolSafe-labeled spot cleaners. No baking soda, oxygen bleach, ammonia or protease enzymes.</li><li>Silk dyes can run. Test hidden spots first.</li><li>Rotate twice a year, vacuum underneath to prevent moths, professional wash every 1–3 years.</li></ul></div>'+
-    '<div class="card"><h3>Instruments</h3><ul><li>Keep the room at 40–50% humidity, away from vents, radiators and sunny windows.</li><li>Dust with a dry microfiber cloth. Never spray anything on an instrument.</li><li>No furniture polish, silicone or alcohol on finishes or keys.</li></ul></div>'+
+    '<div class="card"><h3>Piano & harp</h3><ul><li>They sit where the humidity stays steady, so there’s nothing to run. Keep them away from heat vents, sunny windows and outside doors.</li><li>Dry microfiber only on finishes and the harp’s soundboard. Never spray anything on either.</li><li>No furniture polish, silicone or alcohol on finishes, keys or strings.</li><li>Close the piano lid over the keys when no one is playing.</li></ul></div>'+
     '<div class="card"><h3>Plants, with cats and little kids</h3><ul><li><b>Lilies</b> (true lilies and daylilies) can cause fatal kidney failure in cats, even from pollen or vase water. Keep them out of the house entirely.</li><li>Pothos, philodendron, monstera, peace lily, dieffenbachia, ZZ, snake plant and aloe irritate mouths and stomachs. Keep them high or in rooms the cats don’t use.</li><li>Generally safe picks: spider plant, calathea and prayer plants, parlor palm, Boston fern, peperomia, haworthia, African violet.</li><li>No leaf shine, systemic pesticides or essential-oil sprays.</li></ul></div>'+
     '<div class="card"><h3>Cats</h3><ul><li>Essential oils are toxic to cats, including tea tree, eucalyptus, citrus, pine, peppermint and wintergreen. That covers “natural” cleaners scented with them and diffusers.</li><li>Phenol cleaners (some Pine-Sol and Lysol formulas) are dangerous to cats.</li><li>Let floors dry before cats walk on them. They lick their paws.</li><li>ASPCA Animal Poison Control: <b>(888) 426-4435</b></li></ul></div>'+
     '<div class="card"><h3>Little kids</h3><ul><li>Store all cleaners up high or locked, in their original bottles.</li><li>Laundry and dishwasher pods are a top poisoning risk.</li><li>Never leave a bucket of water or a filled tub unattended. The pool and pond need the same watchfulness.</li><li>Poison Control (US): <b>1-800-222-1222</b></li></ul></div>'+
@@ -714,7 +890,7 @@ function viewGuide(){
   h+='<section><div class="section-h"><h2>When stronger is worth it</h2></div><div class="kit">'+strong.map(function(r){return '<div class="card alt"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p><p><span class="bad">Care:</span> '+r[2]+'</p></div>'}).join("")+'</div></section>';
   return h;
 }
-var titles={today:"To do",all:"Cleaning",upkeep:"Home",week:"Week wrap-up",guide:"Guide"};
+var titles={today:"To do",all:"Cleaning",plants:"Plants",upkeep:"Home",week:"Week wrap-up",guide:"Cleaning guide"};
 function masthead(){
   var n=houseName(),hr=new Date().getHours();
   document.getElementById("house").textContent=n;
@@ -736,7 +912,7 @@ function render(){
   var focusQ=document.activeElement&&document.activeElement.id==="q",pos=focusQ?document.activeElement.selectionStart:0;
   document.getElementById("title").textContent=titles[ui.tab];
   document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
-  var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="upkeep"?viewUpkeep():ui.tab==="week"?viewWeek():viewGuide();
+  var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="plants"?viewPlants():ui.tab==="upkeep"?viewUpkeep():ui.tab==="week"?viewWeek():viewGuide();
   var view=document.getElementById("view"),keepV=typed(view);
   view.innerHTML=v;put(keepV);
   if(focusQ){var q=document.getElementById("q");q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}
@@ -749,7 +925,7 @@ var EVERY=[1,2,3,4,7,10,14,21,30,45,60,90,120,180,270,365,730];
 function sheetTop(back){return '<div class="sheet-top"><button class="btn small ghost" data-act="back">← '+(stack.length?"Back":"Close")+'</button>'+(back||"")+'</div>'}
 function renderSheet(){
   var el=document.getElementById("sheet"),m=cur.mode,out;
-  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else if(m==="edittask")out=editTaskSheet();else out=settingsSheet();
+  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else if(m==="edittask")out=editTaskSheet();else if(m==="plant")out=plantSheet();else if(m==="plantadd")out=plantAddSheet();else if(m==="fact")out=factSheet();else out=settingsSheet();
   if(out==null){back();return}
   el.innerHTML='<div class="sheet-in">'+out+'</div>';el.hidden=false;
 }
@@ -770,7 +946,10 @@ function taskSheet(){
   var apps=appsFor(t);
   out+='<div style="display:flex;flex-direction:column;gap:8px"><div class="badges"><span class="badge">'+esc(t.area)+'</span><span class="badge">'+(t.list==="upkeep"?"Upkeep":tier(t))+'</span>'+(t.m?'<span class="badge">~'+t.m+' min</span>':'')+
     apps.map(function(k){return '<button class="badge" data-act="openapp" data-app="'+esc(k)+'">'+esc(S.apps[k].name||"Appliance")+(S.apps[k].model?" · "+esc(S.apps[k].model):"")+'</button>'}).join("")+'</div><h2 id="sheet-title">'+esc(t.name)+'</h2>';
-  out+='<p>'+(d==null?"Not set up yet.":"Last done <b>"+fmtAgo(d)+"</b>"+(h[0].by?" by "+esc(h[0].by):"")+" ("+fmtDate(h[0].at)+").")+' Repeats '+fmtEvery(every(t))+'.'+(cleanTasks().indexOf(t.id)>=0?' The cleaners usually do this.':'')+'</p></div>';
+  out+='<p>'+(d==null?"Not set up yet.":"Last done <b>"+fmtAgo(d)+"</b>"+(h[0].by?" by "+esc(h[0].by):"")+" ("+fmtDate(h[0].at)+").")+' Repeats '+fmtEvery(every(t))+'.</p></div>';
+  var pz=paused(t);if(pz)out+='<div class="banner"><p>'+esc(pz)+'.</p></div>';
+  if(cleanTasks().indexOf(t.id)>=0){var bw=!!s.between,nv=nextVisit();
+    out+='<div class="card"><h3>The cleaners do this</h3><div class="seg two" role="group" aria-label="Between visits"><button data-act="between" data-v="0" aria-pressed="'+(!bw)+'">Wait for them</button><button data-act="between" data-v="1" aria-pressed="'+bw+'">We do it between visits too</button></div><p class="fineprint">'+(bw?"It comes due on its own schedule, even between visits.":"It stays off your to-do list until their next visit"+(nv?", "+fmtShort(nv):"")+".")+'</p></div>'}
   if(aside(t))out+='<div class="banner"><p>'+(aside(t)==="supplies"?"Set aside until you get supplies.":"Set aside until "+fmtShort(s.until)+".")+'</p><div class="btnrow"><button class="btn small" data-act="unaside">Put it back on the list</button></div></div>';
   out+='<div class="card"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea>';
   if(ps.length){var mm=me();out+='<div><span class="lbl">Who did it</span><div class="chips wrap" role="group" aria-label="Who did it">'+ps.map(function(p){return '<button class="chip" data-act="who" data-v="'+esc(p)+'" aria-pressed="'+(p===mm)+'">'+esc(p)+'</button>'}).join("")+'</div></div>'}
@@ -808,7 +987,7 @@ function appSheet(){
   var k=KINDS[a.kind]||KINDS.other,ts=appTasks(id),now=isoDay(new Date());
   var war=a.warranty?(a.warranty>=now?'<span class="good">Under warranty until '+fmtDate(a.warranty+"T12:00")+'</span>':'<span class="bad">Warranty ended '+fmtDate(a.warranty+"T12:00")+'</span>'):"";
   var q=encodeURIComponent([a.brand,a.model||k.label,"manual"].filter(Boolean).join(" "));
-  var out=sheetTop()+'<div style="display:flex;flex-direction:column;gap:6px"><p class="eyebrow">'+esc(k.label)+(a.location?' · '+esc(a.location):'')+'</p><h2 id="sheet-title">'+esc(a.name||k.label)+'</h2>'+(war?'<p>'+war+'</p>':'')+'</div>';
+  var out=sheetTop()+'<div style="display:flex;flex-direction:column;gap:6px"><p class="eyebrow">'+esc(k.label)+(a.location?' · '+esc(a.location):'')+'</p><h2 id="sheet-title">'+esc(a.name||k.label)+'</h2>'+(war?'<p>'+war+'</p>':'')+'</div>'+photoBlock("apps",id,"Model label");
   var facts=[["Brand",a.brand],["Model",a.model],["Serial",a.serial],["Bought",a.bought&&fmtDate(a.bought+"T12:00")]].filter(function(f){return f[1]});
   if(facts.length)out+='<div class="card"><dl class="facts">'+facts.map(function(f){return '<dt>'+f[0]+'</dt><dd>'+esc(f[1])+'</dd>'}).join("")+'</dl></div>';
   out+='<div class="btnrow">'+(a.manual?'<a class="btn small" href="'+esc(a.manual)+'" target="_blank" rel="noopener">Open the manual</a>':'')+'<a class="btn small ghost" href="https://www.google.com/search?q='+q+'" target="_blank" rel="noopener">Find the manual online</a></div>';
@@ -860,30 +1039,73 @@ function editSheet(){
   var on=all.filter(function(t){return !hidden(t)}).length;
   var out=sheetTop('<span class="fineprint">'+on+' of '+all.length+' on</span>')+'<h2 id="sheet-title">What’s in our house</h2>'+
     '<div class="seg" role="group" aria-label="Which list" style="grid-template-columns:1fr 1fr"><button data-act="editlist" data-list="clean" aria-pressed="'+(list==="clean")+'">Cleaning</button><button data-act="editlist" data-list="upkeep" aria-pressed="'+(list==="upkeep")+'">Upkeep</button></div>'+
-    '<p class="fineprint">Uncheck anything that doesn’t apply to your house. It comes off every list right away, and you can check it again any time. Your history is kept.</p>';
+    '<p class="fineprint">Uncheck anything that doesn’t apply to your house. It comes off every list right away, and you can check it again any time. Your history is kept. Use “set last done” under a room to set up all its new tasks at once.</p>';
   areas.forEach(function(a){
-    var ts=by[a],n=ts.filter(function(t){return !hidden(t)}).length;
-    out+='<div class="card"><div class="areah"><h3>'+esc(a)+'<span class="n">'+n+' of '+ts.length+'</span></h3><div class="btnrow"><button class="btn small" data-act="editarea" data-area="'+esc(a)+'" data-v="on"'+(n===ts.length?" disabled":"")+'>All</button><button class="btn small ghost" data-act="editarea" data-area="'+esc(a)+'" data-v="off"'+(n===0?" disabled":"")+'>None</button></div></div><div>'+
+    var ts=by[a],n=ts.filter(function(t){return !hidden(t)}).length,un=ts.filter(function(t){return !hidden(t)&&since(t)==null&&!aside(t)&&!resting(t)}).length;
+    out+='<div class="card"><div class="areah"><h3>'+esc(a)+'<span class="n">'+n+' of '+ts.length+'</span></h3><div class="btnrow"><button class="btn small" data-act="editarea" data-area="'+esc(a)+'" data-v="on"'+(n===ts.length?" disabled":"")+'>All</button><button class="btn small ghost" data-act="editarea" data-area="'+esc(a)+'" data-v="off"'+(n===0?" disabled":"")+'>None</button></div></div>'+
+      (un?'<select class="agosel" id="ag-'+areas.indexOf(a)+'" data-area="'+esc(a)+'" aria-label="Set last done for '+esc(a)+'"><option value="">'+un+' not set up · set last done…</option><option value="0">Done today</option><option value="7">About a week ago</option><option value="30">About a month ago</option><option value="90">About 3 months ago</option><option value="180">About 6 months ago</option><option value="400">Over a year ago</option><option value="fresh">Not sure · spread them out</option></select>':'')+'<div>'+
       ts.map(function(t){var off=hidden(t);return '<div class="check'+(off?" off":"")+'"><input type="checkbox" id="ed-'+esc(t.id)+'" data-edit="'+esc(t.id)+'"'+(off?"":" checked")+'><label for="ed-'+esc(t.id)+'">'+esc(t.name)+'</label><span class="m">'+fmtEvery(every(t))+'</span><button class="ed" data-act="edittask" data-v="'+esc(t.id)+'" aria-label="Edit '+esc(t.name)+'">Edit</button></div>'}).join("")+'</div></div>';
   });
   out+='<div class="card"><h3>Add a task</h3><form class="form" id="quickadd">'+
-    '<div><label class="lbl" for="qa-name">What needs doing, and how often</label><input type="text" id="qa-name" autocomplete="off" placeholder="e.g. Wipe the piano keys every 2 weeks"></div>'+
+    '<div><label class="lbl" for="qa-name">What needs doing, and how often</label><div class="fieldrow"><input type="text" id="qa-name" autocomplete="off" placeholder="e.g. Dust the harp every 2 weeks">'+micBtn("qa-name")+'</div></div>'+
     '<div class="grid2 stack"><div><label class="lbl" for="qa-area">Area</label><select id="qa-area">'+areas.map(function(a){return '<option value="'+esc(a)+'">'+esc(a)+'</option>'}).join("")+(areas.indexOf("Other")<0?'<option value="Other">Other</option>':'')+'</select></div>'+
     '<div><label class="lbl" for="qa-every">Repeat</label><select id="qa-every"><option value="">From what I said (or monthly)</option>'+EVERY.map(function(n){return '<option value="'+n+'">'+fmtEvery(n)+'</option>'}).join("")+'</select></div></div>'+
     '<div class="btnrow"><button class="btn primary" type="submit">Add to our list</button><button class="btn small ghost" type="button" data-act="add" data-list="'+list+'">Add with steps & supplies</button></div>'+
-    '<p class="fineprint">To say it instead of typing, tap the field, then the microphone on your phone’s keyboard. Include how often, like “every other week” or “monthly,” and it’s picked up automatically.</p></form></div>';
+    '<p class="fineprint">'+micHint()+' Include how often, like “every other week” or “monthly,” and it’s picked up automatically.</p></form></div>';
   return out+'<div class="btnrow"><button class="btn primary" data-act="back">Done</button></div>';
+}
+function plantAddSheet(){
+  var r0=cur.extra.room||ROOMS[1];
+  return sheetTop()+'<h2 id="sheet-title">Add plants</h2><p class="fineprint">One plant per line. Add how often it needs water if you know, like “Fiddle leaf fig every 10 days.” Otherwise it uses the choice below. You can add photos, light and cat safety on each plant later.</p>'+
+  '<form class="form" id="plantform-bulk"><div class="grid2 stack"><div><label class="lbl" for="pa-room">Room</label><input type="text" id="pa-room" list="pa-rooms" value="'+esc(r0)+'"><datalist id="pa-rooms">'+rooms().map(function(r){return '<option value="'+esc(r)+'">'}).join("")+'</datalist></div>'+
+  '<div><label class="lbl" for="pa-every">Water every</label><select id="pa-every">'+[2,3,4,5,7,10,14,21,30].map(function(n){return '<option value="'+n+'"'+(n===7?" selected":"")+'>'+n+' days</option>'}).join("")+'</select></div></div>'+
+  '<div><label class="lbl" for="pa-list">Plants</label><div class="fieldrow"><textarea id="pa-list" rows="7" placeholder="Monstera\nPothos on the bookshelf\nCalathea every 5 days"></textarea>'+micBtn("pa-list")+'</div><p class="fineprint" style="margin-top:4px">'+micHint()+' Pause between plants and each one lands on its own line.</p></div>'+
+  '<label class="check"><input type="checkbox" id="pa-today" checked><span>Watered today</span></label>'+
+  '<div class="btnrow"><button class="btn primary" type="submit">Add to this room</button><button class="btn ghost" type="button" data-act="back">Done</button></div></form>';
+}
+function plantSheet(){
+  var p=S.plants[cur.id];if(!p)return null;p=Object.assign({id:cur.id},p);
+  var d=pSince(p),h=p.hist||[];
+  var out=sheetTop('<span class="pill '+(d==null?"st-soon":thirsty(p)?"st-due":"st-ok")+'">'+(d==null?"Water?":thirsty(p)?"Thirsty":"Water "+dayName(new Date(Date.now()+pUntil(p)*DAY)))+'</span>');
+  out+=photoBlock("plants",cur.id,p.name);
+  out+='<div style="display:flex;flex-direction:column;gap:6px"><p class="eyebrow">'+esc(p.room||"")+(p.light?' · '+esc(p.light):'')+'</p><h2 id="sheet-title">'+esc(p.name)+'</h2><p>'+(d==null?"Not watered yet.":"Watered <b>"+fmtAgo(d)+"</b>"+(h[0].by?" by "+esc(h[0].by):"")+".")+' Water every '+pEvery(p)+' days.'+(p.safe==="no"?' <span class="bad">Not safe for cats.</span>':p.safe==="yes"?' <span class="good">Safe for cats.</span>':'')+'</p></div>';
+  out+='<div class="btnrow"><button class="btn primary" data-act="water">Watered it</button></div>';
+  out+='<div class="card"><h3>Details</h3><form class="form" id="plantform"><div><label class="lbl" for="pp-name">Name</label><input type="text" id="pp-name" value="'+esc(p.name)+'"></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="pp-room">Room</label><input type="text" id="pp-room" list="pp-rooms" value="'+esc(p.room||"")+'"><datalist id="pp-rooms">'+rooms().map(function(r){return '<option value="'+esc(r)+'">'}).join("")+'</datalist></div>'+
+    '<div><label class="lbl" for="pp-every">Water every</label><select id="pp-every">'+[2,3,4,5,7,10,14,21,30].concat(pEvery(p)).filter(function(v,i,a){return a.indexOf(v)===i}).sort(function(a,b){return a-b}).map(function(n){return '<option value="'+n+'"'+(n===pEvery(p)?" selected":"")+'>'+n+' days</option>'}).join("")+'</select></div></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="pp-light">Light</label><select id="pp-light"><option value="">Not sure</option>'+LIGHT.map(function(l){return '<option'+(p.light===l?" selected":"")+'>'+l+'</option>'}).join("")+'</select></div>'+
+    '<div><label class="lbl" for="pp-safe">With the cats</label><select id="pp-safe"><option value="">Not sure</option><option value="yes"'+(p.safe==="yes"?" selected":"")+'>Safe for cats</option><option value="no"'+(p.safe==="no"?" selected":"")+'>Toxic to cats</option></select></div></div>'+
+    '<div><label class="lbl" for="pp-notes">Notes</label><textarea id="pp-notes" placeholder="Likes to dry out, mist in winter, where it came from">'+esc(p.notes||"")+'</textarea></div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">Save</button><button class="btn small ghost danger" type="button" data-act="delplant">Remove plant</button></div></form></div>';
+  if(h.length)out+='<div class="card"><h3>Watering history</h3><ul class="hist">'+h.slice(0,12).map(function(x){return '<li><span class="d">'+fmtDate(x.at)+(x.by?' · '+esc(x.by):'')+'</span></li>'}).join("")+'</ul></div>';
+  return out;
+}
+function factSheet(){
+  var id=cur.id,f=id?S.facts[id]:null,type=f?f.type:cur.extra.type,c=type==="contact";f=f||{label:cur.extra.label||""};
+  var out=sheetTop()+'<p class="eyebrow">'+(c?"Contact":"House fact")+'</p><h2 id="sheet-title">'+esc(f.label||(c?"New contact":"New house fact"))+'</h2>';
+  if(id)out+=photoBlock("facts",id,f.label);
+  if(c&&f.phone)out+='<div class="card"><dl class="facts"><dt>Phone</dt><dd>'+esc(f.phone)+'</dd>'+(f.email?'<dt>Email</dt><dd>'+esc(f.email)+'</dd>':'')+'</dl><div class="btnrow"><button class="btn small" data-act="copy" data-v="'+esc(f.phone)+'">Copy number</button></div></div>';
+  out+='<form class="form" id="factform"><div class="card"><div><label class="lbl" for="fx-label">'+(c?"Who they are":"What it is")+'</label><input type="text" id="fx-label" value="'+esc(f.label)+'" placeholder="'+(c?"e.g. Piano tuner":"e.g. Water shutoff")+'"></div>';
+  if(c)out+='<div><label class="lbl" for="fx-name">Name or company</label><input type="text" id="fx-name" value="'+esc(f.name||"")+'"></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="fx-phone">Phone</label><input type="text" id="fx-phone" inputmode="tel" value="'+esc(f.phone||"")+'"></div><div><label class="lbl" for="fx-email">Email</label><input type="text" id="fx-email" inputmode="email" value="'+esc(f.email||"")+'"></div></div>'+
+    '<div class="grid2"><div><label class="lbl" for="fx-last">Last used</label><input type="date" id="fx-last" value="'+esc(f.last||"")+'"></div><div><label class="lbl" for="fx-cost">Usual cost ($)</label><input type="number" id="fx-cost" min="0" value="'+esc(f.cost||"")+'"></div></div>';
+  out+='<div><label class="lbl" for="fx-value">'+(c?"Notes":"Details")+'</label><textarea id="fx-value" rows="5" placeholder="'+(c?"What they do for us, how to book":"Where it is, sizes, model numbers")+'">'+esc(f.value||"")+'</textarea></div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">Save</button>'+(id?'<button class="btn small ghost danger" type="button" data-act="delfact">Remove</button>':'')+'</div></div></form>';
+  if(!id&&CAP.assets)out+='<p class="fineprint">Save first, then you can add a photo (handy for a breaker panel map or a paint can label).</p>';
+  return out;
 }
 function settingsSheet(){
   return sheetTop()+'<h2 id="sheet-title">Household</h2><form class="form" id="setform">'+
   '<div class="card"><div><label class="lbl" for="s-name">House name</label><input type="text" id="s-name" value="'+esc(houseName())+'"></div>'+
   '<div><label class="lbl" for="s-people">Who logs tasks (comma separated)</label><input type="text" id="s-people" value="'+esc(people().join(", "))+'" placeholder="e.g. Katrina, Wei"><p class="fineprint" style="margin-top:4px">Adds a “Who did it” choice and a “Who did what” chart to the week. This phone remembers the last name picked.</p></div></div>'+
   '<div class="card"><h3>House cleaners</h3><div class="grid2"><div><label class="lbl" for="s-every">They come</label><select id="s-every">'+[7,14,21,28,30].map(function(n){return '<option value="'+n+'"'+(n===cleanEvery()?" selected":"")+'>'+fmtEvery(n)+'</option>'}).join("")+'</select></div><div><label class="lbl" for="s-ccost">Usual cost ($)</label><input type="number" id="s-ccost" min="0" step="1" value="'+esc(P("cleanCost",""))+'"></div></div>'+
+  '<div class="grid2"><div><label class="lbl" for="s-next">Next visit</label><input type="date" id="s-next" value="'+(nextVisit()?isoDay(nextVisit()):"")+'"></div><div></div></div>'+
+  '<div><label class="lbl" for="s-prep">Before they come (one per line)</label><textarea id="s-prep" rows="5">'+esc(prepItems().join("\n"))+'</textarea></div>'+
   '<div><label class="lbl" for="s-cnotes">Notes for the cleaners</label><textarea id="s-cnotes" placeholder="e.g. Wood floors: barely damp mop, no vinegar or steam. Silk & wool rugs: vacuum on suction only, stay off the fringe. Don’t move the piano.">'+esc(P("cleanNotes",""))+'</textarea></div></div>'+
   '<div class="card"><h3>Savings</h3><div><label class="lbl" for="s-rate">Hourly rate to compare against ($)</label><input type="number" id="s-rate" min="0" step="1" value="'+rate()+'"></div></div>'+
   '<div class="btnrow"><button class="btn primary" type="submit">Save</button></div></form>'+
   '<div class="card"><h3>What’s in our house</h3><p class="fineprint">Turn whole groups of tasks on or off in one place.</p><div class="btnrow"><button class="btn small" data-act="editlist" data-list="clean">Edit cleaning list</button><button class="btn small" data-act="editlist" data-list="upkeep">Edit upkeep list</button></div></div>'+
-  '<div class="card"><h3>Backup</h3><p class="fineprint">Copy everything (tasks, history, appliances, visits, purchases) to keep in a note, or paste a backup back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div>';
+  '<div class="card"><h3>Backup</h3><p class="fineprint">Copy everything (tasks, history, plants, appliances, facts, visits, purchases) to keep in a note, or paste a backup back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div>';
 }
 
 /* ---------------- Toast ---------------- */
@@ -912,6 +1134,26 @@ document.addEventListener("click",function(e){
     case "open":openSheet("task",id);break;
     case "openapp":openSheet("app",b.dataset.app||(r&&r.dataset.app));break;
     case "back":back();break;
+    case "openplant":openSheet("plant",r&&r.dataset.plant);break;
+    case "addplants":openSheet("plantadd",null,{room:b.dataset.room});break;
+    case "water":{if(!guard())return;var pid=r&&r.dataset.plant||(cur&&cur.mode==="plant"&&cur.id);if(!pid)return;var un=water([pid]);toast("Watered: "+S.plants[pid].name,un);break}
+    case "waterroom":{if(!guard())return;var wr=plants().filter(function(p){return (p.room||"Other")===b.dataset.room&&thirsty(p)}).map(function(p){return p.id});toast("Watered "+wr.length+" plants",water(wr));break}
+    case "waterall":{if(!guard())return;var wa=plants().filter(thirsty).map(function(p){return p.id});toast("Watered "+wa.length+" plants",water(wa));break}
+    case "delplant":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}var gp=cur.id,ph=S.plants[gp]&&S.plants[gp].photo;delete S.plants[gp];save("plants",gp);if(ph&&CAP.assets)CAP.assets.delete(ph).catch(function(){});back();toast("Plant removed");break}
+    case "newfact":openSheet("fact",null,{type:b.dataset.type,label:b.dataset.label});break;
+    case "openfact":openSheet("fact",r&&r.dataset.fact);break;
+    case "delfact":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}var gf=cur.id,fp=S.facts[gf]&&S.facts[gf].photo;delete S.facts[gf];save("facts",gf);if(fp&&CAP.assets)CAP.assets.delete(fp).catch(function(){});back();toast("Removed");break}
+    case "copy":copyText(b.dataset.v,"Copied");break;
+    case "jump":{var jt=document.getElementById(b.dataset.v);if(jt)jt.scrollIntoView({behavior:"smooth",block:"start"});break}
+    case "season":{if(!guard())return;var sp=Object.assign({},S.prefs);sp[b.dataset.k]=b.dataset.v==="1";S.prefs=sp;savePrefs();break}
+    case "between":{if(!guard())return;patch(cur.id,{between:b.dataset.v==="1"?true:null});break}
+    case "fresh":{if(!guard())return;var fl=unsetTasks();toast("Started "+fl.length+" tasks fresh · they’ll come due a few at a time",setAgo(fl,"fresh"));break}
+    case "camenow":{if(!guard())return;var ct=active("clean").filter(function(t){return cleanTasks().indexOf(t.id)>=0}).map(function(t){return t.id});
+      var vid=logVisit(new Date().toISOString(),+P("cleanCost",0)||0,"",ct);toast("Visit logged · "+ct.length+" tasks done",function(){removeVisit(vid)});break}
+    case "photo":{if(!CAP.assets)return;photoTarget={kind:b.dataset.kind,id:b.dataset.id};var fp2=document.getElementById("filepick");fp2.value="";fp2.click();break}
+    case "delphoto":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}var dk=b.dataset.kind,di=b.dataset.id,o2=Object.assign({},S[dk][di]),old=o2.photo;delete o2.photo;S[dk][di]=o2;save(dk,di);if(old&&CAP.assets)CAP.assets.delete(old).catch(function(){});break}
+    case "mic":{var dc=CAP.dict;if(!dc)return;if(dc.active()){dc.stop().catch(function(){});return}
+      dictTarget=b.dataset.target;dc.start().catch(function(er){var c=er&&er.code;if(c==="not_granted")toast("Dictation is off for this page. Use the microphone on your keyboard instead.");else if(c&&c!=="stopped"&&c!=="dismissed")toast("Dictation didn’t start. Try again, or use your keyboard’s microphone.")});break}
     case "settings":openSheet("settings");break;
     case "visit":openSheet("visit");break;
     case "quick":{if(!guard())return;var t=findTask(id),prev=S.state[id]?clone(S.state[id]):undefined;markDone(id);toast("Done: "+t.name,function(){S.state[id]=prev;saveState(id)});break}
@@ -959,7 +1201,21 @@ document.addEventListener("click",function(e){
       if(d.prefs){S.prefs=Object.assign({},S.prefs,d.prefs);savePrefs()}render();toast("Backup restored")}catch(x){toast("That doesn’t look like a backup from this app.")}break}
   }
 });
+var photoTarget=null;
 document.addEventListener("change",function(e){
+  var tg=e.target;
+  if(tg.id==="filepick"){var file=tg.files&&tg.files[0],pt=photoTarget;if(!file||!pt||!CAP.assets)return;
+    toast("Adding photo…");
+    shrink(file).then(function(bl){return CAP.assets.upload(bl)}).then(function(res){
+      var o=Object.assign({},S[pt.kind][pt.id]),old=o.photo;o.photo=res.id;S[pt.kind][pt.id]=o;save(pt.kind,pt.id);if(old)CAP.assets.delete(old).catch(function(){});toast("Photo added");
+    }).catch(function(er){toast(er&&er.code==="too_large"?"That photo is too big. Try a smaller one.":er&&er.code==="not_granted"?"Photos need edit access to this page.":"Couldn’t add the photo. Try again.")});return}
+  if(tg.dataset&&tg.dataset.habit){if(!guard()){tg.checked=!tg.checked;return}var ht=findTask(tg.dataset.habit);
+    if(tg.checked)markDone(ht.id);else{var hs2=Object.assign({},st(ht.id)),td=isoDay(new Date());hs2.hist=(hs2.hist||[]).filter(function(x){return isoDay(new Date(x.at))!==td});S.state[ht.id]=hs2;saveState(ht.id)}return}
+  if(tg.dataset&&tg.dataset.prep!=null&&tg.dataset.prep!==""){if(!guard())return;var nvd=isoDay(nextVisit()),pp=P("prep",{}),dn=pp.date===nvd?(pp.done||[]).slice():[],ix=+tg.dataset.prep;
+    if(tg.checked){if(dn.indexOf(ix)<0)dn.push(ix)}else dn=dn.filter(function(x){return x!==ix});S.prefs=Object.assign({},S.prefs,{prep:{date:nvd,done:dn}});savePrefs();return}
+  if(tg.classList&&tg.classList.contains("agosel")&&tg.value){if(!guard())return;var ar=tg.dataset.area,lst2=cur.extra.list||"clean",v2=tg.value;
+    var sel=tasks().filter(function(t){return t.list===lst2&&t.area===ar&&!hidden(t)&&since(t)==null&&!aside(t)&&!resting(t)});tg.value="";
+    toast(ar+": "+sel.length+" tasks set up",setAgo(sel,v2));return}
   var ed=e.target.dataset&&e.target.dataset.edit;
   if(ed){if(!guard()){e.target.checked=!e.target.checked;return}patch(ed,{hidden:e.target.checked?null:true});return}if(e.target.id==="every"&&cur&&cur.mode==="task"){if(!guard())return;var t=findTask(cur.id),n=+e.target.value;patch(cur.id,{every:n===t.e?null:n})}});
 document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
@@ -978,8 +1234,26 @@ function parseTask(text){
 }
 function val(id){var x=document.getElementById(id);return x?x.value.trim():""}
 document.addEventListener("submit",function(e){
-  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd","editform"].indexOf(f)<0)return;
+  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd","editform","plantform","plantform-bulk","factform"].indexOf(f)<0)return;
   e.preventDefault();if(!guard())return;
+  if(CAP.dict&&CAP.dict.active())CAP.dict.stop().catch(function(){});
+  if(f==="plantform-bulk"){
+    var room=val("pa-room")||"Living room",lines=document.getElementById("pa-list").value.split(/\n|;/).map(function(x){return x.trim()}).filter(Boolean),dflt=+val("pa-every")||7,wt=document.getElementById("pa-today").checked,ids=[],base=Date.now().toString(36);
+    if(!lines.length){toast("Type or say at least one plant.");return}
+    lines.forEach(function(l,i){var pt2=parseTask(l),id="p"+base+i,ev2=pt2.e||dflt;S.plants[id]={name:pt2.name||l,room:room,every:ev2,hist:wt?[{at:new Date().toISOString()}]:[]};ids.push(id)});
+    document.getElementById("pa-list").value="";bulkSave("plants",ids);toast("Added "+ids.length+" plant"+(ids.length===1?"":"s")+" to "+room);return;
+  }
+  if(f==="plantform"){
+    var pp2=Object.assign({},S.plants[cur.id]);pp2.name=val("pp-name")||pp2.name;pp2.room=val("pp-room")||pp2.room;pp2.every=+val("pp-every")||7;
+    ["light","safe","notes"].forEach(function(k){var v3=val("pp-"+k);if(v3)pp2[k]=v3;else delete pp2[k]});
+    S.plants[cur.id]=pp2;save("plants",cur.id);toast("Saved");return;
+  }
+  if(f==="factform"){
+    var fid=cur.id||("x"+Date.now().toString(36)),fo=Object.assign({},S.facts[fid]||{type:cur.extra.type});
+    fo.label=val("fx-label")||(fo.type==="contact"?"Contact":"House fact");
+    ["name","phone","email","last","cost","value"].forEach(function(k){var v4=document.getElementById("fx-"+k);if(!v4)return;var t4=v4.value.trim();if(t4)fo[k]=t4;else delete fo[k]});
+    S.facts[fid]=fo;var isNew=!cur.id;cur.id=fid;save("facts",fid);toast(isNew?"Saved. You can add a photo now.":"Saved");return;
+  }
   if(f==="editform"){
     var t=findTask(cur.id),nm=val("et-name");if(!t||!nm){toast("Give the task a name.");return}
     var ch={name:nm,area:val("et-area")||t.area,m:+val("et-min")||0,sup:val("et-sup"),s:document.getElementById("et-steps").value.split("\n").map(function(x){return x.trim()}).filter(Boolean)},ne=+val("et-every");
@@ -1022,7 +1296,8 @@ document.addEventListener("submit",function(e){
     var np=Object.assign({},S.prefs);
     np.houseName=val("s-name")||"The Zhang-Wolfe House";
     np.people=val("s-people").split(",").map(function(x){return x.trim()}).filter(Boolean);
-    np.cleanEvery=+val("s-every");var cc=parseFloat(val("s-ccost"));if(cc>=0)np.cleanCost=cc;else delete np.cleanCost;
+    np.cleanEvery=+val("s-every");if(val("s-next"))np.cleanAnchor=val("s-next");
+    var pl=document.getElementById("s-prep").value.split("\n").map(function(x){return x.trim()}).filter(Boolean);if(pl.length)np.prepItems=pl;var cc=parseFloat(val("s-ccost"));if(cc>=0)np.cleanCost=cc;else delete np.cleanCost;
     np.cleanNotes=document.getElementById("s-cnotes").value.trim();var rt=parseFloat(val("s-rate"));if(rt>=0)np.rate=rt;
     S.prefs=np;savePrefs();closeSheet();toast("Saved");
   }
