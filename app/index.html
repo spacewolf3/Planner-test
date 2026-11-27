@@ -146,7 +146,7 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 .check{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);cursor:pointer}
 .check:first-child{border-top:0}
 .check input{width:22px;height:22px;accent-color:var(--accent);flex:none}
-.check .m{margin-left:auto;color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums}
+.check .m{margin-left:auto;color:var(--muted);font-size:.84rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .hist{list-style:none;padding:0;margin:0}
 .hist li{padding:8px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
 .hist li:first-child{border-top:0}
@@ -191,6 +191,10 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 .daylog .nt,.daylog .when{grid-column:1/-1;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
 .daylog .when{grid-column:auto;display:block}
 .fineprint{color:var(--muted);font-size:.82rem;margin:0}
+.listbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.areah{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.areah .n{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;margin-left:6px;font-weight:400}
+.check.off span:not(.m){color:var(--muted);text-decoration:line-through}
 @media (prefers-reduced-motion:no-preference){.row{transition:background .15s}}
 </style>
 
@@ -594,7 +598,9 @@ function viewAll(){
   var list=all.filter(function(t){return (ui.area==="All"||t.area===ui.area)&&(!q||t.name.toLowerCase().indexOf(q)>=0)}).sort(byDue);
   var hid=tasks().filter(function(t){return t.list==="clean"&&hidden(t)});
   document.getElementById("sub").textContent=all.length+" tasks";
-  var h='<input class="search" id="q" type="search" placeholder="Search cleaning tasks" value="'+esc(ui.q)+'" aria-label="Search tasks">'+areaChips(all,ui.area,"area");
+  var tot=tasks().filter(function(t){return t.list==="clean"}).length;
+  var h='<div class="listbar"><span class="fineprint">'+all.length+' of '+tot+' tasks are on your house’s list</span><button class="btn small" data-act="editlist" data-list="clean">Edit our list</button></div>';
+  h+='<input class="search" id="q" type="search" placeholder="Search cleaning tasks" value="'+esc(ui.q)+'" aria-label="Search tasks">'+areaChips(all,ui.area,"area");
   h+=list.length?rows(list):'<div class="empty">No tasks match.</div>';
   h+='<div class="btnrow"><button class="btn" data-act="add" data-list="clean">Add a task</button></div>';
   if(hid.length)h+='<details class="aside"><summary>Hidden from your list <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
@@ -618,7 +624,7 @@ function viewUpkeep(){
   h+=ids.length?'<ul class="rows">'+ids.map(appRow).join("")+'</ul>':'<div class="empty"><strong>Add your appliances.</strong> Save the brand, model and serial number, warranty dates and the manual link. Each one comes with its own care tasks.</div>';
   if(sug.length)h+='<p class="fineprint" style="margin-top:10px">Quick add</p><div class="chips wrap" style="margin-top:6px">'+sug.map(function(s){return '<button class="chip" data-act="quickapp" data-kind="'+s[0]+'" data-name="'+esc(s[1])+'">+ '+esc(s[1])+'</button>'}).join("")+'<button class="chip" data-act="newapp">+ Something else</button></div>';
   h+='</section>';
-  h+='<section><div class="section-h"><h2>Upkeep</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button></div></section>';
+  h+='<section><div class="section-h"><h2>Upkeep</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button><button class="btn" data-act="editlist" data-list="upkeep">Edit our list</button></div></section>';
   if(hid.length)h+='<details class="aside"><summary>Hidden <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
   return h;
 }
@@ -736,7 +742,7 @@ var EVERY=[1,2,3,4,7,10,14,21,30,45,60,90,120,180,270,365,730];
 function sheetTop(back){return '<div class="sheet-top"><button class="btn small ghost" data-act="back">← '+(stack.length?"Back":"Close")+'</button>'+(back||"")+'</div>'}
 function renderSheet(){
   var el=document.getElementById("sheet"),m=cur.mode,out;
-  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else out=settingsSheet();
+  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else out=settingsSheet();
   if(out==null){back();return}
   el.innerHTML='<div class="sheet-in">'+out+'</div>';el.hidden=false;
 }
@@ -829,6 +835,20 @@ function visitSheet(){
   if(vs.length)out+='<div class="card"><h3>Past visits</h3><ul class="daylog">'+vs.slice(0,12).map(function(v){return '<li><span>'+fmtShort(v.at)+'<span class="when">'+(v.tasks||[]).length+' tasks'+(v.cost?' · '+money(v.cost):'')+(v.note?' · '+esc(v.note):'')+'</span></span><span class="x"><button class="btn small ghost danger" data-act="delvisit" data-v="'+esc(v.id)+'">Remove</button></span></li>'}).join("")+'</ul></div>';
   return out;
 }
+function editSheet(){
+  var list=cur.extra.list||"clean",all=tasks().filter(function(t){return t.list===list}),areas=[],by={};
+  all.forEach(function(t){if(!by[t.area]){by[t.area]=[];areas.push(t.area)}by[t.area].push(t)});
+  var on=all.filter(function(t){return !hidden(t)}).length;
+  var out=sheetTop('<span class="fineprint">'+on+' of '+all.length+' on</span>')+'<h2 id="sheet-title">What’s in our house</h2>'+
+    '<div class="seg" role="group" aria-label="Which list" style="grid-template-columns:1fr 1fr"><button data-act="editlist" data-list="clean" aria-pressed="'+(list==="clean")+'">Cleaning</button><button data-act="editlist" data-list="upkeep" aria-pressed="'+(list==="upkeep")+'">Upkeep</button></div>'+
+    '<p class="fineprint">Uncheck anything that doesn’t apply to your house. It comes off every list right away, and you can check it again any time. Your history is kept.</p>';
+  areas.forEach(function(a){
+    var ts=by[a],n=ts.filter(function(t){return !hidden(t)}).length;
+    out+='<div class="card"><div class="areah"><h3>'+esc(a)+'<span class="n">'+n+' of '+ts.length+'</span></h3><div class="btnrow"><button class="btn small" data-act="editarea" data-area="'+esc(a)+'" data-v="on"'+(n===ts.length?" disabled":"")+'>All</button><button class="btn small ghost" data-act="editarea" data-area="'+esc(a)+'" data-v="off"'+(n===0?" disabled":"")+'>None</button></div></div><div>'+
+      ts.map(function(t){var off=hidden(t);return '<label class="check'+(off?" off":"")+'"><input type="checkbox" id="ed-'+esc(t.id)+'" data-edit="'+esc(t.id)+'"'+(off?"":" checked")+'><span>'+esc(t.name)+'</span><span class="m">'+fmtEvery(every(t))+'</span></label>'}).join("")+'</div></div>';
+  });
+  return out+'<div class="btnrow"><button class="btn primary" data-act="back">Done</button></div>';
+}
 function settingsSheet(){
   return sheetTop()+'<h2 id="sheet-title">Household</h2><form class="form" id="setform">'+
   '<div class="card"><div><label class="lbl" for="s-name">House name</label><input type="text" id="s-name" value="'+esc(houseName())+'"></div>'+
@@ -837,6 +857,7 @@ function settingsSheet(){
   '<div><label class="lbl" for="s-cnotes">Notes for the cleaners</label><textarea id="s-cnotes" placeholder="e.g. Wood floors: barely damp mop, no vinegar or steam. Silk & wool rugs: vacuum on suction only, stay off the fringe. Don’t move the piano.">'+esc(P("cleanNotes",""))+'</textarea></div></div>'+
   '<div class="card"><h3>Savings</h3><div><label class="lbl" for="s-rate">Hourly rate to compare against ($)</label><input type="number" id="s-rate" min="0" step="1" value="'+rate()+'"></div></div>'+
   '<div class="btnrow"><button class="btn primary" type="submit">Save</button></div></form>'+
+  '<div class="card"><h3>What’s in our house</h3><p class="fineprint">Turn whole groups of tasks on or off in one place.</p><div class="btnrow"><button class="btn small" data-act="editlist" data-list="clean">Edit cleaning list</button><button class="btn small" data-act="editlist" data-list="upkeep">Edit upkeep list</button></div></div>'+
   '<div class="card"><h3>Backup</h3><p class="fineprint">Copy everything (tasks, history, appliances, visits, purchases) to keep in a note, or paste a backup back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div>';
 }
 
@@ -891,6 +912,10 @@ document.addEventListener("click",function(e){
     case "unhide":if(!guard())return;patch(id,{hidden:null});break;
     case "delcustom":if(!guard())return;delete S.custom[id];delete S.state[id];save("state",id,true);save("custom",id,true);back();toast("Task deleted");break;
     case "add":openSheet("add",null,{list:b.dataset.list});break;
+    case "editlist":if(cur&&cur.mode==="edit"){cur.extra.list=b.dataset.list;renderSheet();document.getElementById("sheet").scrollTop=0}else openSheet("edit",null,{list:b.dataset.list});break;
+    case "editarea":{if(!guard())return;var hide=b.dataset.v==="off",lst=cur.extra.list;
+      tasks().forEach(function(t){if(t.list===lst&&t.area===b.dataset.area&&hidden(t)!==hide){var s2=Object.assign({},st(t.id));if(hide)s2.hidden=true;else delete s2.hidden;S.state[t.id]=s2;save("state",t.id,true)}});
+      render();break}
     case "addcare":openSheet("add",null,{list:"upkeep",app:cur.id});break;
     case "quickapp":{if(!guard())return;var aid=newApp(b.dataset.kind,b.dataset.name);openSheet("app",aid);break}
     case "newapp":{if(!guard())return;openSheet("app",newApp("other","New appliance"));break}
@@ -907,7 +932,9 @@ document.addEventListener("click",function(e){
       if(d.prefs){S.prefs=Object.assign({},S.prefs,d.prefs);savePrefs()}render();toast("Backup restored")}catch(x){toast("That doesn’t look like a backup from this app.")}break}
   }
 });
-document.addEventListener("change",function(e){if(e.target.id==="every"&&cur&&cur.mode==="task"){if(!guard())return;var t=findTask(cur.id),n=+e.target.value;patch(cur.id,{every:n===t.e?null:n})}});
+document.addEventListener("change",function(e){
+  var ed=e.target.dataset&&e.target.dataset.edit;
+  if(ed){if(!guard()){e.target.checked=!e.target.checked;return}patch(ed,{hidden:e.target.checked?null:true});return}if(e.target.id==="every"&&cur&&cur.mode==="task"){if(!guard())return;var t=findTask(cur.id),n=+e.target.value;patch(cur.id,{every:n===t.e?null:n})}});
 document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
 function val(id){var x=document.getElementById(id);return x?x.value.trim():""}
 document.addEventListener("submit",function(e){
