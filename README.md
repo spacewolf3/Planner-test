@@ -9,6 +9,9 @@ A household book for one family: cleaning, upkeep, appliances and the cleaners' 
 - **Home**: seasons (pool closed, pond winter mode), appliances (brand, model, serial, warranty, manual link, notes) with their own care tasks, plus upkeep for home systems, safety, pool and pond, house facts and contacts.
 - **Week**: tasks done, time, money, savings vs. hiring out, who did what, and the cleaners' visits.
 - **Guide**: never-mix rules, notes for this house (floors, rugs, instruments, plants with cats), and the gentle and stronger cleaning kits.
+- **Quiet mode**: pause cleaning and upkeep for a trip or sick days; those days don't count, so nothing piles up.
 - **Settings** (gear icon): house name, who logs tasks, cleaner schedule, cost and notes, savings rate, backup.
 
 As a claude.ai artifact the data is saved to your account and syncs. Opened as a plain file, it saves in that browser only.
+
+The cover image and icons (`cover.png`, `icon-512.png`, `icon-180.png`) are rendered from `art-source.html`.

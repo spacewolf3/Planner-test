@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{--bg:#f4f4f7;--ink:#1e1c2a;--muted:#625f73;--accent:#33408c;--wood:#8a5634;--wood-soft:#f2e7de;--ok:#2c7349;--ok-soft:#dcefe2;--line:#dcdbe5}
+*{box-sizing:border-box;margin:0}
+body{background:#fff}
+.rug{height:30px;border-block:4px solid var(--wood);
+ background:linear-gradient(135deg,var(--accent) 25%,transparent 25%) 0 0/32px 20px repeat-x,linear-gradient(225deg,var(--accent) 25%,transparent 25%) 0 0/32px 20px repeat-x,
+ linear-gradient(45deg,var(--wood) 25%,transparent 25%) 16px 100%/32px 12px repeat-x,linear-gradient(315deg,var(--wood) 25%,transparent 25%) 16px 100%/32px 12px repeat-x,var(--wood-soft)}
+#cover{width:1200px;height:630px;background:var(--bg);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;font-family:"Atkinson Hyperlegible",sans-serif;color:var(--ink)}
+.mid{display:grid;grid-template-columns:auto 1fr;gap:56px;align-items:center;padding:0 96px}
+.mono{width:220px;height:220px;border-radius:50%;border:4px solid var(--wood);background:var(--wood-soft);color:var(--wood);display:grid;place-items:center;font-family:"Instrument Serif",serif;font-style:italic;font-size:110px;letter-spacing:.02em}
+h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:104px;line-height:.95}
+.tag{margin-top:22px;font-size:27px;color:var(--muted)}
+.pills{margin-top:26px;display:flex;gap:12px}
+.pill{font-size:21px;font-weight:700;padding:8px 18px;border-radius:999px;background:#fff;border:2px solid var(--line);color:var(--accent)}
+.pill.g{color:var(--ok);background:var(--ok-soft);border-color:transparent}
+.pill.w{color:var(--wood);background:var(--wood-soft);border-color:transparent}
+#icon{width:512px;height:512px;background:var(--wood-soft);position:relative;overflow:hidden;font-family:"Instrument Serif",serif}
+#icon .rug{position:absolute;left:0;right:0;bottom:62px;height:40px}
+#icon .m{position:absolute;inset:44px 0 0;display:grid;place-items:start center}
+#icon .ring{margin-top:6px;width:300px;height:300px;border-radius:50%;border:8px solid var(--wood);background:#fbf6f1;color:var(--wood);display:grid;place-items:center;font-style:italic;font-size:160px;letter-spacing:.02em;padding-bottom:10px}
+</style></head><body>
+<div id="cover"><div class="rug"></div>
+ <div class="mid"><div class="mono">ZW</div>
+  <div><h1>The Zhang-<br>Wolfe House</h1><p class="tag">Our house book: what’s due, who did it, and how to do it right.</p>
+  <div class="pills"><span class="pill">To do</span><span class="pill w">Cleaners</span><span class="pill g">Plants</span><span class="pill">Home</span><span class="pill">Week</span></div></div></div>
+ <div class="rug"></div></div>
+<div style="height:40px"></div>
+<div id="icon"><div class="m"><div class="ring">ZW</div></div><div class="rug"></div></div>
+</body></html>

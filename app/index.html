@@ -1,4 +1,8 @@
 <title>The Zhang-Wolfe House</title>
+<link rel="artifact-thumbnail" href="cover.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Zhang-Wolfe">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -514,7 +518,12 @@ function original(id){return L.filter(function(t){return t.id===id})[0]}
 function st(id){return S.state[id]||{}}
 function every(t){return st(t.id).every||t.e}
 function last(t){var h=st(t.id).hist||[];return h[0]||null}
-function since(t){var a=last(t);return a?Math.max(0,Math.floor((Date.now()-new Date(a.at).getTime())/DAY)):null}
+// Quiet mode: days inside a quiet period don't count toward anything coming due, so the clocks pick up where they left off.
+function quietList(){return P("quiet",[])}
+function quietDays(at){var a=dayStart(at),t=dayStart(new Date()),n=0;
+  quietList().forEach(function(q){var f=new Date(q.from+"T00:00:00"),e=new Date(q.to+"T00:00:00");e.setDate(e.getDate()+1);var st0=Math.max(a,f),en=Math.min(t,e);if(en>st0)n+=Math.round((en-st0)/DAY)});return n}
+function quietNow(){var d=isoDay(new Date());return quietList().filter(function(q){return q.from<=d&&d<=q.to})[0]||null}
+function since(t){var a=last(t);return a?Math.max(0,Math.floor((Date.now()-new Date(a.at).getTime())/DAY)-quietDays(a.at)):null}
 function until(t){var d=since(t);return d==null?null:every(t)-d}
 function ratio(t){var d=since(t);return d==null?1:d/every(t)}
 function aside(t){var s=st(t.id);if(s.why==="supplies")return "supplies";if(s.why==="later"&&s.until&&new Date(s.until).getTime()>Date.now())return "later";return null}
@@ -708,6 +717,14 @@ function viewToday(){
   if(unset.length>=10)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>'+unset.length+' tasks aren’t set up yet. Start them all fresh and they’ll come due a few at a time over the next weeks, or set rough dates room by room.</p><div class="btnrow"><button class="btn small primary" data-act="fresh">Start everything fresh</button><button class="btn small" data-act="editlist" data-list="clean">Set by room</button></div></div>';
   var dow=new Date().getDay();
   if(dow===0||dow>=5){var wk=weekData(0);if(wk.items.length)h+='<div class="banner"><p class="eyebrow">Your week so far</p><p>'+wk.items.length+' task'+(wk.items.length>1?"s":"")+' · '+fmtHrs(wk.min)+' · saved about '+money(wk.saved)+'</p><div class="btnrow"><button class="btn small" data-act="tab" data-v="week">See the wrap-up</button></div></div>'}
+  var qn=quietNow();
+  if(qn){
+    document.getElementById("sub").textContent="quiet until "+dayName(new Date(qn.to+"T12:00:00"));
+    h='<section class="banner"><p class="eyebrow">Quiet mode</p><p class="big" style="font-family:var(--f-display);font-size:1.45rem;margin:0">Resting until '+fmtShort(qn.to+"T12:00:00")+'</p><p>Nothing in cleaning or upkeep comes due while you’re away or under the weather. When it ends, everything picks up where it left off'+(qn.why?' · '+esc(qn.why):'')+'.</p><div class="btnrow"><button class="btn small primary" data-act="quietend">End quiet mode</button><button class="btn small" data-act="quiet">Change dates</button></div></section>';
+    h+=cleanersCard();
+    if(dry.length)h+='<section><div class="section-h"><h2>Thirsty plants</h2><span class="aside">plants still need water</span></div>'+plantRows(dry)+'</section>';
+    return h;
+  }
   h+=cleanersCard();
   h+=habitsCard();
   var ranges=[["now","Due now"],["week","This week"],["month","This month"]];
@@ -731,6 +748,7 @@ function viewToday(){
     h+='<details class="aside" open><summary>Waiting on supplies <span>'+sup.length+'</span></summary>'+rows(sup)+'</details>';
   }
   if(later.length)h+='<details class="aside"><summary>Set aside for later <span>'+later.length+'</span></summary>'+rows(later)+'</details>';
+  h+='<div class="listbar" style="margin-top:4px"><span class="fineprint">Away, busy or sick? Quiet mode pauses everything without letting it pile up.</span><button class="btn small" data-act="quiet">Quiet mode</button></div>';
   if(unset.length)h+='<details class="aside"><summary><span>Not set up yet <span class="hint">· tap one, say when you last did it</span></span><span>'+unset.length+'</span></summary>'+rows(unset.sort(function(a,b){return a.list.localeCompare(b.list)||a.area.localeCompare(b.area)}))+'</details>';
   return h;
 }
@@ -925,7 +943,7 @@ var EVERY=[1,2,3,4,7,10,14,21,30,45,60,90,120,180,270,365,730];
 function sheetTop(back){return '<div class="sheet-top"><button class="btn small ghost" data-act="back">← '+(stack.length?"Back":"Close")+'</button>'+(back||"")+'</div>'}
 function renderSheet(){
   var el=document.getElementById("sheet"),m=cur.mode,out;
-  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else if(m==="edittask")out=editTaskSheet();else if(m==="plant")out=plantSheet();else if(m==="plantadd")out=plantAddSheet();else if(m==="fact")out=factSheet();else out=settingsSheet();
+  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else if(m==="edittask")out=editTaskSheet();else if(m==="plant")out=plantSheet();else if(m==="plantadd")out=plantAddSheet();else if(m==="fact")out=factSheet();else if(m==="quiet")out=quietSheet();else out=settingsSheet();
   if(out==null){back();return}
   el.innerHTML='<div class="sheet-in">'+out+'</div>';el.hidden=false;
 }
@@ -1094,6 +1112,15 @@ function factSheet(){
   if(!id&&CAP.assets)out+='<p class="fineprint">Save first, then you can add a photo (handy for a breaker panel map or a paint can label).</p>';
   return out;
 }
+function quietSheet(){
+  var q=quietNow(),from=q?q.from:isoDay(new Date()),to=q?q.to:isoDay(new Date(Date.now()+6*DAY));
+  var past=quietList().filter(function(x){return x.to<isoDay(new Date())}).slice(-4).reverse();
+  return sheetTop()+'<h2 id="sheet-title">Quiet mode</h2><p>For trips, busy weeks or sick days. While it’s on, cleaning and upkeep stop coming due, and those days don’t count. Afterward nothing shows up overdue just because you were away. Plants still show when they’re thirsty, and the cleaners keep their schedule.</p>'+
+  '<form class="form" id="quietform"><div class="card"><div class="grid2"><div><label class="lbl" for="qm-from">From</label><input type="date" id="qm-from" value="'+from+'"></div><div><label class="lbl" for="qm-to">Through</label><input type="date" id="qm-to" value="'+to+'"></div></div>'+
+  '<div><label class="lbl" for="qm-why">Note (optional)</label><input type="text" id="qm-why" value="'+esc(q&&q.why||"")+'" placeholder="e.g. Visiting family"></div></div>'+
+  '<div class="btnrow"><button class="btn primary" type="submit">'+(q?"Save dates":"Start quiet mode")+'</button></div></form>'+
+  (past.length?'<div class="card"><h3>Past quiet times</h3><ul class="daylog">'+past.map(function(x){return '<li><span>'+fmtShort(x.from+"T12:00:00")+' – '+fmtShort(x.to+"T12:00:00")+(x.why?'<span class="when">'+esc(x.why)+'</span>':'')+'</span><span></span></li>'}).join("")+'</ul></div>':'');
+}
 function settingsSheet(){
   return sheetTop()+'<h2 id="sheet-title">Household</h2><form class="form" id="setform">'+
   '<div class="card"><div><label class="lbl" for="s-name">House name</label><input type="text" id="s-name" value="'+esc(houseName())+'"></div>'+
@@ -1147,6 +1174,9 @@ document.addEventListener("click",function(e){
     case "jump":{var jt=document.getElementById(b.dataset.v);if(jt)jt.scrollIntoView({behavior:"smooth",block:"start"});break}
     case "season":{if(!guard())return;var sp=Object.assign({},S.prefs);sp[b.dataset.k]=b.dataset.v==="1";S.prefs=sp;savePrefs();break}
     case "between":{if(!guard())return;patch(cur.id,{between:b.dataset.v==="1"?true:null});break}
+    case "quiet":openSheet("quiet");break;
+    case "quietend":{if(!guard())return;var td=isoDay(new Date()),yd=isoDay(new Date(Date.now()-DAY)),ql=quietList().map(function(x){return x.from<=td&&td<=x.to?Object.assign({},x,{to:x.from<=yd?yd:null}):x}).filter(function(x){return x.to});
+      S.prefs=Object.assign({},S.prefs,{quiet:ql});savePrefs();toast("Quiet mode ended. Welcome back.");break}
     case "fresh":{if(!guard())return;var fl=unsetTasks();toast("Started "+fl.length+" tasks fresh · they’ll come due a few at a time",setAgo(fl,"fresh"));break}
     case "camenow":{if(!guard())return;var ct=active("clean").filter(function(t){return cleanTasks().indexOf(t.id)>=0}).map(function(t){return t.id});
       var vid=logVisit(new Date().toISOString(),+P("cleanCost",0)||0,"",ct);toast("Visit logged · "+ct.length+" tasks done",function(){removeVisit(vid)});break}
@@ -1234,9 +1264,15 @@ function parseTask(text){
 }
 function val(id){var x=document.getElementById(id);return x?x.value.trim():""}
 document.addEventListener("submit",function(e){
-  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd","editform","plantform","plantform-bulk","factform"].indexOf(f)<0)return;
+  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd","editform","plantform","plantform-bulk","factform","quietform"].indexOf(f)<0)return;
   e.preventDefault();if(!guard())return;
   if(CAP.dict&&CAP.dict.active())CAP.dict.stop().catch(function(){});
+  if(f==="quietform"){
+    var qf=val("qm-from")||isoDay(new Date()),qt=val("qm-to");if(!qt||qt<qf){toast("Pick an end date on or after the start.");return}
+    var cq=quietNow(),ql2=quietList().filter(function(x){return x!==cq&&!(x.from===(cq&&cq.from))}).filter(function(x){return x.to<qf||x.from>qt});
+    var nq={from:qf,to:qt};if(val("qm-why"))nq.why=val("qm-why");ql2.push(nq);ql2.sort(function(a,b){return a.from<b.from?-1:1});
+    S.prefs=Object.assign({},S.prefs,{quiet:ql2.slice(-12)});savePrefs();closeSheet();toast("Quiet mode through "+fmtShort(qt+"T12:00:00"));return;
+  }
   if(f==="plantform-bulk"){
     var room=val("pa-room")||"Living room",lines=document.getElementById("pa-list").value.split(/\n|;/).map(function(x){return x.trim()}).filter(Boolean),dflt=+val("pa-every")||7,wt=document.getElementById("pa-today").checked,ids=[],base=Date.now().toString(36);
     if(!lines.length){toast("Type or say at least one plant.");return}
