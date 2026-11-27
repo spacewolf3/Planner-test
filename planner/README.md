@@ -51,3 +51,7 @@ It also uses Claude (quick add and meal ideas), voice input where the browser su
 ## Where data is kept
 
 Family data (schedules, events, meals, groceries, tasks) is stored with the artifact on claude.ai and shared by everyone with edit access. **None of it is in this repository.** Setup → Backups can save a copy to Google Drive or download one, and restore from a backup file.
+
+## Home-screen icon
+
+`icon/family-planner-icon.png` (drawn from `icon/icon.svg`) is the planner's app icon. claude.ai decides the icon for a plain "Add to Home Screen", so to use this one on an iPhone or iPad, make a Shortcuts shortcut that opens the planner's link and give it this picture as its icon. `thumb.png` is the preview picture shown on the claude.ai gallery card and in shared links.

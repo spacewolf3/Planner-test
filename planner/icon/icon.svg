@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a8791"/>
+      <stop offset="1" stop-color="#17575e"/>
+    </linearGradient>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0b2e32" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- sun -->
+  <g transform="translate(792 238)">
+    <g stroke="#f6c453" stroke-width="22" stroke-linecap="round">
+      <line x1="0" y1="-150" x2="0" y2="-118"/><line x1="0" y1="118" x2="0" y2="150"/>
+      <line x1="-150" y1="0" x2="-118" y2="0"/><line x1="118" y1="0" x2="150" y2="0"/>
+      <line x1="-106" y1="-106" x2="-84" y2="-84"/><line x1="84" y1="84" x2="106" y2="106"/>
+      <line x1="-106" y1="106" x2="-84" y2="84"/><line x1="84" y1="-84" x2="106" y2="-106"/>
+    </g>
+    <circle r="92" fill="#f6c453"/>
+  </g>
+  <!-- little cloud -->
+  <g fill="#e9f5f4" opacity=".9">
+    <circle cx="200" cy="250" r="46"/><circle cx="252" cy="228" r="58"/><circle cx="312" cy="252" r="44"/>
+    <rect x="156" y="250" width="200" height="46" rx="23"/>
+  </g>
+  <g filter="url(#soft)">
+    <!-- chimney -->
+    <rect x="660" y="300" width="76" height="150" rx="14" fill="#c9562f"/>
+    <!-- roof -->
+    <path d="M512 214 L836 478 L188 478 Z" fill="#ec7a4c" stroke="#ec7a4c" stroke-width="44" stroke-linejoin="round"/>
+    <!-- house body: a calendar page -->
+    <rect x="236" y="444" width="552" height="430" rx="56" fill="#fffaf2"/>
+    <!-- binder rings -->
+    <rect x="352" y="420" width="30" height="70" rx="15" fill="#3b4a55"/>
+    <rect x="642" y="420" width="30" height="70" rx="15" fill="#3b4a55"/>
+    <!-- window tiles: who has the kids -->
+    <rect x="286" y="520" width="196" height="138" rx="28" fill="#4cc2c0"/>
+    <rect x="286" y="684" width="196" height="138" rx="28" fill="#a58bf0"/>
+    <path d="M336 592 l36 34 l66 -70" fill="none" stroke="#fffaf2" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- heart window -->
+    <rect x="542" y="520" width="196" height="138" rx="28" fill="#f6c453"/>
+    <path d="M640 630 C 590 598, 584 560, 612 552 C 628 548, 638 558, 640 566 C 642 558, 652 548, 668 552 C 696 560, 690 598, 640 630 Z" fill="#ec7a4c"/>
+    <!-- door -->
+    <rect x="566" y="684" width="148" height="190" rx="26" fill="#1f6f78"/>
+    <circle cx="688" cy="786" r="12" fill="#f6c453"/>
+  </g>
+</svg>
