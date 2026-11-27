@@ -572,7 +572,8 @@ function viewToday(){
   h+='<section class="finder"><div class="seg" role="group" aria-label="When">'+ranges.map(function(r){return '<button data-act="range" data-v="'+r[0]+'" aria-pressed="'+(ui.range===r[0])+'">'+r[1]+'</button>'}).join("")+'</div>'+
     '<span class="lab">How much time do you have?</span><div class="chips wrap" role="group" aria-label="Time available">'+times.map(function(c){return '<button class="chip" data-act="budget" data-v="'+(c[0]||"")+'" aria-pressed="'+(ui.budget===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
   var lim=ui.range==="now"?0:ui.range==="week"?7:30;
-  var pool=live.filter(function(t){var u=until(t);return u!=null&&u<=lim}).sort(byDue),pick=pool;
+  // "This week / month" looks ahead, but only at tasks at least halfway to due, so a weekly job done 2 days ago stays off.
+  var pool=live.filter(function(t){var u=until(t);return u!=null&&u<=lim&&(lim===0||ratio(t)>=.5)}).sort(byDue),pick=pool;
   if(ui.budget){var used=0;pick=[];pool.forEach(function(t){var m=t.m||10;if(used+m<=ui.budget){pick.push(t);used+=m}})}
   var cl=pick.filter(function(t){return t.list==="clean"}),up=pick.filter(function(t){return t.list==="upkeep"});
   if(ui.budget||pick.length)h+='<p class="fit">'+(ui.budget?(pick.length?pick.length+" task"+(pick.length>1?"s":"")+" fit · about "+fmtMin(mins(pick))+" of "+fmtMin(ui.budget):"Nothing on this list fits in "+fmtMin(ui.budget)+". Try more time or a wider window."):pick.length+" task"+(pick.length===1?"":"s")+" · about "+fmtMin(mins(pick)))+'</p>';h+='</section>';
