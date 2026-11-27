@@ -721,7 +721,7 @@ function masthead(){
 function typed(root){var k={};root.querySelectorAll("input[id],textarea[id],select[id]").forEach(function(x){
   if(x.id==="q")return;
   if(x.type==="checkbox"){if(x.checked!==x.defaultChecked)k[x.id]=x.checked;return}
-  if(x.tagName==="SELECT"){var d=[].filter.call(x.options,function(o){return o.defaultSelected})[0];if(d&&x.value!==d.value)k[x.id]=x.value;return}
+  if(x.tagName==="SELECT"){var d=[].filter.call(x.options,function(o){return o.defaultSelected})[0]||x.options[0];if(d&&x.value!==d.value)k[x.id]=x.value;return}
   if(x.value!==x.defaultValue)k[x.id]=x.value});return k}
 function put(k){Object.keys(k).forEach(function(id){var x=document.getElementById(id);if(!x)return;if(x.type==="checkbox")x.checked=k[id];else x.value=k[id]})}
 function render(){
@@ -848,6 +848,12 @@ function editSheet(){
     out+='<div class="card"><div class="areah"><h3>'+esc(a)+'<span class="n">'+n+' of '+ts.length+'</span></h3><div class="btnrow"><button class="btn small" data-act="editarea" data-area="'+esc(a)+'" data-v="on"'+(n===ts.length?" disabled":"")+'>All</button><button class="btn small ghost" data-act="editarea" data-area="'+esc(a)+'" data-v="off"'+(n===0?" disabled":"")+'>None</button></div></div><div>'+
       ts.map(function(t){var off=hidden(t);return '<label class="check'+(off?" off":"")+'"><input type="checkbox" id="ed-'+esc(t.id)+'" data-edit="'+esc(t.id)+'"'+(off?"":" checked")+'><span>'+esc(t.name)+'</span><span class="m">'+fmtEvery(every(t))+'</span></label>'}).join("")+'</div></div>';
   });
+  out+='<div class="card"><h3>Add a task</h3><form class="form" id="quickadd">'+
+    '<div><label class="lbl" for="qa-name">What needs doing, and how often</label><input type="text" id="qa-name" autocomplete="off" placeholder="e.g. Wipe the piano keys every 2 weeks"></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="qa-area">Area</label><select id="qa-area">'+areas.map(function(a){return '<option value="'+esc(a)+'">'+esc(a)+'</option>'}).join("")+(areas.indexOf("Other")<0?'<option value="Other">Other</option>':'')+'</select></div>'+
+    '<div><label class="lbl" for="qa-every">Repeat</label><select id="qa-every"><option value="">From what I said (or monthly)</option>'+EVERY.map(function(n){return '<option value="'+n+'">'+fmtEvery(n)+'</option>'}).join("")+'</select></div></div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">Add to our list</button><button class="btn small ghost" type="button" data-act="add" data-list="'+list+'">Add with steps & supplies</button></div>'+
+    '<p class="fineprint">To say it instead of typing, tap the field, then the microphone on your phone’s keyboard. Include how often, like “every other week” or “monthly,” and it’s picked up automatically.</p></form></div>';
   return out+'<div class="btnrow"><button class="btn primary" data-act="back">Done</button></div>';
 }
 function settingsSheet(){
@@ -937,10 +943,29 @@ document.addEventListener("change",function(e){
   var ed=e.target.dataset&&e.target.dataset.edit;
   if(ed){if(!guard()){e.target.checked=!e.target.checked;return}patch(ed,{hidden:e.target.checked?null:true});return}if(e.target.id==="every"&&cur&&cur.mode==="task"){if(!guard())return;var t=findTask(cur.id),n=+e.target.value;patch(cur.id,{every:n===t.e?null:n})}});
 document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
+// Pull a repeat out of a typed or dictated phrase: "Clean the gutters twice a year" → {name:"Clean the gutters", e:180}
+var NUMW={one:1,a:1,an:1,two:2,three:3,four:4,five:5,six:6,eight:8,ten:10,twelve:12};
+function parseTask(text){
+  var s=text.trim().replace(/[.!]+$/,""),e=null,re=[
+    [/\bevery\s+other\s+(day|week|month|year)\b/i,function(m){return {day:2,week:14,month:60,year:730}[m[1].toLowerCase()]}],
+    [/\bevery\s+(\d+|one|two|three|four|five|six|eight|ten|twelve)?\s*(day|week|month|year)s?\b/i,function(m){var n=m[1]?(+m[1]||NUMW[m[1].toLowerCase()]):1;return n*{day:1,week:7,month:30,year:365}[m[2].toLowerCase()]}],
+    [/\btwice\s+a\s+(week|month|year)\b/i,function(m){return {week:3,month:14,year:180}[m[1].toLowerCase()]}],
+    [/\b(once\s+a\s+(day|week|month|year))\b/i,function(m){return {day:1,week:7,month:30,year:365}[m[2].toLowerCase()]}],
+    [/\b(daily|weekly|biweekly|fortnightly|monthly|quarterly|yearly|annually)\b/i,function(m){return {daily:1,weekly:7,biweekly:14,fortnightly:14,monthly:30,quarterly:90,yearly:365,annually:365}[m[1].toLowerCase()]}]];
+  for(var i=0;i<re.length&&e==null;i++){var m=s.match(re[i][0]);if(m){e=re[i][1](m);s=s.replace(m[0]," ")}}
+  s=s.replace(/\s{2,}/g," ").replace(/[\s,;:-]+$/,"").replace(/^[\s,;:-]+/,"").trim();
+  return {name:s.charAt(0).toUpperCase()+s.slice(1),e:e};
+}
 function val(id){var x=document.getElementById(id);return x?x.value.trim():""}
 document.addEventListener("submit",function(e){
-  var f=e.target.id;if(["buyform","addform","appform","visitform","setform"].indexOf(f)<0)return;
+  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd"].indexOf(f)<0)return;
   e.preventDefault();if(!guard())return;
+  if(f==="quickadd"){
+    var raw=val("qa-name");if(!raw){toast("Type or say a task first.");return}
+    var pt=parseTask(raw),ev=+val("qa-every")||pt.e||30,qid="u"+Date.now().toString(36),qarea=val("qa-area")||"Other";
+    S.custom[qid]={list:cur.extra.list||"clean",name:pt.name||raw,area:qarea,e:ev,m:15,sup:"",s:[]};
+    document.getElementById("qa-name").value="";save("custom",qid);toast("Added to "+qarea+" · "+fmtEvery(ev));return;
+  }
   if(f==="buyform"){
     var a=parseFloat(val("b-amt"));if(!(a>0)){toast("Enter how much it cost.");return}
     var bid="b"+Date.now().toString(36),dt=val("b-date");
