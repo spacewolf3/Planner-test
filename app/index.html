@@ -213,6 +213,18 @@ label.lbl{font-size:.85rem;color:var(--muted);font-weight:700;display:block;marg
 .season{display:grid;grid-template-columns:5.5em 1fr;gap:10px;align-items:center}
 select.agosel{min-height:36px;padding:6px 10px;font-size:.88rem;margin-top:8px}
 .jump{margin-bottom:-6px}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gal .f{position:relative}
+.gal img,.gal .doc{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;color:var(--accent);font-weight:700;text-decoration:none}
+.gal .x{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:1rem;line-height:1;display:grid;place-items:center;padding:0}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.quick .btn{padding:10px 6px;font-size:.92rem}
+.amt{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.row .clip{color:var(--muted);font-size:.78rem;font-weight:400}
+.mhead{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:12px 0 6px}
+.mhead .n{float:right;font-variant-numeric:tabular-nums}
+.big2{font-family:var(--f-display);font-size:2.4rem;line-height:1}
+.statline{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline}
 .listbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .areah{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .areah .n{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;margin-left:6px;font-weight:400}
@@ -231,18 +243,17 @@ select.agosel{min-height:36px;padding:6px 10px;font-size:.88rem;margin-top:8px}
     <button class="gear" data-act="settings" aria-label="Household settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
   <div class="rug" aria-hidden="true"></div>
-  <div class="pagehead"><h2 id="title">To do</h2><span class="sub" id="sub"></span></div>
+  <div class="pagehead"><h2 id="title">House</h2><span class="sub" id="sub"></span></div>
   <main id="view" class="view" aria-live="polite"></main>
   <p class="foot" id="foot"></p>
 </div>
 
 <nav class="tabs" aria-label="Sections">
-  <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>To do</button>
-  <button data-tab="all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Cleaning</button>
-  <button data-tab="plants"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10M12 20v-7"/><path d="M12 13c0-4 3-7 8-7 0 4-3 7-8 7z"/><path d="M12 11C12 8 10 5 4 5c0 4 3 6 8 6z"/></svg>Plants</button>
-  <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>Home</button>
-  <button data-tab="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Week</button>
-
+  <button data-tab="house" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>House</button>
+  <button data-tab="fixes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Fix-its</button>
+  <button data-tab="upkeep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8.5 15l2.5 2.5L16 13"/></svg>Maintenance</button>
+  <button data-tab="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg>Log</button>
+  <button data-tab="cleaning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v8"/><path d="M7 11h10l1 10H6z"/><path d="M9 15v6M12 15v6M15 15v6"/></svg>Cleaning</button>
 </nav>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div>
@@ -431,14 +442,14 @@ var CLEAN_DEFAULT=["f-vacuum","f-mop","h-dust","b-toilet","b-sinks","b-shower","
 
 /* ---------------- Store: db when the page runs in claude.ai, this device otherwise ---------------- */
 var LS="hk-log-v1";
-var COLS={state:"state",custom:"custom",spend:"spend",visits:"visits",apps:"appliances",plants:"plants",facts:"facts"};
-var S={state:{},custom:{},spend:{},visits:{},apps:{},plants:{},facts:{},prefs:{},mode:"local",readonly:false};
-var CAP={assets:null,dict:null},dictTarget=null,dictState="idle";
+var COLS={state:"state",custom:"custom",spend:"spend",visits:"visits",apps:"appliances",plants:"plants",facts:"facts",fixes:"fixes",log:"log"};
+var S={state:{},custom:{},spend:{},visits:{},apps:{},plants:{},facts:{},fixes:{},log:{},prefs:{},mode:"local",readonly:false};
+var CAP={assets:null,dict:null,sample:null,sampleImg:false},dictTarget=null,dictState="idle";
 // Writes still on their way to the store; a live snapshot that arrives first must not undo them on screen.
 var pend={};
 function clone(v){return JSON.parse(JSON.stringify(v))}
 function lsRead(){try{var v=JSON.parse(localStorage.getItem(LS)||"{}");Object.keys(COLS).forEach(function(k){S[k]=v[k]||{}});S.prefs=v.prefs||{}}catch(e){}}
-function lsWrite(){try{var o={prefs:S.prefs};Object.keys(COLS).forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
+function lsWrite(){try{var o={prefs:S.prefs};Object.keys(COLS).forEach(function(k){var m={};Object.keys(S[k]).forEach(function(i){if(!(S[k][i]&&S[k][i]._new))m[i]=S[k][i]});o[k]=m});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
 var dbref=null,chains={};
 function chain(key,fn){var p=(chains[key]||Promise.resolve()).then(fn,fn);chains[key]=p.catch(function(){});return p}
 function writeErr(e){
@@ -472,11 +483,12 @@ function connect(){
     if(!db){footer();return}
     dbref=db;S.mode="db";footer();
     Object.keys(COLS).forEach(function(k){
-      db.collection(COLS[k]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});var pk=pend[k]||{};Object.keys(pk).forEach(function(id){if(pk[id])m[id]=pk[id];else delete m[id]});S[k]=m;lsWrite();render()},function(){});
+      db.collection(COLS[k]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});var pk=pend[k]||{};Object.keys(pk).forEach(function(id){if(pk[id])m[id]=pk[id];else delete m[id]});Object.keys(S[k]).forEach(function(id){if(S[k][id]&&S[k][id]._new&&!m[id])m[id]=S[k][id]});S[k]=m;lsWrite();render()},function(){});
     });
     db.collection("meta").doc("prefs").onSnapshot(function(d){S.prefs=d.exists?Object.assign({},d.data()):{};lsWrite();render()},function(){});
   }).catch(function(){footer()});
   window.claude.use("assets").then(function(a){CAP.assets=a;render()}).catch(function(){});
+  window.claude.use("sample").then(function(sm){if(!sm)return;CAP.sample=sm;sm.limits().then(function(l){CAP.sampleImg=!!(l&&l.images);render()}).catch(function(){})}).catch(function(){});
   window.claude.use("dictation").then(function(d){
     if(!d)return;CAP.dict=d;
     d.onFinal(function(e){var x=document.getElementById(dictTarget),t=(e.text||"").trim();if(!x||!t)return;
@@ -595,6 +607,30 @@ function setAside(id,why,days){var s=Object.assign({},st(id));s.why=why;if(days)
 function clearAside(id){var s=Object.assign({},st(id));delete s.why;delete s.until;S.state[id]=s;saveState(id)}
 function patch(id,obj){var s=Object.assign({},st(id),obj);Object.keys(obj).forEach(function(k){if(obj[k]==null||obj[k]==="")delete s[k]});S.state[id]=s;saveState(id)}
 
+/* Fix-its and the house log */
+var AREAS=["Kitchen","Living room","Family room","Dining room","Bedrooms","Bathrooms","Laundry","Garage","Basement","Outside","Roof & gutters","Pool","Pond","Whole house"];
+var CATS=["Repairs","Maintenance","Improvements","Appliances","Pool & pond","Garden & plants","Cleaning","Supplies","Other"];
+var PRI={urgent:0,soon:1,someday:2},PRI_L={urgent:"Urgent",soon:"Soon",someday:"Someday"},STAT_L={todo:"To do",doing:"In progress",waiting:"Waiting",done:"Fixed"};
+function fixes(){return Object.keys(S.fixes).filter(function(k){return !S.fixes[k]._new}).map(function(k){return Object.assign({id:k},S.fixes[k])})}
+function openFixes(){return fixes().filter(function(f){return f.status!=="done"}).sort(function(a,b){return (PRI[a.pri]||1)-(PRI[b.pri]||1)||(a.status==="doing"?-1:0)-(b.status==="doing"?-1:0)||String(a.created).localeCompare(String(b.created))})}
+function entries(){return Object.keys(S.log).filter(function(k){return !S.log[k]._new}).map(function(k){return Object.assign({id:k},S.log[k])})}
+function linked(field,id){return entries().filter(function(e){return e[field]===id}).sort(function(a,b){return a.date<b.date?1:-1})}
+function spentOn(list){return list.reduce(function(n,e){return n+(+e.amount||0)},0)}
+function areas(){var a=AREAS.slice();fixes().concat(entries()).forEach(function(x){if(x.area&&a.indexOf(x.area)<0)a.push(x.area)});return a}
+function vendors(){var v={};facts("contact").forEach(function(c){if(c.name)v[c.name]=1;else if(c.label)v[c.label]=1});entries().forEach(function(e){if(e.vendor)v[e.vendor]=1});return Object.keys(v).sort()}
+function taskCat(t){return t.list==="clean"?"Cleaning":/Pool|Pond/.test(t.area)?"Pool & pond":t.area==="Plants"?"Garden & plants":"Maintenance"}
+function dayOf(x){return typeof x==="string"&&x.length===10?new Date(x+"T12:00:00"):new Date(x)}
+// Everything that happened to the house, newest first. Kinds: entry (receipt / work / note), task, clean, visit, fix, buy.
+function events(){
+  var ev=[];
+  entries().forEach(function(e){ev.push({kind:"entry",id:e.id,at:dayOf(e.date||e.created),title:e.title||(e.type==="receipt"?"Receipt":e.type==="note"?"Note":"Work done"),sub:e.vendor||"",cat:e.cat||"Other",amount:+e.amount||0,files:(e.files||[]).length,type:e.type})});
+  tasks().forEach(function(t){(st(t.id).hist||[]).forEach(function(h){if(h.est||h.visit)return;ev.push({kind:t.list==="clean"?"clean":"task",id:t.id,at:new Date(h.at),title:t.name,sub:h.by||"",cat:taskCat(t),amount:+h.cost||0,note:h.note})})});
+  visits().forEach(function(v){ev.push({kind:"visit",id:v.id,at:new Date(v.at),title:"House cleaners",sub:(v.tasks||[]).length+" tasks",cat:"Cleaning",amount:+v.cost||0,note:v.note})});
+  fixes().forEach(function(f){if(f.status==="done"&&f.doneAt)ev.push({kind:"fix",id:f.id,at:dayOf(f.doneAt),title:"Fixed: "+f.title,sub:f.area||"",cat:"Repairs",amount:0})});
+  Object.keys(S.spend).forEach(function(k){var b=S.spend[k];ev.push({kind:"buy",id:k,at:new Date(b.at),title:b.what||"Purchase",sub:"",cat:"Supplies",amount:+b.amt||0})});
+  return ev.sort(function(a,b){return b.at-a.at});
+}
+
 /* Plants, one by one */
 var ROOMS=["Plant cabinet","Living room","Kitchen","Family room"];
 var LIGHT=["Low light","Medium light","Bright indirect","Direct sun"];
@@ -670,10 +706,10 @@ function weekData(off){
 function delta(a,b,f){var d=a-b;if(!b&&!a)return "";return (d>0?"+":d<0?"−":"±")+f(Math.abs(d))+" vs last week"}
 
 /* ---------------- Rendering ---------------- */
-var ui={tab:"today",budget:null,range:"now",area:"All",q:"",upArea:"All",weekOff:0};
+var ui={tab:"house",csub:"todo",budget:null,range:"now",area:"All",q:"",upArea:"All",weekOff:0,fview:"open",lf:"all",lq:""};
 var DROP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>',LEAF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></svg>';
-try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=saved.tab;if(saved.range)ui.range=saved.range}catch(e){}
-function rememberUi(){try{localStorage.setItem("hk-ui",JSON.stringify({tab:ui.tab,range:ui.range}))}catch(e){}}
+try{var saved=JSON.parse(localStorage.getItem("hk-ui")||"{}");if(saved.tab)ui.tab=({today:"house",all:"cleaning",plants:"cleaning"})[saved.tab]||saved.tab;if(saved.csub)ui.csub=saved.csub;else if(saved.tab==="all"||saved.tab==="plants")ui.csub=saved.tab;if(saved.range)ui.range=saved.range}catch(e){}
+function rememberUi(){try{localStorage.setItem("hk-ui",JSON.stringify({tab:ui.tab,csub:ui.csub,range:ui.range}))}catch(e){}}
 var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function row(t){
   var s=status(t),d=since(t),pct=Math.min(100,Math.round(ratio(t)*100)),l=last(t);
@@ -708,13 +744,13 @@ function habitsCard(){
     return '<div class="check"><input type="checkbox" id="hb-'+esc(t.id)+'" data-habit="'+esc(t.id)+'"'+(d?" checked":"")+'><label for="hb-'+esc(t.id)+'">'+esc(t.name)+'</label><span class="m">'+(d&&l.by?esc(l.by):t.m?"~"+t.m+" min":"")+'</span></div>'}).join("")+'</div></section>';
 }
 function viewToday(){
-  var all=active(),live=all.filter(function(t){return !aside(t)&&!resting(t)&&!habit(t)});
-  var logged=all.filter(function(t){return since(t)!=null}),unset=unsetTasks().filter(function(t){return !habit(t)});
+  var all=active("clean"),live=all.filter(function(t){return !aside(t)&&!resting(t)&&!habit(t)});
+  var logged=all.filter(function(t){return since(t)!=null}),unset=unsetTasks("clean").filter(function(t){return !habit(t)});
   var dry=plants().filter(thirsty);
   var dueNow=live.filter(isDue).length+dry.length;
   document.getElementById("sub").textContent=dueNow?dueNow+" due now":"all caught up";
   var h="";
-  if(unset.length>=10)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>'+unset.length+' tasks aren’t set up yet. Start them all fresh and they’ll come due a few at a time over the next weeks, or set rough dates room by room.</p><div class="btnrow"><button class="btn small primary" data-act="fresh">Start everything fresh</button><button class="btn small" data-act="editlist" data-list="clean">Set by room</button></div></div>';
+  if(unset.length>=10)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>'+unset.length+' tasks aren’t set up yet. Start them all fresh and they’ll come due a few at a time over the next weeks, or set rough dates room by room.</p><div class="btnrow"><button class="btn small primary" data-act="fresh" data-list="clean">Start everything fresh</button><button class="btn small" data-act="editlist" data-list="clean">Set by room</button></div></div>';
   var dow=new Date().getDay();
   if(dow===0||dow>=5){var wk=weekData(0);if(wk.items.length)h+='<div class="banner"><p class="eyebrow">Your week so far</p><p>'+wk.items.length+' task'+(wk.items.length>1?"s":"")+' · '+fmtHrs(wk.min)+' · saved about '+money(wk.saved)+'</p><div class="btnrow"><button class="btn small" data-act="tab" data-v="week">See the wrap-up</button></div></div>'}
   var qn=quietNow();
@@ -740,7 +776,7 @@ function viewToday(){
   if(!pick.length&&!ui.budget&&!dry.length)h+='<div class="empty"><strong>'+(lim?"Nothing coming due in that window.":"Nothing is due right now.")+'</strong> '+(logged.length?"Enjoy the clean house.":"Set up a few tasks to get started.")+'</div>';
   if(cl.length)h+='<section><div class="section-h"><h2>Cleaning</h2><span class="aside">'+cl.length+' · ~'+fmtMin(mins(cl))+'</span></div>'+rows(cl)+'</section>';
   if(dry.length)h+='<section><div class="section-h"><h2>Thirsty plants</h2><span class="aside">'+dry.length+'</span></div>'+plantRows(dry)+(dry.length>1?'<div class="btnrow" style="margin-top:10px"><button class="btn small" data-act="waterall">Watered all '+dry.length+'</button></div>':'')+'</section>';
-  if(up.length)h+='<section><div class="section-h"><h2>Home upkeep</h2><span class="aside">'+up.length+' · ~'+fmtMin(mins(up))+'</span></div>'+rows(up)+'</section>';
+  if(false)h+='<section><div class="section-h"><h2>Home upkeep</h2><span class="aside">'+up.length+' · ~'+fmtMin(mins(up))+'</span></div>'+rows(up)+'</section>';
   var later=all.filter(function(t){return aside(t)==="later"}),sup=all.filter(function(t){return aside(t)==="supplies"});
   if(sup.length){
     var items={};sup.forEach(function(t){(t.sup||"Supplies for "+t.name).split(/,\s*/).forEach(function(x){items[x.trim()]=1})});
@@ -813,14 +849,20 @@ function viewUpkeep(){
   var ids=Object.keys(S.apps).sort(function(a,b){return String(S.apps[a].name).localeCompare(String(S.apps[b].name))});
   var have={};ids.forEach(function(k){have[S.apps[k].kind]=1});
   var sug=SUGGEST.filter(function(s){return !have[s[0]]});
-  var h='<div class="chips jump">'+[["sec-season","Seasons"],["sec-apps","Appliances"],["sec-upkeep","Upkeep"],["sec-facts","House facts"],["sec-contacts","Contacts"]].map(function(j){return '<button class="chip" data-act="jump" data-v="'+j[0]+'">'+j[1]+'</button>'}).join("")+'</div>';
+  var un=unsetTasks("upkeep"),soonU=all.filter(function(t){return !aside(t)&&!resting(t)&&since(t)!=null&&!isDue(t)&&until(t)<=30}).sort(function(a,b){return until(a)-until(b)});
+  var h='';
+  if(un.length>=5)h+='<div class="banner"><p class="eyebrow">Getting set up</p><p>'+un.length+' maintenance tasks aren’t set up yet. Start them fresh so they come due gradually, or set them room by room.</p><div class="btnrow"><button class="btn small primary" data-act="fresh" data-list="upkeep">Start them fresh</button><button class="btn small" data-act="editlist" data-list="upkeep">Set by area</button></div></div>';
+  var dueL=all.filter(isDue).sort(byDue);
+  h+='<section><div class="section-h"><h2>Due now</h2><span class="aside">'+dueL.length+'</span></div>'+(dueL.length?rows(dueL):'<div class="empty">Nothing is due. '+(soonU.length?'Next up: '+esc(soonU[0].name)+', '+dayName(new Date(Date.now()+until(soonU[0])*DAY))+'.':'')+'</div>')+'</section>';
+  if(soonU.length)h+='<section><div class="section-h"><h2>Next 30 days</h2><span class="aside">'+soonU.length+'</span></div>'+rows(soonU.slice(0,8))+'</section>';
+  h+='<div class="chips jump">'+[["sec-season","Seasons"],["sec-apps","Appliances"],["sec-upkeep","Upkeep"],["sec-facts","House facts"],["sec-contacts","Contacts"]].map(function(j){return '<button class="chip" data-act="jump" data-v="'+j[0]+'">'+j[1]+'</button>'}).join("")+'</div>';
   h+='<section class="card" id="sec-season"><h3>Seasons</h3>'+seasonRow("Pool","poolClosed",["Open","Closed for winter"])+seasonRow("Pond","pondWinter",["Active","Winter mode"])+
     '<p class="fineprint">While the pool is closed only its safety check and the opening reminder stay on. Pond winter mode pauses water tests, water changes, filter rinses, plant trimming and the UV bulb. Plant feeding, repotting and winterizing the faucets follow the calendar on their own.</p></section>';
   h+='<section id="sec-apps"><div class="section-h"><h2>Appliances</h2><span class="aside">'+ids.length+' saved</span></div>';
   h+=ids.length?'<ul class="rows">'+ids.map(appRow).join("")+'</ul>':'<div class="empty"><strong>Add your appliances.</strong> Save the brand, model and serial number, warranty dates and the manual link. Each one comes with its own care tasks.</div>';
   if(sug.length)h+='<p class="fineprint" style="margin-top:10px">Quick add</p><div class="chips wrap" style="margin-top:6px">'+sug.map(function(s){return '<button class="chip" data-act="quickapp" data-kind="'+s[0]+'" data-name="'+esc(s[1])+'">+ '+esc(s[1])+'</button>'}).join("")+'<button class="chip" data-act="newapp">+ Something else</button></div>';
   h+='</section>';
-  h+='<section id="sec-upkeep"><div class="section-h"><h2>Upkeep</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button><button class="btn" data-act="editlist" data-list="upkeep">Edit our list</button></div></section>';
+  h+='<section id="sec-upkeep"><div class="section-h"><h2>All maintenance</h2><span class="aside">home, safety, pool & pond</span></div>'+areaChips(all,ui.upArea,"uparea")+'<div style="height:10px"></div>'+rows(list)+'<div class="btnrow" style="margin-top:10px"><button class="btn" data-act="add" data-list="upkeep">Add a task</button><button class="btn" data-act="editlist" data-list="upkeep">Edit our list</button></div></section>';
   if(hid.length)h+='<details class="aside"><summary>Hidden <span>'+hid.length+'</span></summary>'+rows(hid)+'</details>';
   [["fact","sec-facts","House facts","Shutoffs, filter sizes, paint colors and other things you only need once in a while.",FACT_SUG],["contact","sec-contacts","Contacts","The people who help with the house.",CONTACT_SUG]].forEach(function(g){
     var fs=facts(g[0]),used={};fs.forEach(function(f){used[f.label]=1});
@@ -908,7 +950,86 @@ function viewGuide(){
   h+='<section><div class="section-h"><h2>When stronger is worth it</h2></div><div class="kit">'+strong.map(function(r){return '<div class="card alt"><h3>'+r[0]+'</h3><p><span class="good">Use for:</span> '+r[1]+'</p><p><span class="bad">Care:</span> '+r[2]+'</p></div>'}).join("")+'</div></section>';
   return h;
 }
-var titles={today:"To do",all:"Cleaning",plants:"Plants",upkeep:"Home",week:"Week wrap-up",guide:"Cleaning guide"};
+var CLIP='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 11l-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg>';
+function quickActions(){return '<div class="quick"><button class="btn" data-act="newfix">+ Fix-it</button><button class="btn" data-act="newentry" data-type="receipt">+ Receipt</button><button class="btn" data-act="newentry" data-type="work">+ Log work</button></div>'}
+function fixRow(f){
+  var done=f.status==="done",cls=done?"st-ok":f.pri==="urgent"?"st-due":f.pri==="soon"?"st-soon":"st-new";
+  var lab=done?"Fixed":f.status!=="todo"?STAT_L[f.status]:PRI_L[f.pri||"soon"],sp=spentOn(linked("fix",f.id)),nf=(f.files||[]).length;
+  var meta=[f.area,done?(f.doneAt?"fixed "+fmtShort(dayOf(f.doneAt)):""):(f.who==="pro"?"hiring out":f.who==="diy"?"DIY":""),f.est&&!done?"est. "+money(+f.est):"",sp?money(sp)+" spent":""].filter(Boolean).join(" · ");
+  return '<li class="row '+cls+'" data-fix="'+esc(f.id)+'"><button class="tick" data-act="fixdone" aria-label="'+(done?"Reopen ":"Mark fixed: ")+esc(f.title)+'"'+(done?' style="border-color:var(--ok);color:var(--ok)"':'')+'>'+TICK+'</button>'+
+    '<button class="main" data-act="openfix"><span class="name">'+esc(f.title)+(nf?' <span class="clip">'+CLIP+nf+'</span>':'')+'</span><span class="meta">'+(meta?esc(meta):"Tap to add details")+'</span></button><span class="pill">'+lab+'</span></li>';
+}
+function fixRows(l){return '<ul class="rows">'+l.map(fixRow).join("")+'</ul>'}
+function evRow(e){
+  var meta=[fmtShort(e.at),e.sub,e.cat].filter(Boolean).join(" · ");
+  return '<li class="row noTick"><button class="main" data-act="openev" data-kind="'+e.kind+'" data-id="'+esc(e.id)+'"><span class="name">'+esc(e.title)+(e.files?' <span class="clip">'+CLIP+e.files+'</span>':'')+'</span><span class="meta">'+esc(meta)+(e.note?' · '+esc(e.note):'')+'</span></button><span class="amt">'+(e.amount?money(e.amount):'')+'</span></li>';
+}
+function catBars(list){
+  var g={};list.forEach(function(e){if(e.amount)g[e.cat]=(g[e.cat]||0)+e.amount});
+  var ks=Object.keys(g).sort(function(a,b){return g[b]-g[a]}),mx=Math.max.apply(null,ks.map(function(k){return g[k]}))||1;
+  return ks.length?'<div class="bars">'+ks.map(function(k){return '<div class="bar wood"><span>'+esc(k)+'</span><span class="n">'+money(g[k])+'</span><div class="track"><div class="fill" style="width:'+Math.max(3,Math.round(g[k]/mx*100))+'%"></div></div></div>'}).join("")+'</div>':'<p class="fineprint">No costs logged yet. Add receipts and they add up here.</p>';
+}
+function viewHouse(){
+  var of=openFixes(),urgent=of.filter(function(f){return f.pri==="urgent"}),dueM=active("upkeep").filter(isDue).sort(byDue);
+  var now=new Date(),yr=now.getFullYear(),ev=events(),yev=ev.filter(function(e){return e.at.getFullYear()===yr&&e.kind!=="clean"}),mev=yev.filter(function(e){return e.at.getMonth()===now.getMonth()});
+  var soonW=Object.keys(S.apps).filter(function(k){var w=S.apps[k].warranty;if(!w)return false;var d=daysTo(new Date(w+"T12:00:00"));return d>=0&&d<=60});
+  var cDue=active("clean").filter(isDue).length,dry=plants().filter(thirsty).length,nv=nextVisit(),qn=quietNow();
+  var att=urgent.length+dueM.length+soonW.length;
+  document.getElementById("sub").textContent=att?att+" need attention":"all in hand";
+  var h=quickActions();
+  if(qn)h+='<div class="banner"><p class="eyebrow">Quiet mode</p><p>Resting until '+fmtShort(qn.to+"T12:00:00")+'. Maintenance and cleaning aren’t coming due.</p><div class="btnrow"><button class="btn small" data-act="quietend">End quiet mode</button></div></div>';
+  h+='<section><div class="section-h"><h2>Needs attention</h2><span class="aside">'+att+'</span></div>';
+  if(!att)h+='<div class="empty"><strong>Nothing urgent.</strong> No urgent fix-its or overdue maintenance.</div>';
+  else{
+    if(urgent.length)h+=fixRows(urgent);
+    if(dueM.length)h+=(urgent.length?'<div style="height:10px"></div>':'')+rows(dueM.slice(0,6))+(dueM.length>6?'<div class="btnrow" style="margin-top:8px"><button class="btn small ghost" data-act="tab" data-v="upkeep">All '+dueM.length+' due</button></div>':'');
+    if(soonW.length)h+='<ul class="rows" style="margin-top:10px">'+soonW.map(function(k){var a=S.apps[k];return '<li class="row noTick st-soon" data-app="'+esc(k)+'"><button class="main" data-act="openapp"><span class="name">'+esc(a.name)+' warranty</span><span class="meta">ends '+fmtShort(a.warranty+"T12:00:00")+'</span></button><span class="pill">Warranty</span></li>'}).join("")+'</ul>';
+  }
+  h+='</section>';
+  var rest=of.filter(function(f){return f.pri!=="urgent"});
+  h+='<section><div class="section-h"><h2>Fix-its</h2><span class="aside">'+of.length+' open</span></div>'+(rest.length?fixRows(rest.slice(0,5)):'<div class="empty">'+(of.length?'Only the urgent ones above.':'No open fix-its. Add anything that needs repairing or working on.')+'</div>')+(rest.length>5?'<div class="btnrow" style="margin-top:8px"><button class="btn small ghost" data-act="tab" data-v="fixes">All fix-its</button></div>':'')+'</section>';
+  var upc=active("upkeep").filter(function(t){return !aside(t)&&!resting(t)&&since(t)!=null&&!isDue(t)&&until(t)<=30}).sort(function(a,b){return until(a)-until(b)});
+  if(upc.length)h+='<section><div class="section-h"><h2>Coming up</h2><span class="aside">next 30 days</span></div>'+rows(upc.slice(0,4))+'</section>';
+  h+='<section><div class="section-h"><h2>Spending</h2><span class="aside">'+yr+'</span></div><div class="card"><div class="statline"><div><p class="fineprint">This year</p><p class="big2">'+money(spentOn(yev))+'</p></div><div><p class="fineprint">'+now.toLocaleDateString(undefined,{month:"long"})+'</p><p class="big2">'+money(spentOn(mev))+'</p></div></div>'+catBars(yev)+'<div class="btnrow"><button class="btn small" data-act="tab" data-v="log">Open the log</button></div></div></section>';
+  var rec=ev.filter(function(e){return e.kind!=="clean"}).slice(0,5);
+  if(rec.length)h+='<section><div class="section-h"><h2>Recently</h2></div><ul class="rows">'+rec.map(evRow).join("")+'</ul></section>';
+  h+='<section class="cleaners"><p class="eyebrow">Cleaning</p><p>'+(cDue?cDue+' cleaning task'+(cDue>1?'s':'')+' due':'Cleaning is caught up')+(dry?' · '+dry+' thirsty plant'+(dry>1?'s':''):'')+(nv?' · cleaners '+dayName(nv):'')+'</p><div class="btnrow"><button class="btn small wood" data-act="tab" data-v="cleaning">Go to cleaning</button></div></section>';
+  return h;
+}
+function viewFixes(){
+  var of=openFixes(),done=fixes().filter(function(f){return f.status==="done"}).sort(function(a,b){return String(b.doneAt).localeCompare(String(a.doneAt))});
+  document.getElementById("sub").textContent=of.length+" open";
+  var h='<form class="card form" id="fixquick"><label class="lbl" for="fq-title">What needs fixing or doing?</label><div class="fieldrow"><input type="text" id="fq-title" autocomplete="off" placeholder="e.g. Loose stair rail, repaint the powder room">'+micBtn("fq-title")+'</div>'+
+    '<div class="seg" role="group" aria-label="Priority" style="grid-template-columns:repeat(3,1fr)">'+["urgent","soon","someday"].map(function(k){return '<button type="button" data-act="fqpri" data-v="'+k+'" aria-pressed="'+((ui.fqpri||"soon")===k)+'">'+PRI_L[k]+'</button>'}).join("")+'</div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">Add fix-it</button><button class="btn small ghost" type="button" data-act="newfix">Add with details</button></div></form>';
+  h+='<div class="seg two" role="group" aria-label="Show"><button data-act="fview" data-v="open" aria-pressed="'+(ui.fview==="open")+'">Open ('+of.length+')</button><button data-act="fview" data-v="done" aria-pressed="'+(ui.fview==="done")+'">Fixed ('+done.length+')</button></div>';
+  if(ui.fview==="open"){
+    if(!of.length)h+='<div class="empty"><strong>Nothing on the list.</strong> Add repairs, projects and anything you keep meaning to get to.</div>';
+    ["urgent","soon","someday"].forEach(function(k){var l=of.filter(function(f){return (f.pri||"soon")===k});if(l.length)h+='<section><div class="section-h"><h2>'+PRI_L[k]+'</h2><span class="aside">'+l.length+(spentOn(l.map(function(f){return {amount:+f.est||0}}))?' · est. '+money(spentOn(l.map(function(f){return {amount:+f.est||0}}))):'')+'</span></div>'+fixRows(l)+'</section>'});
+  }else h+=done.length?fixRows(done):'<div class="empty">Fixed things land here, with what they cost.</div>';
+  return h;
+}
+function viewLog(){
+  var all=events(),now=new Date(),yr=now.getFullYear(),q=ui.lq.toLowerCase();
+  var F={all:function(e){return e.kind!=="clean"},receipts:function(e){return (e.kind==="entry"&&e.type==="receipt")||e.kind==="buy"},repairs:function(e){return e.kind==="fix"||(e.kind==="entry"&&(e.cat==="Repairs"||e.type==="work"))},maint:function(e){return e.kind==="task"||(e.kind==="entry"&&/Maintenance|Appliances|Pool/.test(e.cat))},cleaning:function(e){return e.kind==="clean"||e.kind==="visit"||e.cat==="Cleaning"}};
+  var list=all.filter(F[ui.lf]||F.all).filter(function(e){return !q||(e.title+" "+e.sub+" "+e.cat+" "+(e.note||"")).toLowerCase().indexOf(q)>=0});
+  var yev=all.filter(function(e){return e.at.getFullYear()===yr&&e.kind!=="clean"});
+  document.getElementById("sub").textContent=money(spentOn(yev))+" in "+yr;
+  var h=quickActions();
+  h+='<section class="card"><div class="statline"><div><p class="fineprint">'+yr+' so far</p><p class="big2">'+money(spentOn(yev))+'</p></div><div><p class="fineprint">'+now.toLocaleDateString(undefined,{month:"long"})+'</p><p class="big2">'+money(spentOn(yev.filter(function(e){return e.at.getMonth()===now.getMonth()})))+'</p></div></div>'+catBars(yev)+'<div class="btnrow"><button class="btn small ghost" data-act="tab" data-v="week">Weekly wrap-up</button></div></section>';
+  h+='<input class="search" id="lq" type="search" placeholder="Search the log: vendor, room, appliance…" value="'+esc(ui.lq)+'" aria-label="Search the log">';
+  h+='<div class="chips" role="group" aria-label="Filter">'+[["all","All"],["receipts","Receipts"],["repairs","Repairs"],["maint","Maintenance"],["cleaning","Cleaning"]].map(function(c){return '<button class="chip" data-act="lf" data-v="'+c[0]+'" aria-pressed="'+(ui.lf===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
+  if(!list.length)return h+'<div class="empty"><strong>Nothing logged yet.</strong> Receipts, repairs and finished maintenance all show up here, newest first.</div>';
+  var mon="",out="",grp=[];
+  var flush=function(){if(!grp.length)return;out+='<p class="mhead">'+mon+'<span class="n">'+(spentOn(grp)?money(spentOn(grp)):'')+'</span></p><ul class="rows">'+grp.map(evRow).join("")+'</ul>';grp=[]};
+  list.slice(0,250).forEach(function(e){var m=e.at.toLocaleDateString(undefined,{month:"long",year:"numeric"});if(m!==mon){flush();mon=m}grp.push(e)});flush();
+  return h+out;
+}
+function viewCleaning(){
+  var h='<div class="seg" role="group" aria-label="Cleaning view" style="grid-template-columns:repeat(3,1fr)">'+[["todo","To do"],["all","All tasks"],["plants","Plants"]].map(function(c){return '<button data-act="csub" data-v="'+c[0]+'" aria-pressed="'+(ui.csub===c[0])+'">'+c[1]+'</button>'}).join("")+'</div>';
+  return h+(ui.csub==="all"?viewAll():ui.csub==="plants"?viewPlants():viewToday());
+}
+var titles={house:"House",fixes:"Fix-its",upkeep:"Maintenance",log:"Log",cleaning:"Cleaning",week:"Week wrap-up",guide:"Cleaning guide"};
 function masthead(){
   var n=houseName(),hr=new Date().getHours();
   document.getElementById("house").textContent=n;
@@ -919,7 +1040,7 @@ function masthead(){
 }
 // A live update re-renders while someone may be typing: carry over anything changed in a field.
 function typed(root){var k={};root.querySelectorAll("input[id],textarea[id],select[id]").forEach(function(x){
-  if(x.id==="q")return;
+  if(x.id==="q"||x.id==="lq")return;
   if(x.type==="checkbox"){if(x.checked!==x.defaultChecked)k[x.id]=x.checked;return}
   if(x.tagName==="SELECT"){var d=[].filter.call(x.options,function(o){return o.defaultSelected})[0]||x.options[0];if(d&&x.value!==d.value)k[x.id]=x.value;return}
   if(x.value!==x.defaultValue)k[x.id]=x.value});return k}
@@ -927,13 +1048,13 @@ function put(k){Object.keys(k).forEach(function(id){var x=document.getElementByI
 function render(){
   if(!document.getElementById("view"))return;
   masthead();
-  var focusQ=document.activeElement&&document.activeElement.id==="q",pos=focusQ?document.activeElement.selectionStart:0;
-  document.getElementById("title").textContent=titles[ui.tab];
+  var ae=document.activeElement,focusQ=ae&&(ae.id==="q"||ae.id==="lq")?ae.id:null,pos=focusQ?ae.selectionStart:0;
+  document.getElementById("title").textContent=titles[ui.tab]||"House";
   document.querySelectorAll("nav.tabs button").forEach(function(b){if(b.dataset.tab===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
-  var v=ui.tab==="today"?viewToday():ui.tab==="all"?viewAll():ui.tab==="plants"?viewPlants():ui.tab==="upkeep"?viewUpkeep():ui.tab==="week"?viewWeek():viewGuide();
+  var v=ui.tab==="house"?viewHouse():ui.tab==="fixes"?viewFixes():ui.tab==="upkeep"?viewUpkeep():ui.tab==="log"?viewLog():ui.tab==="cleaning"?viewCleaning():ui.tab==="week"?viewWeek():ui.tab==="guide"?viewGuide():viewHouse();
   var view=document.getElementById("view"),keepV=typed(view);
   view.innerHTML=v;put(keepV);
-  if(focusQ){var q=document.getElementById("q");q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}
+  if(focusQ){var q=document.getElementById(focusQ);if(q){q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}}}
   if(cur){var sh=document.getElementById("sheet"),keep=typed(sh),sc=sh.scrollTop;renderSheet();sh.scrollTop=sc;put(keep)}
 }
 
@@ -943,7 +1064,7 @@ var EVERY=[1,2,3,4,7,10,14,21,30,45,60,90,120,180,270,365,730];
 function sheetTop(back){return '<div class="sheet-top"><button class="btn small ghost" data-act="back">← '+(stack.length?"Back":"Close")+'</button>'+(back||"")+'</div>'}
 function renderSheet(){
   var el=document.getElementById("sheet"),m=cur.mode,out;
-  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else if(m==="edittask")out=editTaskSheet();else if(m==="plant")out=plantSheet();else if(m==="plantadd")out=plantAddSheet();else if(m==="fact")out=factSheet();else if(m==="quiet")out=quietSheet();else out=settingsSheet();
+  if(m==="task")out=taskSheet();else if(m==="add")out=addSheet();else if(m==="app")out=appSheet();else if(m==="visit")out=visitSheet();else if(m==="edit")out=editSheet();else if(m==="edittask")out=editTaskSheet();else if(m==="plant")out=plantSheet();else if(m==="plantadd")out=plantAddSheet();else if(m==="fact")out=factSheet();else if(m==="quiet")out=quietSheet();else if(m==="fix")out=fixSheet();else if(m==="entry")out=entrySheet();else out=settingsSheet();
   if(out==null){back();return}
   el.innerHTML='<div class="sheet-in">'+out+'</div>';el.hidden=false;
 }
@@ -953,8 +1074,10 @@ function openSheet(mode,id,extra){
   var el=document.getElementById("sheet");el.scrollTop=0;document.body.style.overflow="hidden";
   var b=el.querySelector("[data-act=back]");if(b)b.focus();
 }
-function back(){if(stack.length){cur=stack.pop();renderSheet();document.getElementById("sheet").scrollTop=0}else closeSheet()}
-function closeSheet(){cur=null;stack=[];var el=document.getElementById("sheet");el.hidden=true;el.innerHTML="";document.body.style.overflow="";render();if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
+// Leaving a new fix-it or log entry that was never saved throws the draft away.
+function dropDraft(){if(!cur)return;var k=cur.mode==="fix"?"fixes":cur.mode==="entry"?"log":null;if(k&&S[k][cur.id]&&S[k][cur.id]._new)delete S[k][cur.id]}
+function back(){dropDraft();if(stack.length){cur=stack.pop();renderSheet();document.getElementById("sheet").scrollTop=0}else closeSheet()}
+function closeSheet(){dropDraft();cur=null;stack=[];var el=document.getElementById("sheet");el.hidden=true;el.innerHTML="";document.body.style.overflow="";render();if(lastFocus&&document.contains(lastFocus))lastFocus.focus()}
 
 function taskSheet(){
   var t=findTask(cur.id);if(!t)return null;
@@ -972,7 +1095,7 @@ function taskSheet(){
   out+='<div class="card"><label class="lbl" for="note">Note (optional)</label><textarea id="note" placeholder="What worked, what to try next time"></textarea>';
   if(ps.length){var mm=me();out+='<div><span class="lbl">Who did it</span><div class="chips wrap" role="group" aria-label="Who did it">'+ps.map(function(p){return '<button class="chip" data-act="who" data-v="'+esc(p)+'" aria-pressed="'+(p===mm)+'">'+esc(p)+'</button>'}).join("")+'</div></div>'}
   out+='<div class="grid2"><div><label class="lbl" for="dmin">Minutes it took</label><input type="number" id="dmin" min="0" inputmode="numeric" value="'+(t.m||"")+'"></div><div><label class="lbl" for="dcost">Spent on it ($)</label><input type="number" id="dcost" min="0" step="0.01" inputmode="decimal" placeholder="0"></div></div>'+
-    '<div class="btnrow"><button class="btn primary" data-act="done">Mark done</button></div>';
+    '<div class="btnrow"><button class="btn primary" data-act="done">Mark done</button><button class="btn small ghost" data-act="newentry" data-type="receipt" data-task="'+esc(t.id)+'">Add a receipt</button></div>';
   if(!aside(t))out+='<div class="btnrow"><button class="btn small" data-act="later" data-v="1">Tomorrow</button><button class="btn small" data-act="later" data-v="3">In 3 days</button><button class="btn small" data-act="later" data-v="7">Next week</button><button class="btn small" data-act="supplies">Need supplies</button></div>';
   out+='</div>';
   if(d==null)out+='<div class="card"><h3>When did you last do this?</h3><p class="fineprint">A rough guess is fine. It won’t count toward any week’s totals.</p><div class="btnrow">'+[[0,"Today"],[7,"~1 week"],[30,"~1 month"],[90,"~3 months"],[180,"~6 months"],[400,"Over a year"]].map(function(x){return '<button class="btn small" data-act="ago" data-v="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div></div>';
@@ -1009,6 +1132,8 @@ function appSheet(){
   var facts=[["Brand",a.brand],["Model",a.model],["Serial",a.serial],["Bought",a.bought&&fmtDate(a.bought+"T12:00")]].filter(function(f){return f[1]});
   if(facts.length)out+='<div class="card"><dl class="facts">'+facts.map(function(f){return '<dt>'+f[0]+'</dt><dd>'+esc(f[1])+'</dd>'}).join("")+'</dl></div>';
   out+='<div class="btnrow">'+(a.manual?'<a class="btn small" href="'+esc(a.manual)+'" target="_blank" rel="noopener">Open the manual</a>':'')+'<a class="btn small ghost" href="https://www.google.com/search?q='+q+'" target="_blank" rel="noopener">Find the manual online</a></div>';
+  var le=linked("app",id);
+  out+='<section><div class="section-h"><h2>Service & receipts</h2><span class="aside">'+(le.length?money(spentOn(le))+' total':'')+'</span></div>'+(le.length?'<ul class="rows">'+le.map(function(e){return evRow({kind:"entry",id:e.id,at:dayOf(e.date),title:e.title||"Receipt",sub:e.vendor||"",cat:e.cat,amount:+e.amount||0,files:(e.files||[]).length})}).join("")+'</ul>':'<p class="fineprint">Repairs, service calls and parts for this appliance.</p>')+'<div class="btnrow" style="margin-top:10px"><button class="btn small" data-act="newentry" data-type="receipt" data-app="'+esc(id)+'">Add a receipt</button><button class="btn small ghost" data-act="newentry" data-type="work" data-app="'+esc(id)+'">Log a repair</button></div></section>';
   out+='<section><div class="section-h"><h2>Care</h2><span class="aside">'+ts.length+' task'+(ts.length===1?"":"s")+'</span></div>'+(ts.length?rows(ts.sort(byDue)):'<div class="empty">No care tasks yet.</div>')+'<div class="btnrow" style="margin-top:10px"><button class="btn small" data-act="addcare">Add a care task</button></div></section>';
   if(a.notes)out+='<div class="card"><h3>Notes</h3><p style="white-space:pre-wrap">'+esc(a.notes)+'</p></div>';
   out+='<div class="card"><h3>Details</h3><form class="form" id="appform">'+
@@ -1121,6 +1246,52 @@ function quietSheet(){
   '<div class="btnrow"><button class="btn primary" type="submit">'+(q?"Save dates":"Start quiet mode")+'</button></div></form>'+
   (past.length?'<div class="card"><h3>Past quiet times</h3><ul class="daylog">'+past.map(function(x){return '<li><span>'+fmtShort(x.from+"T12:00:00")+' – '+fmtShort(x.to+"T12:00:00")+(x.why?'<span class="when">'+esc(x.why)+'</span>':'')+'</span><span></span></li>'}).join("")+'</ul></div>':'');
 }
+function gallery(kind,id,accept){
+  var o=S[kind][id]||{},fs=o.files||[],h='';
+  if(fs.length)h+='<div class="gal">'+fs.map(function(f,i){var u=blob(f.id),isPdf=/pdf/.test(f.type||"");
+    return '<div class="f">'+(isPdf?'<a class="doc" href="'+u+'" target="_blank" rel="noopener">PDF</a>':'<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" alt="'+esc(f.name||"Photo")+'" loading="lazy"></a>')+(CAP.assets?'<button class="x" data-act="delfile" data-kind="'+kind+'" data-id="'+esc(id)+'" data-i="'+i+'" aria-label="Remove">×</button>':'')+'</div>'}).join("")+'</div>';
+  if(CAP.assets)h+='<div class="btnrow"><button class="btn small" data-act="addfile" data-kind="'+kind+'" data-id="'+esc(id)+'" data-accept="'+accept+'">'+(kind==="log"?"Add receipt photo or PDF":"Add photos")+'</button>'+(kind==="log"&&CAP.sampleImg&&fs.some(function(f){return !/pdf/.test(f.type||"")})?'<button class="btn small primary" data-act="readreceipt">Fill in from the photo</button>':'')+'</div>';
+  else h+='<p class="fineprint">Photos and receipts can be added when this page is opened in Claude.</p>';
+  return h;
+}
+function fixSheet(){
+  var f=S.fixes[cur.id];if(!f)return null;var id=cur.id,draft=!!f._new,le=linked("fix",id);
+  var out=sheetTop(draft?'':'<span class="pill '+(f.status==="done"?"st-ok":f.pri==="urgent"?"st-due":"st-soon")+'">'+(f.status==="done"?"Fixed":STAT_L[f.status||"todo"])+'</span>')+'<p class="eyebrow">Fix-it'+(f.created&&!draft?' · added '+fmtShort(dayOf(f.created)):'')+'</p><h2 id="sheet-title">'+esc(f.title||"New fix-it")+'</h2>';
+  out+='<div class="card"><span class="lbl">Status</span><div class="seg" style="grid-template-columns:repeat(4,1fr)" role="group" aria-label="Status">'+["todo","doing","waiting","done"].map(function(k){return '<button data-act="fixstat" data-v="'+k+'" aria-pressed="'+((f.status||"todo")===k)+'">'+(k==="done"?"Fixed":STAT_L[k])+'</button>'}).join("")+'</div>'+
+    '<span class="lbl">Priority</span><div class="seg" style="grid-template-columns:repeat(3,1fr)" role="group" aria-label="Priority">'+["urgent","soon","someday"].map(function(k){return '<button data-act="fixpri" data-v="'+k+'" aria-pressed="'+((f.pri||"soon")===k)+'">'+PRI_L[k]+'</button>'}).join("")+'</div></div>';
+  var cts=facts("contact");
+  out+='<form class="form card" id="fixform"><div><label class="lbl" for="fx2-title">What needs doing</label><div class="fieldrow"><input type="text" id="fx2-title" value="'+esc(f.title||"")+'" placeholder="e.g. Kitchen faucet drips">'+micBtn("fx2-title")+'</div></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="fx2-area">Where</label><input type="text" id="fx2-area" list="fx2-areas" value="'+esc(f.area||"")+'"><datalist id="fx2-areas">'+areas().map(function(a){return '<option value="'+esc(a)+'">'}).join("")+'</datalist></div>'+
+    '<div><label class="lbl" for="fx2-who">Who’s doing it</label><select id="fx2-who"><option value="">Not decided</option><option value="diy"'+(f.who==="diy"?" selected":"")+'>We’ll do it</option><option value="pro"'+(f.who==="pro"?" selected":"")+'>Hiring someone</option></select></div></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="fx2-contact">Contact</label><select id="fx2-contact"><option value="">None</option>'+cts.map(function(c){return '<option value="'+esc(c.id)+'"'+(f.contact===c.id?" selected":"")+'>'+esc(c.name||c.label)+'</option>'}).join("")+'</select></div>'+
+    '<div><label class="lbl" for="fx2-est">Estimate ($)</label><input type="number" id="fx2-est" min="0" step="1" inputmode="decimal" value="'+esc(f.est||"")+'"></div></div>'+
+    '<div><label class="lbl" for="fx2-notes">Notes</label><textarea id="fx2-notes" placeholder="What’s wrong, quotes, parts, what was tried">'+esc(f.notes||"")+'</textarea></div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">'+(draft?"Add fix-it":"Save")+'</button>'+(draft?'':'<button class="btn small ghost danger" type="button" data-act="delfix">Remove</button>')+'</div></form>';
+  if(!draft){
+    out+='<section class="card"><h3>Photos</h3>'+gallery("fixes",id,"image/*")+'</section>';
+    out+='<section><div class="section-h"><h2>Receipts & work</h2><span class="aside">'+(le.length?money(spentOn(le))+' spent':'')+'</span></div>'+(le.length?'<ul class="rows">'+le.map(function(e){return evRow({kind:"entry",id:e.id,at:dayOf(e.date),title:e.title||"Receipt",sub:e.vendor||"",cat:e.cat,amount:+e.amount||0,files:(e.files||[]).length})}).join("")+'</ul>':'<p class="fineprint">Quotes, parts and invoices for this job.</p>')+
+      '<div class="btnrow" style="margin-top:10px"><button class="btn small" data-act="newentry" data-type="receipt" data-fix="'+esc(id)+'">Add a receipt</button><button class="btn small ghost" data-act="newentry" data-type="work" data-fix="'+esc(id)+'">Log work on this</button></div></section>';
+  }
+  return out;
+}
+function entrySheet(){
+  var e=S.log[cur.id];if(!e)return null;var id=cur.id,draft=!!e._new,ty=e.type||"receipt";
+  var tl={receipt:"Receipt",work:"Work done",note:"Note"};
+  var out=sheetTop()+'<p class="eyebrow">House log</p><h2 id="sheet-title">'+esc(e.title||(draft?"New "+tl[ty].toLowerCase():tl[ty]))+'</h2>';
+  out+='<div class="seg" role="group" aria-label="Type" style="grid-template-columns:repeat(3,1fr)">'+["receipt","work","note"].map(function(k){return '<button data-act="entrytype" data-v="'+k+'" aria-pressed="'+(ty===k)+'">'+tl[k]+'</button>'}).join("")+'</div>';
+  if(ty!=="note")out+='<section class="card"><h3>'+(ty==="receipt"?"Receipt":"Photos")+'</h3>'+gallery("log",id,ty==="receipt"?"image/*,application/pdf":"image/*")+(ty==="receipt"&&CAP.assets?'<p class="fineprint">Snap a paper receipt, or add the PDF from an emailed invoice.'+(CAP.sampleImg?' “Fill in from the photo” asks Claude to read it for you (uses your Claude usage).':'')+'</p>':'')+'</section>';
+  var of=fixes().filter(function(f){return f.status!=="done"||f.id===e.fix}),apps=Object.keys(S.apps);
+  out+='<form class="form card" id="entryform"><div><label class="lbl" for="en-title">'+(ty==="receipt"?"What it was for":ty==="work"?"What was done":"Note")+'</label><div class="fieldrow"><input type="text" id="en-title" value="'+esc(e.title||"")+'" placeholder="'+(ty==="receipt"?"e.g. Replacement furnace filters":ty==="work"?"e.g. Plumber replaced the kitchen faucet cartridge":"e.g. Roof looks fine after the storm")+'">'+micBtn("en-title")+'</div></div>'+
+    '<div class="grid2"><div><label class="lbl" for="en-date">Date</label><input type="date" id="en-date" value="'+esc(e.date||isoDay(new Date()))+'"></div><div><label class="lbl" for="en-amt">Amount ($)</label><input type="number" id="en-amt" min="0" step="0.01" inputmode="decimal" value="'+esc(e.amount||"")+'"></div></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="en-vendor">Store or company</label><input type="text" id="en-vendor" list="en-vendors" value="'+esc(e.vendor||"")+'"><datalist id="en-vendors">'+vendors().map(function(v){return '<option value="'+esc(v)+'">'}).join("")+'</datalist></div>'+
+    '<div><label class="lbl" for="en-cat">Category</label><select id="en-cat">'+CATS.map(function(c){return '<option'+((e.cat||"Repairs")===c?" selected":"")+'>'+c+'</option>'}).join("")+'</select></div></div>'+
+    '<div class="grid2 stack"><div><label class="lbl" for="en-area">Where</label><input type="text" id="en-area" list="en-areas" value="'+esc(e.area||"")+'"><datalist id="en-areas">'+areas().map(function(a){return '<option value="'+esc(a)+'">'}).join("")+'</datalist></div>'+
+    '<div><label class="lbl" for="en-fix">Fix-it</label><select id="en-fix"><option value="">None</option>'+of.map(function(f){return '<option value="'+esc(f.id)+'"'+(e.fix===f.id?" selected":"")+'>'+esc(f.title)+'</option>'}).join("")+'</select></div></div>'+
+    '<div><label class="lbl" for="en-app">Appliance</label><select id="en-app"><option value="">None</option>'+apps.map(function(k){return '<option value="'+esc(k)+'"'+(e.app===k?" selected":"")+'>'+esc(S.apps[k].name||"Appliance")+'</option>'}).join("")+'</select></div>'+
+    '<div><label class="lbl" for="en-notes">Notes</label><textarea id="en-notes" placeholder="Warranty on the work, part numbers, what to watch for">'+esc(e.notes||"")+'</textarea></div>'+
+    '<div class="btnrow"><button class="btn primary" type="submit">'+(draft?"Add to the log":"Save")+'</button>'+(draft?'':'<button class="btn small ghost danger" type="button" data-act="delentry">Remove</button>')+'</div></form>';
+  return out;
+}
 function settingsSheet(){
   return sheetTop()+'<h2 id="sheet-title">Household</h2><form class="form" id="setform">'+
   '<div class="card"><div><label class="lbl" for="s-name">House name</label><input type="text" id="s-name" value="'+esc(houseName())+'"></div>'+
@@ -1132,7 +1303,7 @@ function settingsSheet(){
   '<div class="card"><h3>Savings</h3><div><label class="lbl" for="s-rate">Hourly rate to compare against ($)</label><input type="number" id="s-rate" min="0" step="1" value="'+rate()+'"></div></div>'+
   '<div class="btnrow"><button class="btn primary" type="submit">Save</button></div></form>'+
   '<div class="card"><h3>What’s in our house</h3><p class="fineprint">Turn whole groups of tasks on or off in one place.</p><div class="btnrow"><button class="btn small" data-act="editlist" data-list="clean">Edit cleaning list</button><button class="btn small" data-act="editlist" data-list="upkeep">Edit upkeep list</button></div></div>'+
-  '<div class="card"><h3>Backup</h3><p class="fineprint">Copy everything (tasks, history, plants, appliances, facts, visits, purchases) to keep in a note, or paste a backup back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div>';
+  '<div class="card"><h3>Backup</h3><p class="fineprint">Copy everything (fix-its, log, receipts list, tasks, history, plants, appliances, facts, visits) to keep in a note, or paste a backup back in.</p><div class="btnrow"><button class="btn small" data-act="export">Copy backup</button><button class="btn small ghost" data-act="import">Restore from backup</button></div><div id="io"></div></div>';
 }
 
 /* ---------------- Toast ---------------- */
@@ -1161,6 +1332,41 @@ document.addEventListener("click",function(e){
     case "open":openSheet("task",id);break;
     case "openapp":openSheet("app",b.dataset.app||(r&&r.dataset.app));break;
     case "back":back();break;
+    case "csub":ui.csub=b.dataset.v;rememberUi();render();break;
+    case "fview":ui.fview=b.dataset.v;render();break;
+    case "lf":ui.lf=b.dataset.v;render();break;
+    case "fqpri":ui.fqpri=b.dataset.v;b.parentNode.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});break;
+    case "newfix":{if(!guard())return;var nf="f"+Date.now().toString(36);S.fixes[nf]={title:"",status:"todo",pri:"soon",created:new Date().toISOString(),_new:true};openSheet("fix",nf);break}
+    case "openfix":openSheet("fix",r&&r.dataset.fix);break;
+    case "fixdone":{if(!guard())return;var fid=r.dataset.fix,f0=clone(S.fixes[fid]),f1=Object.assign({},f0);
+      if(f1.status==="done"){f1.status="todo";delete f1.doneAt}else{f1.status="done";f1.doneAt=new Date().toISOString()}
+      S.fixes[fid]=f1;save("fixes",fid);toast(f1.status==="done"?"Fixed: "+f1.title:"Reopened",function(){S.fixes[fid]=f0;save("fixes",fid)});break}
+    case "fixstat":case "fixpri":{if(!guard())return;var fx=Object.assign({},S.fixes[cur.id]);
+      if(act==="fixpri")fx.pri=b.dataset.v;else{fx.status=b.dataset.v;if(fx.status==="done"&&!fx.doneAt)fx.doneAt=new Date().toISOString();if(fx.status!=="done")delete fx.doneAt}
+      S.fixes[cur.id]=fx;if(fx._new)render();else save("fixes",cur.id);if(act==="fixstat"&&fx.status==="done"&&!fx._new)toast("Marked fixed. Add the receipt below if there was one.");break}
+    case "delfix":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}var gx=cur.id;(S.fixes[gx].files||[]).forEach(function(f){if(CAP.assets)CAP.assets.delete(f.id).catch(function(){})});delete S.fixes[gx];save("fixes",gx);back();toast("Fix-it removed");break}
+    case "newentry":{if(!guard())return;var ne="e"+Date.now().toString(36),ty=b.dataset.type||"receipt",ent={type:ty,date:isoDay(new Date()),created:new Date().toISOString(),_new:true};
+      if(b.dataset.fix){ent.fix=b.dataset.fix;ent.cat="Repairs";ent.area=(S.fixes[b.dataset.fix]||{}).area}
+      if(b.dataset.app){ent.app=b.dataset.app;ent.cat="Appliances"}
+      if(b.dataset.task){var tt=findTask(b.dataset.task);ent.task=b.dataset.task;ent.cat=taskCat(tt);ent.title=tt.name}
+      if(!ent.cat)ent.cat=ty==="receipt"?"Supplies":"Repairs";
+      S.log[ne]=ent;openSheet("entry",ne);break}
+    case "entrytype":{var en=Object.assign({},S.log[cur.id]);en.type=b.dataset.v;S.log[cur.id]=en;if(en._new)render();else save("log",cur.id);break}
+    case "delentry":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}var ge=cur.id;(S.log[ge].files||[]).forEach(function(f){if(CAP.assets)CAP.assets.delete(f.id).catch(function(){})});delete S.log[ge];save("log",ge);back();toast("Removed from the log");break}
+    case "openev":{var k=b.dataset.kind,eid=b.dataset.id;if(k==="entry")openSheet("entry",eid);else if(k==="task"||k==="clean")openSheet("task",eid);else if(k==="visit")openSheet("visit");else if(k==="fix")openSheet("fix",eid);else{ui.tab="week";render();window.scrollTo(0,0)}break}
+    case "addfile":{if(!CAP.assets||!guard())return;var ak=b.dataset.kind,aid2=b.dataset.id;
+      if(S[ak][aid2]&&S[ak][aid2]._new){var dr=Object.assign({},S[ak][aid2]);delete dr._new;S[ak][aid2]=dr;save(ak,aid2,true)}
+      photoTarget={kind:ak,id:aid2,multi:true};var fp3=document.getElementById("filepick");fp3.accept=b.dataset.accept||"image/*";fp3.multiple=true;fp3.value="";fp3.click();break}
+    case "delfile":{if(!guard())return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="?";return}var dk2=b.dataset.kind,di2=b.dataset.id,o3=Object.assign({},S[dk2][di2]),fl2=(o3.files||[]).slice(),gone2=fl2.splice(+b.dataset.i,1)[0];o3.files=fl2;S[dk2][di2]=o3;save(dk2,di2);if(gone2&&CAP.assets)CAP.assets.delete(gone2.id).catch(function(){});break}
+    case "readreceipt":{if(!CAP.sample)return;var re=S.log[cur.id],img=(re.files||[]).filter(function(f){return !/pdf/.test(f.type||"")})[0];if(!img)return;
+      b.disabled=true;b.textContent="Reading…";
+      (BLOBS[img.id]?Promise.resolve(BLOBS[img.id]):fetch(blob(img.id)).then(function(r){return r.blob()})).then(function(bl){
+        return CAP.sample.json("This photo is a receipt or invoice for something bought or done for a house. Read it and answer with JSON only: {\"vendor\": store or company name or null, \"date\": purchase date as YYYY-MM-DD or null, \"total\": the total amount paid as a number or null, \"summary\": what was bought or done in at most 8 words or null, \"category\": one of "+JSON.stringify(CATS)+"}. Use null for anything you can't read.",{images:[bl],modelTier:"quick"});
+      }).then(function(d){d=d||{};var setv=function(fid2,v){var x=document.getElementById(fid2);if(x&&v!=null&&v!==""&&!x.value)x.value=v};
+        setv("en-vendor",d.vendor);setv("en-title",d.summary);if(d.total!=null){var am=document.getElementById("en-amt");if(am&&!am.value)am.value=(+d.total).toFixed(2)}
+        if(d.date&&/^\d{4}-\d\d-\d\d$/.test(d.date))document.getElementById("en-date").value=d.date;if(d.category&&CATS.indexOf(d.category)>=0&&!re.fix&&!re.app&&!re.task)document.getElementById("en-cat").value=d.category;
+        b.disabled=false;b.textContent="Fill in from the photo";toast("Filled in. Check it over, then save.");
+      }).catch(function(er){b.disabled=false;b.textContent="Fill in from the photo";var c=er&&er.code;toast(c==="not_granted"?"Reading receipts is turned off for this page.":c==="rate_limited"?"Claude is busy. Try again in a minute.":"Couldn’t read that receipt. You can fill it in by hand.")});break}
     case "openplant":openSheet("plant",r&&r.dataset.plant);break;
     case "addplants":openSheet("plantadd",null,{room:b.dataset.room});break;
     case "water":{if(!guard())return;var pid=r&&r.dataset.plant||(cur&&cur.mode==="plant"&&cur.id);if(!pid)return;var un=water([pid]);toast("Watered: "+S.plants[pid].name,un);break}
@@ -1177,7 +1383,7 @@ document.addEventListener("click",function(e){
     case "quiet":openSheet("quiet");break;
     case "quietend":{if(!guard())return;var td=isoDay(new Date()),yd=isoDay(new Date(Date.now()-DAY)),ql=quietList().map(function(x){return x.from<=td&&td<=x.to?Object.assign({},x,{to:x.from<=yd?yd:null}):x}).filter(function(x){return x.to});
       S.prefs=Object.assign({},S.prefs,{quiet:ql});savePrefs();toast("Quiet mode ended. Welcome back.");break}
-    case "fresh":{if(!guard())return;var fl=unsetTasks();toast("Started "+fl.length+" tasks fresh · they’ll come due a few at a time",setAgo(fl,"fresh"));break}
+    case "fresh":{if(!guard())return;var fl=unsetTasks(b.dataset.list||"clean");toast("Started "+fl.length+" tasks fresh · they’ll come due a few at a time",setAgo(fl,"fresh"));break}
     case "camenow":{if(!guard())return;var ct=active("clean").filter(function(t){return cleanTasks().indexOf(t.id)>=0}).map(function(t){return t.id});
       var vid=logVisit(new Date().toISOString(),+P("cleanCost",0)||0,"",ct);toast("Visit logged · "+ct.length+" tasks done",function(){removeVisit(vid)});break}
     case "photo":{if(!CAP.assets)return;photoTarget={kind:b.dataset.kind,id:b.dataset.id};var fp2=document.getElementById("filepick");fp2.value="";fp2.click();break}
@@ -1231,9 +1437,15 @@ document.addEventListener("click",function(e){
       if(d.prefs){S.prefs=Object.assign({},S.prefs,d.prefs);savePrefs()}render();toast("Backup restored")}catch(x){toast("That doesn’t look like a backup from this app.")}break}
   }
 });
-var photoTarget=null;
+var photoTarget=null,BLOBS={};
 document.addEventListener("change",function(e){
   var tg=e.target;
+  if(tg.id==="filepick"&&photoTarget&&photoTarget.multi){var ptm=photoTarget,fl3=[].slice.call(tg.files||[]);if(!fl3.length||!CAP.assets)return;
+    toast("Adding "+(fl3.length>1?fl3.length+" files":"file")+"…");
+    fl3.reduce(function(pr,file){return pr.then(function(){var isImg=/^image\//.test(file.type);return (isImg?shrink(file):Promise.resolve(file)).then(function(bl){return CAP.assets.upload(bl).then(function(res){
+      if(isImg)BLOBS[res.id]=bl;var o4=Object.assign({},S[ptm.kind][ptm.id]);o4.files=(o4.files||[]).concat([{id:res.id,type:res.contentType||file.type,name:file.name}]);S[ptm.kind][ptm.id]=o4;save(ptm.kind,ptm.id)})})})},Promise.resolve())
+    .then(function(){toast("Added")}).catch(function(er){toast(er&&er.code==="too_large"?"That file is too big.":er&&er.code==="unsupported_type"?"That file type can’t be added. Use a photo or PDF.":"Couldn’t add that file. Try again.")});
+    tg.multiple=false;tg.accept="image/*";return}
   if(tg.id==="filepick"){var file=tg.files&&tg.files[0],pt=photoTarget;if(!file||!pt||!CAP.assets)return;
     toast("Adding photo…");
     shrink(file).then(function(bl){return CAP.assets.upload(bl)}).then(function(res){
@@ -1248,7 +1460,7 @@ document.addEventListener("change",function(e){
     toast(ar+": "+sel.length+" tasks set up",setAgo(sel,v2));return}
   var ed=e.target.dataset&&e.target.dataset.edit;
   if(ed){if(!guard()){e.target.checked=!e.target.checked;return}patch(ed,{hidden:e.target.checked?null:true});return}if(e.target.id==="every"&&cur&&cur.mode==="task"){if(!guard())return;var t=findTask(cur.id),n=+e.target.value;patch(cur.id,{every:n===t.e?null:n})}});
-document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}});
+document.addEventListener("input",function(e){if(e.target.id==="q"){ui.q=e.target.value;render()}else if(e.target.id==="lq"){ui.lq=e.target.value;render()}});
 // Pull a repeat out of a typed or dictated phrase: "Clean the gutters twice a year" → {name:"Clean the gutters", e:180}
 var NUMW={one:1,a:1,an:1,two:2,three:3,four:4,five:5,six:6,eight:8,ten:10,twelve:12};
 function parseTask(text){
@@ -1264,9 +1476,19 @@ function parseTask(text){
 }
 function val(id){var x=document.getElementById(id);return x?x.value.trim():""}
 document.addEventListener("submit",function(e){
-  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd","editform","plantform","plantform-bulk","factform","quietform"].indexOf(f)<0)return;
+  var f=e.target.id;if(["buyform","addform","appform","visitform","setform","quickadd","editform","plantform","plantform-bulk","factform","quietform","fixquick","fixform","entryform"].indexOf(f)<0)return;
   e.preventDefault();if(!guard())return;
   if(CAP.dict&&CAP.dict.active())CAP.dict.stop().catch(function(){});
+  if(f==="fixquick"){var ft=val("fq-title");if(!ft){toast("Type or say what needs fixing.");return}
+    var qf2="f"+Date.now().toString(36);S.fixes[qf2]={title:ft,status:"todo",pri:ui.fqpri||"soon",created:new Date().toISOString()};document.getElementById("fq-title").value="";save("fixes",qf2);toast("Added to fix-its");return}
+  if(f==="fixform"){var fo2=Object.assign({},S.fixes[cur.id]),tt2=val("fx2-title");if(!tt2){toast("Say what needs doing.");return}
+    fo2.title=tt2;[["area","fx2-area"],["who","fx2-who"],["contact","fx2-contact"],["est","fx2-est"],["notes","fx2-notes"]].forEach(function(p2){var v5=val(p2[1]);if(v5)fo2[p2[0]]=v5;else delete fo2[p2[0]]});
+    var wasNew=!!fo2._new;delete fo2._new;S.fixes[cur.id]=fo2;save("fixes",cur.id);toast(wasNew?"Fix-it added":"Saved");return}
+  if(f==="entryform"){var eo=Object.assign({},S.log[cur.id]);
+    [["title","en-title"],["date","en-date"],["vendor","en-vendor"],["cat","en-cat"],["area","en-area"],["fix","en-fix"],["app","en-app"],["notes","en-notes"]].forEach(function(p3){var v6=val(p3[1]);if(v6)eo[p3[0]]=v6;else delete eo[p3[0]]});
+    var am2=parseFloat(val("en-amt"));if(am2>=0)eo.amount=Math.round(am2*100)/100;else delete eo.amount;
+    if(!eo.title&&!eo.amount&&!(eo.files||[]).length){toast("Add what it was for or an amount.");return}
+    if(people().length&&!eo.by)eo.by=me();var wn=!!eo._new;delete eo._new;S.log[cur.id]=eo;save("log",cur.id);back();toast(wn?"Added to the log":"Saved");return}
   if(f==="quietform"){
     var qf=val("qm-from")||isoDay(new Date()),qt=val("qm-to");if(!qt||qt<qf){toast("Pick an end date on or after the start.");return}
     var cq=quietNow(),ql2=quietList().filter(function(x){return x!==cq&&!(x.from===(cq&&cq.from))}).filter(function(x){return x.to<qf||x.from>qt});

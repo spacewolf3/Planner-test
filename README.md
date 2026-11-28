@@ -1,16 +1,13 @@
 # The Zhang-Wolfe House
 
-A household book for one family: cleaning, upkeep, appliances and the cleaners' visits. The app is a single file, `app/index.html`.
+A house book for one family: a maintenance tracker and log, with a lightweight cleaning tracker. The app is a single file, `app/index.html`, published as a claude.ai artifact.
 
-- **To do**: what's due now, this week or this month, narrowed to the time you have (10 min to 2 hrs). Cleaning and home upkeep are listed separately. Also a shopping list from "Need supplies", plus the tasks not set up yet.
-- **House cleaners**: every other Tuesday, with a "before they come" checklist and one-tap logging. Their tasks wait for the next visit unless marked "we do it between visits too." Log each visit and check what they did. Those tasks reset as done "by Cleaners." Keeps a usual checklist, cost and house-rules notes to send them.
-- **Plants**: every plant by room (plant cabinet, living room, kitchen, family room), with watering, photos, light and cat safety. Bulk add by typing or dictating one plant per line.
-- **Cleaning**: every cleaning task, including the 2.5 baths, wood floors, silk and wool rugs, instruments and plants.
-- **Home**: seasons (pool closed, pond winter mode), appliances (brand, model, serial, warranty, manual link, notes) with their own care tasks, plus upkeep for home systems, safety, pool and pond, house facts and contacts.
-- **Week**: tasks done, time, money, savings vs. hiring out, who did what, and the cleaners' visits.
-- **Guide**: never-mix rules, notes for this house (floors, rugs, instruments, plants with cats), and the gentle and stronger cleaning kits.
-- **Quiet mode**: pause cleaning and upkeep for a trip or sick days; those days don't count, so nothing piles up.
-- **Settings** (gear icon): house name, who logs tasks, cleaner schedule, cost and notes, savings rate, backup.
+- **House**: overview of what needs attention (urgent fix-its, overdue maintenance, warranties ending), open fix-its, what's coming up, spending this year by category, recent work, and a cleaning summary.
+- **Fix-its**: repairs and projects with priority (urgent / soon / someday), status (to do / in progress / waiting / fixed), area, DIY or hired, contact, estimate, notes, photos, and linked receipts.
+- **Maintenance**: the recurring schedule (due now, next 30 days), seasons (pool closed, pond winter mode), appliances with model numbers, warranties, manuals, care tasks and their own service history, house facts and contacts.
+- **Log**: everything done to the house, newest first: receipts (photos or PDFs, with Claude reading the photo to fill in vendor, date and amount), work done, notes, finished maintenance, fixed fix-its and cleaners' visits. Yearly and monthly totals by category, search, filters, and the weekly wrap-up.
+- **Cleaning**: to-do by timeframe and time available, every-day checklist, cleaners every other Tuesday with a before-they-come list, all cleaning tasks, and plants by room.
+- **Guide** (book icon) and **settings** (gear): cleaning guide, household names, cleaners, quiet mode, backup.
 
 As a claude.ai artifact the data is saved to your account and syncs. Opened as a plain file, it saves in that browser only.
 
